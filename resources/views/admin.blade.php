@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Admin App</title>
+    <title>Cloudy Learning Management</title>
     @vite(['resources/admin/admin.ts'])
 </head>
 <body>
