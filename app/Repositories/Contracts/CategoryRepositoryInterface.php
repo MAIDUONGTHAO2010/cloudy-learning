@@ -12,4 +12,6 @@ use Prettus\Repository\Contracts\RepositoryInterface;
 interface CategoryRepositoryInterface extends RepositoryInterface
 {
     public function getCategoriesByAdmin();
+
+    public function getChildrenByAdmin(int $parentId);
 }

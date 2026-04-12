@@ -20,7 +20,9 @@ class EnsureAdminValid
             return $next($request);
         }
 
-        if (!Auth::check()) {
+        $user = Auth::user();
+
+        if (!$user || !$user->isAdmin()) {
             if ($request->expectsJson()) {
                 return response()->json([
                     'message' => 'Unauthenticated.',

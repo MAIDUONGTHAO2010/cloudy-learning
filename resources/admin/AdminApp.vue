@@ -67,6 +67,7 @@ import { useRoute } from 'vue-router';
 const navItems = [
     { to: '/dashboard', label: 'Dashboard', short: '01' },
     { to: '/users', label: 'Users', short: '02' },
+    { to: '/categories', label: 'Categories', short: '03' },
 ];
 
 const route = useRoute();

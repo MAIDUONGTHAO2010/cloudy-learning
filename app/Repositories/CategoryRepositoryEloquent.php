@@ -25,7 +25,18 @@ class CategoryRepositoryEloquent extends BaseRepository implements CategoryRepos
 
     public function getCategoriesByAdmin()
     {
-        return $this->model
+        return Category::query()
+            ->whereNull('parent_id')
+            ->withCount('children')
+            ->orderByDesc('order')
+            ->orderByDesc('id')
+            ->get();
+    }
+
+    public function getChildrenByAdmin(int $parentId)
+    {
+        return Category::query()
+            ->where('parent_id', $parentId)
             ->orderByDesc('order')
             ->orderByDesc('id')
             ->get();

@@ -5,7 +5,7 @@ const routes = [
     { path: '/', redirect: '/dashboard' },
     { path: '/dashboard', component: () => import('../Dashboard.vue') },
     { path: '/users', component: () => import('../Users.vue') },
-    { path: '/categories', component: () => import('../Users.vue') },
+    { path: '/categories', component: () => import('../category/Category.vue') },
 ];
 
 export const router = createRouter({
