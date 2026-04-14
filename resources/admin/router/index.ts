@@ -6,6 +6,8 @@ const routes = [
     { path: '/dashboard', component: () => import('../Dashboard.vue') },
     { path: '/users', component: () => import('../Users.vue') },
     { path: '/categories', component: () => import('../category/Category.vue') },
+    { path: '/courses', component: () => import('../course/Course.vue') },
+    { path: '/courses/:courseId/lessons', component: () => import('../lesson/Lesson.vue') },
 ];
 
 export const router = createRouter({
