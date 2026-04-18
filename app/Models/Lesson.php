@@ -19,8 +19,8 @@ class Lesson extends Model
 
     protected $casts = [
         'is_active' => 'boolean',
-        'order'     => 'integer',
-        'duration'  => 'integer',
+        'order' => 'integer',
+        'duration' => 'integer',
     ];
 
     public function course()

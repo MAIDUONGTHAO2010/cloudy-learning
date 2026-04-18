@@ -13,19 +13,19 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('categories', function (Blueprint $table) {
-        $table->id();
-        $table->string('name');
-        $table->string('slug')->unique();
-        $table->text('description')->nullable();
+            $table->id();
+            $table->string('name');
+            $table->string('slug')->unique();
+            $table->text('description')->nullable();
 
-        $table->unsignedBigInteger('parent_id')->nullable();
-        $table->foreign('parent_id')->references('id')->on('categories')->onDelete('cascade');
+            $table->unsignedBigInteger('parent_id')->nullable();
+            $table->foreign('parent_id')->references('id')->on('categories')->onDelete('cascade');
 
-        $table->string('image')->nullable();
-        $table->integer('order')->default(0);
-        $table->boolean('is_active')->default(CategoryStatus::ACTIVE);
+            $table->string('image')->nullable();
+            $table->integer('order')->default(0);
+            $table->boolean('is_active')->default(CategoryStatus::ACTIVE);
 
-        $table->timestamps();
+            $table->timestamps();
         });
     }
 

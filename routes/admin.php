@@ -4,9 +4,13 @@ use App\Http\Controllers\Admin\Auth\AuthController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\CourseController;
 use App\Http\Controllers\Admin\CourseReviewController;
+use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\InstructorController;
 use App\Http\Controllers\Admin\LessonController;
+use App\Http\Controllers\Admin\NotificationController;
 use App\Http\Controllers\Admin\QuizController;
+use App\Http\Controllers\Admin\TagController;
+use App\Http\Controllers\Admin\UserController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('login', [AuthController::class, 'login']);
@@ -15,11 +19,28 @@ Route::get('login', function () {
     return view('admin');
 });
 
+Route::get('/', function () {
+    return redirect('/admin/dashboard');
+});
+
 Route::middleware('admin.valid')->group(function () {
     Route::post('logout', [AuthController::class, 'logout']);
 
     // API routes
     Route::prefix('api')->group(function () {
+        // Notifications
+        Route::get('notifications', [NotificationController::class, 'index']);
+        Route::get('notifications/unread-count', [NotificationController::class, 'unreadCount']);
+        Route::put('notifications/read-all', [NotificationController::class, 'markAllRead']);
+        Route::put('notifications/{id}/read', [NotificationController::class, 'markRead']);
+
+        // Dashboard
+        Route::get('dashboard', [DashboardController::class, 'index']);
+
+        // Users
+        Route::get('users/stats', [UserController::class, 'stats']);
+        Route::get('users', [UserController::class, 'index']);
+
         Route::get('categories', [CategoryController::class, 'index']);
         Route::post('categories', [CategoryController::class, 'store']);
         Route::put('categories/{id}', [CategoryController::class, 'update']);
@@ -28,6 +49,9 @@ Route::middleware('admin.valid')->group(function () {
 
         // Instructors
         Route::get('instructors', [InstructorController::class, 'index']);
+
+        // Tags
+        Route::get('tags', [TagController::class, 'index']);
 
         // Courses — reorder must come before {id} wildcard
         Route::post('courses/reorder', [CourseController::class, 'reorder']);

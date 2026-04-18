@@ -15,7 +15,7 @@ class Quiz extends Model
     ];
 
     protected $casts = [
-        'time_limit'    => 'integer',
+        'time_limit' => 'integer',
         'passing_score' => 'integer',
     ];
 

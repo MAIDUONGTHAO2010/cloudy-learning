@@ -3,115 +3,51 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Course;
+use App\Http\Requests\Admin\Course\ReorderCourseRequest;
+use App\Http\Requests\Admin\Course\StoreCourseRequest;
+use App\Http\Requests\Admin\Course\UpdateCourseRequest;
+use App\Services\CourseService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 
 class CourseController extends Controller
 {
-    public function index()
-    {
-        $courses = Course::with('instructor:id,name')
-            ->withCount('lessons')
-            ->withAvg('reviews', 'rating')
-            ->withCount('reviews')
-            ->orderBy('order')
-            ->get();
+    public function __construct(protected CourseService $courseService) {}
 
-        return response()->json($courses);
+    public function index(Request $request)
+    {
+        return response()->json($this->courseService->listPaginated());
     }
 
     public function show(int $id)
     {
-        $course = Course::with('instructor:id,name')
-            ->withAvg('reviews', 'rating')
-            ->withCount('reviews')
-            ->findOrFail($id);
-
-        return response()->json($course);
+        return response()->json($this->courseService->show($id));
     }
 
-    public function store(Request $request)
+    public function store(StoreCourseRequest $request)
     {
-        $data = $request->validate([
-            'user_id'     => 'required|exists:users,id',
-            'title'       => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'thumbnail'   => 'nullable|string|max:255',
-            'order'       => 'nullable|integer|min:0',
-            'is_active'   => 'nullable|boolean',
-        ]);
-
-        $data['slug'] = $this->uniqueSlug(Str::slug($data['title']));
-
-        $course = Course::create($data);
-        $course->load('instructor:id,name');
-        $course->loadCount(['lessons', 'reviews']);
-        $course->loadAvg('reviews', 'rating');
+        $course = $this->courseService->create($request->validated());
 
         return response()->json($course, 201);
     }
 
-    public function update(Request $request, int $id)
+    public function update(UpdateCourseRequest $request, int $id)
     {
-        $data = $request->validate([
-            'user_id'     => 'required|exists:users,id',
-            'title'       => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'thumbnail'   => 'nullable|string|max:255',
-            'order'       => 'nullable|integer|min:0',
-            'is_active'   => 'nullable|boolean',
-        ]);
-
-        $data['slug'] = $this->uniqueSlug(Str::slug($data['title']), $id);
-
-        $course = Course::findOrFail($id);
-        $course->update($data);
-        $course->load('instructor:id,name');
-        $course->loadCount(['lessons', 'reviews']);
-        $course->loadAvg('reviews', 'rating');
+        $course = $this->courseService->update($id, $request->validated());
 
         return response()->json($course);
     }
 
     public function destroy(int $id)
     {
-        Course::findOrFail($id)->delete();
+        $this->courseService->delete($id);
 
         return response()->json(['message' => 'Deleted successfully']);
     }
 
-    public function reorder(Request $request)
+    public function reorder(ReorderCourseRequest $request)
     {
-        $items = $request->validate([
-            'items'         => 'required|array',
-            'items.*.id'    => 'required|integer|exists:courses,id',
-            'items.*.order' => 'required|integer|min:0',
-        ])['items'];
-
-        foreach ($items as $item) {
-            Course::where('id', $item['id'])->update(['order' => $item['order']]);
-        }
+        $this->courseService->reorder($request->validated()['items']);
 
         return response()->json(['message' => 'Reordered successfully']);
-    }
-
-    private function uniqueSlug(string $slug, ?int $excludeId = null): string
-    {
-        $original = $slug;
-        $count = 1;
-
-        while (true) {
-            $query = Course::where('slug', $slug);
-            if ($excludeId) {
-                $query->where('id', '!=', $excludeId);
-            }
-            if (!$query->exists()) {
-                break;
-            }
-            $slug = $original . '-' . $count++;
-        }
-
-        return $slug;
     }
 }

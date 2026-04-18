@@ -14,7 +14,7 @@ class QuestionOption extends Model
     ];
 
     protected $casts = [
-        'label'      => 'integer',
+        'label' => 'integer',
         'is_correct' => 'boolean',
     ];
 

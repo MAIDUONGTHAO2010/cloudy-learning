@@ -131,9 +131,7 @@
 import axios from 'axios';
 import { reactive, ref } from 'vue';
 import { useAdminUser } from './composables/useAdminUser.js';
-import { useRouter } from 'vue-router';
 
-const router = useRouter();
 const { setAdminUser } = useAdminUser();
 
 const form = reactive({

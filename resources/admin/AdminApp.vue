@@ -59,17 +59,20 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import Footer from './components/Footer.vue';
 import Header from './components/Header.vue';
 import { useAdminUser } from './composables/useAdminUser.js';
 import { useRoute } from 'vue-router';
 
-const navItems = [
-    { to: '/dashboard', label: 'Dashboard', short: '01' },
-    { to: '/users', label: 'Users', short: '02' },
-    { to: '/categories', label: 'Categories', short: '03' },
-    { to: '/courses', label: 'Courses', short: '04' },
-];
+const { t } = useI18n();
+
+const navItems = computed(() => [
+    { to: '/dashboard', label: t('admin.nav.dashboard'), short: '01' },
+    { to: '/users',     label: t('admin.nav.users'),     short: '02' },
+    { to: '/categories',label: t('admin.nav.categories'),short: '03' },
+    { to: '/courses',   label: t('admin.nav.courses'),   short: '04' },
+]);
 
 const route = useRoute();
 const { adminUser } = useAdminUser();

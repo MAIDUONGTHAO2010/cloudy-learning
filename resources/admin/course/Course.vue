@@ -45,6 +45,7 @@
             <tr>
               <th class="w-10 px-4 py-4"></th>
               <th class="px-6 py-4">Title</th>
+              <th class="px-6 py-4">Category</th>
               <th class="px-6 py-4">Instructor</th>
               <th class="px-6 py-4">Lessons</th>
               <th class="px-6 py-4">Rating</th>
@@ -87,8 +88,25 @@
                     <p v-if="course.description" class="mt-0.5 max-w-xs truncate text-xs text-slate-400">
                       {{ course.description }}
                     </p>
+                    <div v-if="course.tags?.length" class="mt-1 flex flex-wrap gap-1">
+                      <span
+                        v-for="tag in course.tags"
+                        :key="tag.id"
+                        class="rounded-full bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-500"
+                      >
+                        {{ tag.name }}
+                      </span>
+                    </div>
                   </div>
                 </div>
+              </td>
+
+              <!-- Category -->
+              <td class="px-6 py-4 text-slate-500">
+                <span v-if="course.category" class="rounded-full bg-violet-50 px-2.5 py-1 text-xs font-medium text-violet-600">
+                  {{ course.category.name }}
+                </span>
+                <span v-else class="text-slate-300">—</span>
               </td>
 
               <!-- Instructor -->
@@ -158,9 +176,29 @@
           </tbody>
         </table>
       </div>
+      <!-- Pagination -->
+      <div v-if="lastPage > 1" class="flex items-center justify-between border-t border-slate-100 px-6 py-4">
+        <p class="text-sm text-slate-400">
+          Page {{ currentPage }} of {{ lastPage }} &nbsp;·&nbsp; {{ total.toLocaleString() }} courses
+        </p>
+        <div class="flex gap-2">
+          <button
+            @click="fetch(currentPage - 1)"
+            :disabled="currentPage === 1"
+            class="rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 transition hover:bg-slate-50 disabled:opacity-40"
+          >
+            ← Prev
+          </button>
+          <button
+            @click="fetch(currentPage + 1)"
+            :disabled="currentPage === lastPage"
+            class="rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 transition hover:bg-slate-50 disabled:opacity-40"
+          >
+            Next →
+          </button>
+        </div>
+      </div>
     </section>
-
-    <!-- Create / Edit Modal -->
     <Teleport to="body">
       <div v-if="showModal" class="fixed inset-0 z-50 flex items-center justify-center p-4">
         <div class="absolute inset-0 bg-slate-950/40 backdrop-blur-sm" @click="closeModal"></div>
@@ -214,6 +252,60 @@
               <p v-if="!instructors.length" class="mt-1.5 text-xs text-slate-400">
                 No instructors found. Assign the "Instructor" role to a user first.
               </p>
+            </div>
+
+            <!-- Category -->
+            <div>
+              <label class="mb-1.5 block text-sm font-medium text-slate-700">Category</label>
+              <select
+                v-model.number="form.category_id"
+                class="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+              >
+                <option :value="null">No category</option>
+                <option v-for="cat in categories" :key="cat.id" :value="cat.id">
+                  {{ cat.name }}
+                </option>
+              </select>
+            </div>
+
+            <!-- Tags -->
+            <div>
+              <label class="mb-1.5 block text-sm font-medium text-slate-700">Tags</label>
+              <!-- selected chips -->
+              <div v-if="form.tags.length" class="mb-2 flex flex-wrap gap-1.5">
+                <span
+                  v-for="tag in form.tags"
+                  :key="tag"
+                  class="inline-flex items-center gap-1 rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-600"
+                >
+                  {{ tag }}
+                  <button type="button" @click="removeTag(tag)" class="ml-0.5 rounded-full text-blue-400 hover:text-blue-700">&times;</button>
+                </span>
+              </div>
+              <!-- type-to-add input -->
+              <input
+                v-model="tagInput"
+                @keydown.enter.prevent="addTag"
+                @keydown.,.prevent="addTag"
+                type="text"
+                placeholder="Type a tag and press Enter or comma"
+                class="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+              />
+              <!-- quick-select from existing tags -->
+              <div v-if="allTags.length" class="mt-2 flex flex-wrap gap-1.5">
+                <button
+                  v-for="t in allTags"
+                  :key="t.id"
+                  type="button"
+                  @click="toggleTag(t.name)"
+                  :class="form.tags.includes(t.name)
+                    ? 'bg-blue-500 text-white'
+                    : 'bg-slate-100 text-slate-500 hover:bg-slate-200'"
+                  class="rounded-full px-2.5 py-1 text-xs font-medium transition"
+                >
+                  {{ t.name }}
+                </button>
+              </div>
             </div>
 
             <!-- Status -->
@@ -380,7 +472,7 @@ import { ref, reactive, computed, onMounted } from 'vue';
 import axios from 'axios';
 import { useCourses, type Course } from '../composables/useCourses';
 
-const { items, loading, fetch, create, update, remove, reorder } = useCourses();
+const { items, loading, currentPage, lastPage, total, fetch, create, update, remove, reorder } = useCourses();
 
 // ── Instructors ──────────────────────────────────────────────────────────────
 type Instructor = { id: number; name: string; email: string };
@@ -395,9 +487,58 @@ const fetchInstructors = async () => {
     }
 };
 
+// ── Categories ───────────────────────────────────────────────────────────────
+type CategoryOption = { id: number; name: string };
+const categories = ref<CategoryOption[]>([]);
+
+const fetchCategories = async () => {
+    try {
+        const res = await axios.get('/admin/api/categories');
+        categories.value = res.data;
+    } catch {
+        categories.value = [];
+    }
+};
+
+// ── Tags ─────────────────────────────────────────────────────────────────────
+type TagOption = { id: number; name: string; slug: string };
+const allTags    = ref<TagOption[]>([]);
+const tagInput   = ref('');
+
+const fetchAllTags = async () => {
+    try {
+        const res = await axios.get('/admin/api/tags');
+        allTags.value = res.data;
+    } catch {
+        allTags.value = [];
+    }
+};
+
+const addTag = () => {
+    const name = tagInput.value.trim().replace(/,$/, '').trim();
+    if (name && !form.tags.includes(name)) {
+        form.tags.push(name);
+    }
+    tagInput.value = '';
+};
+
+const removeTag = (name: string) => {
+    form.tags = form.tags.filter((t) => t !== name);
+};
+
+const toggleTag = (name: string) => {
+    if (form.tags.includes(name)) {
+        removeTag(name);
+    } else {
+        form.tags.push(name);
+    }
+};
+
 onMounted(() => {
     fetch();
     fetchInstructors();
+    fetchCategories();
+    fetchAllTags();
 });
 
 // ── Drag & Drop ──────────────────────────────────────────────────────────────
@@ -447,6 +588,8 @@ const form = reactive({
     title:       '',
     description: '',
     user_id:     0 as number,
+    category_id: null as number | null,
+    tags:        [] as string[],
     is_active:   true as boolean,
 });
 
@@ -455,7 +598,10 @@ const openCreateModal = () => {
     form.title           = '';
     form.description     = '';
     form.user_id         = instructors.value[0]?.id ?? 0;
+    form.category_id     = null;
+    form.tags            = [];
     form.is_active       = true;
+    tagInput.value       = '';
     formError.value      = null;
     showModal.value      = true;
 };
@@ -465,7 +611,10 @@ const openEditModal = (course: Course) => {
     form.title           = course.title;
     form.description     = course.description ?? '';
     form.user_id         = course.user_id;
+    form.category_id     = course.category_id ?? null;
+    form.tags            = course.tags?.map((t) => t.name) ?? [];
     form.is_active       = course.is_active ?? true;
+    tagInput.value       = '';
     formError.value      = null;
     showModal.value      = true;
 };
@@ -481,6 +630,8 @@ const submitModal = async () => {
             title:       form.title,
             description: form.description,
             user_id:     form.user_id,
+            category_id: form.category_id,
+            tags:        form.tags,
             is_active:   form.is_active,
         };
         if (editingCourse.value?.id) {

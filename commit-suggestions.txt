@@ -1,0 +1,8 @@
+Recommended commit message:
+feat: add CI workflow, lint autofix scripts, and contact admin notifications
+
+Other good options:
+feat: add GitHub Actions checks for PHP and Vue
+chore: add composer and npm autofix scripts for code quality
+feat: notify admins when users submit the contact form
+chore: set up CI for pint and eslint validation

@@ -1,0 +1,51 @@
+name: CI
+
+on:
+  push:
+    branches:
+    - main
+    - master
+    - develop
+  pull_request:
+
+
+jobs:
+  phpcs:
+    name: PHPCS
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout source
+      uses: actions/checkout@v4
+
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.2'
+        tools: composer:v2
+
+    - name: Install Composer dependencies
+      run: composer install --no-interaction --prefer-dist --no-progress
+
+    - name: Run PHP code style check
+      run: composer phpcs
+
+  vue-lint:
+    name: Vue Lint
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout source
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: npm
+
+    - name: Install Node dependencies
+      run: npm install
+
+    - name: Run Vue lint
+      run: npm run lint

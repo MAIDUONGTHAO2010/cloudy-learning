@@ -8,6 +8,7 @@ class Course extends Model
 {
     protected $fillable = [
         'user_id',
+        'category_id',
         'title',
         'slug',
         'description',
@@ -18,12 +19,22 @@ class Course extends Model
 
     protected $casts = [
         'is_active' => 'boolean',
-        'order'     => 'integer',
+        'order' => 'integer',
     ];
 
     public function instructor()
     {
         return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function category()
+    {
+        return $this->belongsTo(Category::class);
+    }
+
+    public function tags()
+    {
+        return $this->belongsToMany(Tag::class);
     }
 
     public function lessons()

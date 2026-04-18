@@ -14,7 +14,7 @@ class Question extends Model
     ];
 
     protected $casts = [
-        'type'  => 'integer',
+        'type' => 'integer',
         'order' => 'integer',
     ];
 

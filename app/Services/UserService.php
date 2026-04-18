@@ -2,15 +2,29 @@
 
 namespace App\Services;
 
-use App\Repositories\UserRepositoryEloquent;
+use App\Repositories\Contracts\UserRepositoryInterface;
 
 class UserService
 {
-    protected $userRepository;
+    public function __construct(protected UserRepositoryInterface $userRepository) {}
 
-    public function __construct(UserRepositoryEloquent $userRepository)
+    public function list(array $filters): mixed
     {
-        $this->userRepository = $userRepository;
+        return $this->userRepository->getPaginated($filters);
     }
 
+    public function stats(): array
+    {
+        return $this->userRepository->getStats();
+    }
+
+    public function listInstructors(): mixed
+    {
+        return $this->userRepository->getInstructors();
+    }
+
+    public function listPublicInstructors(): mixed
+    {
+        return $this->userRepository->getPublicInstructors();
+    }
 }

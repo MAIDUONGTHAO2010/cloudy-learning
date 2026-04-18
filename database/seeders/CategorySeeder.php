@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use App\Models\Category;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
 
@@ -23,7 +22,7 @@ class CategorySeeder extends Seeder
                     ['name' => 'Lập trình Mobile', 'icon' => 'fas fa-mobile-alt'],
                     ['name' => 'Khoa học dữ liệu', 'icon' => 'fas fa-database'],
                     ['name' => 'Game Development', 'icon' => 'fas fa-gamepad'],
-                ]
+                ],
             ],
             [
                 'name' => 'Kinh doanh (Business)',
@@ -32,7 +31,7 @@ class CategorySeeder extends Seeder
                     ['name' => 'Khởi nghiệp', 'icon' => 'fas fa-lightbulb'],
                     ['name' => 'Quản trị nhân sự', 'icon' => 'fas fa-users'],
                     ['name' => 'Tài chính kế toán', 'icon' => 'fas fa-calculator'],
-                ]
+                ],
             ],
             [
                 'name' => 'Thiết kế (Design)',
@@ -41,7 +40,7 @@ class CategorySeeder extends Seeder
                     ['name' => 'Thiết kế đồ họa', 'icon' => 'fas fa-vector-square'],
                     ['name' => 'Thiết kế UI/UX', 'icon' => 'fas fa-desktop'],
                     ['name' => 'Dựng phim & Video', 'icon' => 'fas fa-video'],
-                ]
+                ],
             ],
             [
                 'name' => 'Ngoại ngữ (Languages)',
@@ -50,7 +49,7 @@ class CategorySeeder extends Seeder
                     ['name' => 'Tiếng Anh', 'icon' => 'fas fa-english-badge'],
                     ['name' => 'Tiếng Nhật', 'icon' => 'fas fa-torii-gate'],
                     ['name' => 'Tiếng Hàn', 'icon' => 'fas fa-korea'],
-                ]
+                ],
             ],
         ];
 

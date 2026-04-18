@@ -3,102 +3,44 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Course;
-use App\Models\Lesson;
-use Illuminate\Http\Request;
-use Illuminate\Support\Str;
+use App\Http\Requests\Admin\Lesson\ReorderLessonRequest;
+use App\Http\Requests\Admin\Lesson\StoreLessonRequest;
+use App\Http\Requests\Admin\Lesson\UpdateLessonRequest;
+use App\Services\LessonService;
 
 class LessonController extends Controller
 {
+    public function __construct(protected LessonService $lessonService) {}
+
     public function index(int $courseId)
     {
-        $course = Course::findOrFail($courseId);
-        $lessons = $course->lessons()->orderBy('order')->get();
-
-        return response()->json([
-            'course'  => $course,
-            'lessons' => $lessons,
-        ]);
+        return response()->json($this->lessonService->listByCourse($courseId));
     }
 
-    public function store(Request $request, int $courseId)
+    public function store(StoreLessonRequest $request, int $courseId)
     {
-        Course::findOrFail($courseId);
-
-        $data = $request->validate([
-            'title'     => 'required|string|max:255',
-            'content'   => 'nullable|string',
-            'video_url' => 'nullable|string|max:255',
-            'order'     => 'nullable|integer|min:0',
-            'duration'  => 'nullable|integer|min:0',
-            'is_active' => 'nullable|boolean',
-        ]);
-
-        $data['course_id'] = $courseId;
-        $data['slug']      = $this->uniqueSlug(Str::slug($data['title']));
-
-        $lesson = Lesson::create($data);
-
-        return response()->json($lesson, 201);
+        return response()->json(
+            $this->lessonService->create($courseId, $request->validated()),
+            201
+        );
     }
 
-    public function update(Request $request, int $id)
+    public function update(UpdateLessonRequest $request, int $id)
     {
-        $data = $request->validate([
-            'title'     => 'required|string|max:255',
-            'content'   => 'nullable|string',
-            'video_url' => 'nullable|string|max:255',
-            'order'     => 'nullable|integer|min:0',
-            'duration'  => 'nullable|integer|min:0',
-            'is_active' => 'nullable|boolean',
-        ]);
-
-        $data['slug'] = $this->uniqueSlug(Str::slug($data['title']), $id);
-
-        $lesson = Lesson::findOrFail($id);
-        $lesson->update($data);
-
-        return response()->json($lesson);
+        return response()->json($this->lessonService->update($id, $request->validated()));
     }
 
     public function destroy(int $id)
     {
-        Lesson::findOrFail($id)->delete();
+        $this->lessonService->delete($id);
 
         return response()->json(['message' => 'Deleted successfully']);
     }
 
-    public function reorder(Request $request, int $courseId)
+    public function reorder(ReorderLessonRequest $request, int $courseId)
     {
-        $items = $request->validate([
-            'items'         => 'required|array',
-            'items.*.id'    => 'required|integer|exists:lessons,id',
-            'items.*.order' => 'required|integer|min:0',
-        ])['items'];
-
-        foreach ($items as $item) {
-            Lesson::where('id', $item['id'])->update(['order' => $item['order']]);
-        }
+        $this->lessonService->reorder($courseId, $request->validated()['items']);
 
         return response()->json(['message' => 'Reordered successfully']);
-    }
-
-    private function uniqueSlug(string $slug, ?int $excludeId = null): string
-    {
-        $original = $slug;
-        $count = 1;
-
-        while (true) {
-            $query = Lesson::where('slug', $slug);
-            if ($excludeId) {
-                $query->where('id', '!=', $excludeId);
-            }
-            if (!$query->exists()) {
-                break;
-            }
-            $slug = $original . '-' . $count++;
-        }
-
-        return $slug;
     }
 }

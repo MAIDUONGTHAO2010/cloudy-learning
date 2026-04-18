@@ -6,9 +6,16 @@ use Prettus\Repository\Contracts\RepositoryInterface;
 
 /**
  * Interface UserRepositoryInterface.
- *
- * @package namespace App\Contracts;
  */
 interface UserRepositoryInterface extends RepositoryInterface
 {
+    public function getPaginated(array $filters);
+
+    public function getStats(): array;
+
+    public function getInstructors();
+
+    public function getPublicInstructors();
+
+    public function getTopInstructors(int $limit = 6);
 }

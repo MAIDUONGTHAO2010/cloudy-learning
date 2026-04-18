@@ -8,8 +8,6 @@ use Prettus\Repository\Eloquent\BaseRepository;
 
 /**
  * Class CategoryRepositoryEloquent.
- *
- * @package namespace App\Repositories;
  */
 class CategoryRepositoryEloquent extends BaseRepository implements CategoryRepositoryInterface
 {
@@ -40,5 +38,22 @@ class CategoryRepositoryEloquent extends BaseRepository implements CategoryRepos
             ->orderByDesc('order')
             ->orderByDesc('id')
             ->get();
+    }
+
+    public function getPaginatedByAdmin()
+    {
+        return Category::query()
+            ->whereNull('parent_id')
+            ->withCount('children')
+            ->orderByDesc('order')
+            ->orderByDesc('id')
+            ->paginate(10);
+    }
+
+    public function getPublic()
+    {
+        return Category::whereNull('parent_id')
+            ->orderBy('name')
+            ->get(['id', 'name']);
     }
 }

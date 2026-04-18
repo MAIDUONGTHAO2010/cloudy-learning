@@ -18,23 +18,27 @@ export type Category = {
     children_count?: number;
 };
 
-const items = ref<Category[]>([]);
-const loading = ref(false);
-const error = ref<string | null>(null);
-const childrenMap = reactive<Record<number, Category[]>>({});
+const items       = ref<Category[]>([]);
+const loading     = ref(false);
+const error       = ref<string | null>(null);
+const currentPage = ref(1);
+const lastPage    = ref(1);
+const total       = ref(0);
+const childrenMap     = reactive<Record<number, Category[]>>({});
 const loadingChildren = reactive<Record<number, boolean>>({});
 
 const API_BASE = '/admin/api/categories';
 
 export const useCategories = () => {
-    const fetch = async () => {
+    const fetch = async (page = 1) => {
         loading.value = true;
         error.value = null;
         try {
-            const res = await axios.get(API_BASE);
-            console.log(res.data);
-
-            items.value = res.data;
+            const res = await axios.get(API_BASE, { params: { page } });
+            items.value       = res.data.data;
+            currentPage.value = res.data.current_page;
+            lastPage.value    = res.data.last_page;
+            total.value       = res.data.total;
         } catch (err: any) {
             error.value = err?.message ?? 'Fetch failed';
         } finally {
@@ -57,7 +61,7 @@ export const useCategories = () => {
         try {
             const res = await axios.post(API_BASE, payload);
             if (!payload.parent_id) {
-                items.value.unshift(res.data);
+                await fetch(currentPage.value);
             } else {
                 if (childrenMap[payload.parent_id as number]) {
                     childrenMap[payload.parent_id as number].unshift(res.data);
@@ -98,8 +102,11 @@ export const useCategories = () => {
         try {
             await axios.delete(`${API_BASE}/${id}`);
             if (!parentId) {
-                items.value = items.value.filter((c) => c.id !== id);
                 delete childrenMap[id];
+                const page = items.value.length === 1 && currentPage.value > 1
+                    ? currentPage.value - 1
+                    : currentPage.value;
+                await fetch(page);
             } else {
                 if (childrenMap[parentId]) {
                     childrenMap[parentId] = childrenMap[parentId].filter((c) => c.id !== id);
@@ -118,6 +125,9 @@ export const useCategories = () => {
         items,
         loading,
         error,
+        currentPage,
+        lastPage,
+        total,
         childrenMap,
         loadingChildren,
         fetch,

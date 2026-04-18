@@ -4,6 +4,7 @@ import AdminApp from './AdminApp.vue';
 import { createApp } from 'vue';
 import { router } from './router/index.js';
 import axios from 'axios';
+import { i18n } from '../i18n';
 
 // Set default headers so Laravel middleware returns JSON errors
 // and CSRF token is sent automatically via the XSRF-TOKEN cookie
@@ -12,10 +13,11 @@ axios.defaults.headers.common['Accept'] = 'application/json';
 axios.defaults.withCredentials = true;
 
 // Redirect to login on 401 (session expired or not authenticated)
+// Guard: don't redirect if already on the login page to avoid infinite reload loop
 axios.interceptors.response.use(
     (response) => response,
     (error) => {
-        if (error?.response?.status === 401) {
+        if (error?.response?.status === 401 && window.location.pathname !== '/admin/login') {
             window.location.href = '/admin/login';
         }
         return Promise.reject(error);
@@ -24,4 +26,5 @@ axios.interceptors.response.use(
 
 createApp(AdminApp)
     .use(router)
+    .use(i18n)
     .mount('#admin');

@@ -7,6 +7,9 @@ namespace App\Models;
 use App\Enums\User\UserRole;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -49,6 +52,21 @@ class User extends Authenticatable
             'password' => 'hashed',
             'role' => 'integer',
         ];
+    }
+
+    public function profile(): HasOne
+    {
+        return $this->hasOne(Profile::class);
+    }
+
+    public function courses(): HasMany
+    {
+        return $this->hasMany(Course::class, 'user_id');
+    }
+
+    public function courseReviews(): HasManyThrough
+    {
+        return $this->hasManyThrough(CourseReview::class, Course::class, 'user_id', 'course_id');
     }
 
     public function isAdmin(): bool

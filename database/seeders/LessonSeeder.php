@@ -48,20 +48,20 @@ class LessonSeeder extends Seeder
             }
 
             foreach ($lessons as $lessonData) {
-                $slug     = Str::slug($lessonData['title']);
+                $slug = Str::slug($lessonData['title']);
                 $original = $slug;
-                $count    = 1;
+                $count = 1;
 
                 while (Lesson::where('slug', $slug)->exists()) {
-                    $slug = $original . '-' . $count++;
+                    $slug = $original.'-'.$count++;
                 }
 
                 Lesson::create([
                     'course_id' => $course->id,
-                    'title'     => $lessonData['title'],
-                    'slug'      => $slug,
-                    'duration'  => $lessonData['duration'],
-                    'order'     => $lessonData['order'],
+                    'title' => $lessonData['title'],
+                    'slug' => $slug,
+                    'duration' => $lessonData['duration'],
+                    'order' => $lessonData['order'],
                     'is_active' => true,
                 ]);
             }

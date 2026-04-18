@@ -187,9 +187,30 @@
           </tbody>
         </table>
       </div>
-    </section>
 
-    <!-- Create / Edit Modal -->
+      <!-- Pagination -->
+      <div v-if="lastPage > 1" class="flex items-center justify-between border-t border-slate-100 px-6 py-4">
+        <p class="text-sm text-slate-400">
+          Page {{ currentPage }} of {{ lastPage }} &nbsp;·&nbsp; {{ total.toLocaleString() }} categories
+        </p>
+        <div class="flex gap-2">
+          <button
+            @click="fetch(currentPage - 1)"
+            :disabled="currentPage === 1"
+            class="rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 transition hover:bg-slate-50 disabled:opacity-40"
+          >
+            ← Prev
+          </button>
+          <button
+            @click="fetch(currentPage + 1)"
+            :disabled="currentPage === lastPage"
+            class="rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 transition hover:bg-slate-50 disabled:opacity-40"
+          >
+            Next →
+          </button>
+        </div>
+      </div>
+    </section>
     <Teleport to="body">
       <div v-if="showModal" class="fixed inset-0 z-50 flex items-center justify-center p-4">
         <div class="absolute inset-0 bg-slate-950/40 backdrop-blur-sm" @click="closeModal"></div>
@@ -323,7 +344,7 @@
 import { ref, reactive, computed, onMounted } from 'vue';
 import { useCategories, type Category } from '../composables/useCategories';
 
-const { items, loading, childrenMap, loadingChildren, fetch, fetchChildren, create, update, remove } =
+const { items, loading, childrenMap, loadingChildren, currentPage, lastPage, total, fetch, fetchChildren, create, update, remove } =
   useCategories();
 
 onMounted(() => fetch());

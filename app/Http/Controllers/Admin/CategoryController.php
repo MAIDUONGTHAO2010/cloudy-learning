@@ -3,96 +3,47 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Repositories\Contracts\CategoryRepositoryInterface;
+use App\Http\Requests\Admin\Category\StoreCategoryRequest;
+use App\Http\Requests\Admin\Category\UpdateCategoryRequest;
+use App\Services\CategoryService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 
 class CategoryController extends Controller
 {
-    protected CategoryRepositoryInterface $categoryRepository;
+    public function __construct(protected CategoryService $categoryService) {}
 
-    public function __construct(CategoryRepositoryInterface $categoryRepository)
+    public function index(Request $request)
     {
-        $this->categoryRepository = $categoryRepository;
-    }
+        if ($request->has('page')) {
+            return response()->json($this->categoryService->listPaginated());
+        }
 
-    public function index()
-    {
-        $categories = $this->categoryRepository->getCategoriesByAdmin();
-
-        return response()->json($categories);
+        return response()->json($this->categoryService->list());
     }
 
     public function children(int $id)
     {
-        $children = $this->categoryRepository->getChildrenByAdmin($id);
-
-        return response()->json($children);
+        return response()->json($this->categoryService->children($id));
     }
 
-    public function store(Request $request)
+    public function store(StoreCategoryRequest $request)
     {
-        $data = $request->validate([
-            'name'        => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'order'       => 'nullable|integer|min:0',
-            'is_active'   => 'nullable|boolean',
-            'parent_id'   => 'nullable|exists:categories,id',
-        ]);
-
-        $data['slug'] = $this->uniqueSlug(Str::slug($data['name']));
-
-        $category = $this->categoryRepository->create($data);
-
-        // Reload with children_count for parent categories
-        if (empty($data['parent_id'])) {
-            $category->loadCount('children');
-        }
+        $category = $this->categoryService->create($request->validated());
 
         return response()->json($category, 201);
     }
 
-    public function update(Request $request, int $id)
+    public function update(UpdateCategoryRequest $request, int $id)
     {
-        $data = $request->validate([
-            'name'        => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'order'       => 'nullable|integer|min:0',
-            'is_active'   => 'nullable|boolean',
-        ]);
-
-        $data['slug'] = $this->uniqueSlug(Str::slug($data['name']), $id);
-
-        $category = $this->categoryRepository->update($data, $id);
-
-        $category->loadCount('children');
+        $category = $this->categoryService->update($id, $request->validated());
 
         return response()->json($category);
     }
 
     public function destroy(int $id)
     {
-        $this->categoryRepository->delete($id);
+        $this->categoryService->delete($id);
 
         return response()->json(['message' => 'Deleted successfully']);
-    }
-
-    private function uniqueSlug(string $slug, ?int $excludeId = null): string
-    {
-        $original = $slug;
-        $count = 1;
-
-        while (true) {
-            $query = \App\Models\Category::where('slug', $slug);
-            if ($excludeId) {
-                $query->where('id', '!=', $excludeId);
-            }
-            if (!$query->exists()) {
-                break;
-            }
-            $slug = $original . '-' . $count++;
-        }
-
-        return $slug;
     }
 }
