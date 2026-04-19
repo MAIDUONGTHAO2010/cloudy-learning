@@ -3,6 +3,8 @@
 namespace Database\Seeders;
 
 use App\Enums\Question\Answerpe;
+use App\Enums\Question\AnswerType;
+use App\Enums\Question\QuestionType;
 use App\Models\Lesson;
 use App\Models\Question;
 use App\Models\QuestionOption;
@@ -28,7 +30,7 @@ class QuizSeeder extends Seeder
             $q1 = Question::create([
                 'quiz_id' => $quiz->id,
                 'content' => 'Nội dung chính của bài học này là gì?',
-                'type' => Answerpe::SINGLE, // 1
+                'type' => QuestionType::TEXT, // 1
                 'order' => 0,
             ]);
 
@@ -43,7 +45,7 @@ class QuizSeeder extends Seeder
             $q2 = Question::create([
                 'quiz_id' => $quiz->id,
                 'content' => 'Công cụ nào được đề cập trong bài học?',
-                'type' => Answerpe::SINGLE,
+                'type' => QuestionType::TEXT,
                 'order' => 1,
             ]);
 
@@ -58,7 +60,7 @@ class QuizSeeder extends Seeder
             $q3 = Question::create([
                 'quiz_id' => $quiz->id,
                 'content' => 'Những điểm nào là quan trọng cần ghi nhớ? (Chọn nhiều đáp án)',
-                'type' => Answerpe::MULTIPLE, // 2
+                'type' => QuestionType::TEXT, // 2
                 'order' => 2,
             ]);
 

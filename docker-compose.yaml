@@ -4,19 +4,19 @@ services:
       context: ./docker/php
       dockerfile: Dockerfile
     container_name: cloudy_workspace
+    restart: unless-stopped
     volumes:
       - .:/var/www/html
     depends_on:
       - postgres
       - minio
-    ports:
-      - "5174:5174"
     networks:
       - cloudy
 
   nginx:
     image: nginx:alpine
     container_name: cloudy_nginx
+    restart: unless-stopped
     ports:
       - "8080:80"
     volumes:

@@ -15,7 +15,7 @@ class CourseSeeder extends Seeder
     {
         // Tạo 2 instructor nếu chưa tồn tại
         $instructorA = User::firstOrCreate(
-            ['email' => 'instructor.a@cloudylearning.com'],
+            ['email' => 'instructor@cloudylearning.com'],
             [
                 'name' => 'Nguyen Van An',
                 'password' => Hash::make('Aa@123456789'),
@@ -24,11 +24,11 @@ class CourseSeeder extends Seeder
         );
 
         $instructorB = User::firstOrCreate(
-            ['email' => 'instructor.b@cloudylearning.com'],
+            ['email' => 'student@cloudylearning.com'],
             [
-                'name' => 'Tran Thi Bich',
+                'name' => 'Huynh Ngo Vu Binh',
                 'password' => Hash::make('Aa@123456789'),
-                'role' => UserRole::INSTRUCTOR,
+                'role' => UserRole::STUDENT,
             ]
         );
 
