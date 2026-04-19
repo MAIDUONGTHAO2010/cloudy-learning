@@ -8,6 +8,7 @@ services:
       - .:/var/www/html
     depends_on:
       - postgres
+      - minio
     ports:
       - "5174:5174"
     networks:
@@ -41,6 +42,43 @@ services:
     networks:
       - cloudy
 
+  minio:
+    image: minio/minio:latest
+    container_name: cloudy_minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin123}
+    volumes:
+      - minio_data:/data
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    networks:
+      - cloudy
+
+  minio_init:
+    image: minio/mc:latest
+    container_name: cloudy_minio_init
+    depends_on:
+      - minio
+    volumes:
+      - ./docker/minio/cors.json:/tmp/cors.json:ro
+    entrypoint: >
+      /bin/sh -c "
+      until mc alias set local http://minio:9000 ${MINIO_ROOT_USER:-minioadmin} ${MINIO_ROOT_PASSWORD:-minioadmin123}; do
+        echo 'Waiting for MinIO...';
+        sleep 2;
+      done;
+      mc mb -p local/${AWS_BUCKET:-cloudy-learning} || true;
+      mc anonymous set download local/${AWS_BUCKET:-cloudy-learning} || true;
+      mc cors set local/${AWS_BUCKET:-cloudy-learning} /tmp/cors.json || true;
+      exit 0;
+      "
+    networks:
+      - cloudy
+
   adminer:
     image: adminer:latest
     container_name: cloudy_adminer
@@ -58,4 +96,6 @@ networks:
 
 volumes:
   postgres_data:
+    driver: local
+  minio_data:
     driver: local

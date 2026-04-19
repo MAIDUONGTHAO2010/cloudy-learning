@@ -170,13 +170,31 @@
               />
             </div>
 
+            <!-- Video upload -->
+            <div>
+              <label class="mb-1.5 block text-sm font-medium text-slate-700">Lesson Video</label>
+              <input
+                type="file"
+                accept="video/*"
+                @change="onVideoSelected"
+                class="w-full rounded-2xl border border-dashed border-slate-300 px-4 py-3 text-sm text-slate-700 file:mr-4 file:rounded-xl file:border-0 file:bg-slate-900 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-white"
+              />
+              <p class="mt-2 text-xs text-slate-500">Upload directly to MinIO with a presigned URL. Max file size: 1.5 GB.</p>
+
+              <div v-if="uploadingVideo" class="mt-3 overflow-hidden rounded-full bg-slate-100">
+                <div class="h-2 bg-blue-600 transition-all" :style="{ width: `${uploadProgress}%` }"></div>
+              </div>
+              <p v-if="uploadingVideo" class="mt-2 text-xs text-blue-600">Uploading video… {{ uploadProgress }}%</p>
+              <p v-else-if="form.video_url" class="mt-2 text-xs text-emerald-600">Video uploaded and ready.</p>
+            </div>
+
             <!-- Video URL -->
             <div>
               <label class="mb-1.5 block text-sm font-medium text-slate-700">Video URL</label>
               <input
                 v-model="form.video_url"
                 type="url"
-                placeholder="https://…"
+                placeholder="Auto-filled after upload or paste an external URL"
                 class="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
               />
             </div>
@@ -350,25 +368,59 @@
                     <!-- Question content -->
                     <div>
                       <label class="mb-1 block text-xs font-medium text-slate-600">Question</label>
+                      <!-- text type: textarea -->
                       <textarea
+                        v-if="editForm.type === 1"
                         v-model="editForm.content"
                         rows="2"
                         class="w-full resize-none rounded-2xl border border-slate-200 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
                       ></textarea>
+                      <!-- media type: file upload -->
+                      <div v-else class="space-y-2">
+                        <div v-if="editForm.content" class="flex items-center gap-2 rounded-xl bg-slate-50 px-3 py-2 text-xs text-slate-600">
+                          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0 text-indigo-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clip-rule="evenodd" /></svg>
+                          <span class="truncate">{{ editForm.content }}</span>
+                        </div>
+                        <label class="flex cursor-pointer items-center gap-2 rounded-2xl border-2 border-dashed border-slate-200 px-4 py-3 text-xs text-slate-500 hover:border-indigo-300 hover:text-indigo-500 transition">
+                          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clip-rule="evenodd" /></svg>
+                          {{ editMediaUploading ? `Uploading ${editMediaProgress}%…` : (editForm.content ? 'Replace file' : 'Upload file') }}
+                          <input
+                            type="file"
+                            class="sr-only"
+                            :accept="editForm.type === 2 ? 'image/*' : editForm.type === 3 ? 'audio/*' : 'video/*'"
+                            @change="handleEditMediaChange"
+                            :disabled="editMediaUploading"
+                          />
+                        </label>
+                      </div>
                     </div>
 
-                    <!-- Type -->
+                    <!-- Question Type -->
                     <div>
-                      <label class="mb-1 block text-xs font-medium text-slate-600">Type</label>
+                      <label class="mb-1 block text-xs font-medium text-slate-600">Question Type</label>
+                      <div class="flex flex-wrap gap-2">
+                        <label v-for="qt in [{ val: 1, label: 'Text' }, { val: 2, label: 'Image' }, { val: 3, label: 'Audio' }, { val: 4, label: 'Video' }]" :key="qt.val"
+                          class="flex cursor-pointer items-center gap-1.5 rounded-xl border px-3 py-2 text-xs font-medium transition"
+                          :class="editForm.type === qt.val ? 'border-indigo-400 bg-indigo-50 text-indigo-700' : 'border-slate-200 text-slate-500 hover:bg-slate-50'"
+                        >
+                          <input type="radio" :value="qt.val" v-model="editForm.type" class="sr-only" />
+                          {{ qt.label }}
+                        </label>
+                      </div>
+                    </div>
+
+                    <!-- Answer Type -->
+                    <div>
+                      <label class="mb-1 block text-xs font-medium text-slate-600">Answer Type</label>
                       <div class="flex gap-3">
                         <label class="flex cursor-pointer items-center gap-2 rounded-2xl border px-4 py-2.5 text-sm transition"
-                          :class="editForm.type === 1 ? 'border-blue-400 bg-blue-50 text-blue-700' : 'border-slate-200 text-slate-600 hover:bg-slate-50'">
-                          <input type="radio" :value="1" v-model="editForm.type" class="sr-only" />
+                          :class="editForm.answer_type === 1 ? 'border-blue-400 bg-blue-50 text-blue-700' : 'border-slate-200 text-slate-600 hover:bg-slate-50'">
+                          <input type="radio" :value="1" v-model="editForm.answer_type" class="sr-only" />
                           Single choice (1 đáp án đúng)
                         </label>
                         <label class="flex cursor-pointer items-center gap-2 rounded-2xl border px-4 py-2.5 text-sm transition"
-                          :class="editForm.type === 2 ? 'border-violet-400 bg-violet-50 text-violet-700' : 'border-slate-200 text-slate-600 hover:bg-slate-50'">
-                          <input type="radio" :value="2" v-model="editForm.type" class="sr-only" />
+                          :class="editForm.answer_type === 2 ? 'border-violet-400 bg-violet-50 text-violet-700' : 'border-slate-200 text-slate-600 hover:bg-slate-50'">
+                          <input type="radio" :value="2" v-model="editForm.answer_type" class="sr-only" />
                           Multiple choice (nhiều đáp án đúng)
                         </label>
                       </div>
@@ -397,7 +449,7 @@
                         <label class="flex shrink-0 cursor-pointer items-center gap-1.5 text-xs font-medium"
                           :class="opt.is_correct ? 'text-emerald-600' : 'text-slate-400'">
                           <input
-                            v-if="editForm.type === 2"
+                            v-if="editForm.answer_type === 2"
                             type="checkbox"
                             v-model="opt.is_correct"
                             class="h-4 w-4 rounded accent-emerald-500"
@@ -560,7 +612,7 @@ import axios from 'axios';
 import { useRoute } from 'vue-router';
 import { useLessons, type Lesson } from '../composables/useLessons';
 
-const { items, course, loading, fetch, create, update, remove, reorder } = useLessons();
+const { items, course, loading, fetch, create, update, remove, reorder, presignVideoUpload } = useLessons();
 
 const route    = useRoute();
 const courseId = computed(() => Number(route.params.courseId));
@@ -606,9 +658,12 @@ const onDrop = async () => {
 };
 
 // ── Create / Edit modal ──────────────────────────────────────────────────────
-const showModal    = ref(false);
+const showModal     = ref(false);
 const editingLesson = ref<Lesson | null>(null);
-const formError    = ref<string | null>(null);
+const formError     = ref<string | null>(null);
+const uploadingVideo = ref(false);
+const uploadProgress = ref(0);
+const MAX_VIDEO_SIZE = 1610612736;
 
 const form = reactive({
     title:     '',
@@ -642,10 +697,63 @@ const openEditModal = (lesson: Lesson) => {
 
 const closeModal = () => {
     showModal.value = false;
+    uploadingVideo.value = false;
+    uploadProgress.value = 0;
+};
+
+const onVideoSelected = async (event: Event) => {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+
+    if (!file) {
+        return;
+    }
+
+    if (file.size > MAX_VIDEO_SIZE) {
+        formError.value = 'Video size must be 1.5 GB or smaller.';
+        input.value = '';
+        return;
+    }
+
+    formError.value = null;
+    uploadingVideo.value = true;
+    uploadProgress.value = 0;
+
+    try {
+        const presigned = await presignVideoUpload(file);
+        const safeHeaders = Object.fromEntries(
+            Object.entries(presigned.headers ?? {}).filter(([key]) => !['host', 'content-length'].includes(key.toLowerCase()))
+        );
+
+        await axios.put(presigned.upload_url, file, {
+            headers: {
+                ...safeHeaders,
+                'Content-Type': file.type || 'video/mp4',
+            },
+            onUploadProgress: (progressEvent) => {
+                if (progressEvent.total) {
+                    uploadProgress.value = Math.round((progressEvent.loaded / progressEvent.total) * 100);
+                }
+            },
+        });
+
+        form.video_url = presigned.video_url;
+    } catch (err: any) {
+        formError.value = err?.response?.data?.message ?? err?.message ?? 'Video upload failed.';
+    } finally {
+        uploadingVideo.value = false;
+        input.value = '';
+    }
 };
 
 const submitModal = async () => {
     formError.value = null;
+
+    if (uploadingVideo.value) {
+        formError.value = 'Please wait for the video upload to finish.';
+        return;
+    }
+
     try {
         const payload: Partial<Lesson> = {
             title:     form.title,
@@ -688,7 +796,7 @@ const confirmDelete = async () => {
 
 // ── Quiz Panel ────────────────────────────────────────────────────────────────
 type QuestionOption = { id: number; label: number; content: string; is_correct: boolean };
-type Question       = { id: number; content: string; type: number; order: number; options: QuestionOption[] };
+type Question       = { id: number; content: string; type: number; answer_type: number; order: number; options: QuestionOption[] };
 type Quiz           = { id: number; title: string; questions: Question[] };
 
 const showQuizPanel     = ref(false);
@@ -702,10 +810,14 @@ const quizSaving        = ref(false);
 const editQuestionError = ref<string | null>(null);
 
 const editForm = reactive({
-    content: '',
-    type: 1 as number,
+    content:     '',
+    type:        1 as number,
+    answer_type: 1 as number,
     options: [] as { id: number; content: string; is_correct: boolean }[],
 });
+
+const editMediaUploading = ref(false);
+const editMediaProgress  = ref(0);
 
 const openQuizPanel = async (lesson: Lesson) => {
     quizLesson.value        = lesson;
@@ -755,7 +867,8 @@ const deleteQuiz = async () => {
 const startEditQuestion = (question: Question) => {
     editingQuestionId.value = question.id;
     editForm.content        = question.content;
-    editForm.type           = question.type;
+    editForm.type           = question.type ?? 1;
+    editForm.answer_type    = question.answer_type ?? 1;
     editForm.options        = question.options.map((o) => ({
         id:         o.id,
         content:    o.content,
@@ -776,14 +889,40 @@ const setSingleCorrect = (index: number) => {
     });
 };
 
+const handleEditMediaChange = async (event: Event) => {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (!file) return;
+    editMediaUploading.value = true;
+    editMediaProgress.value  = 0;
+    try {
+        const { data: presign } = await axios.post('/admin/api/questions/presign-media', {
+            file_name:    file.name,
+            content_type: file.type,
+        });
+        await axios.put(presign.upload_url, file, {
+            headers: { 'Content-Type': file.type },
+            withCredentials: false,
+            onUploadProgress: (e) => {
+                editMediaProgress.value = e.total ? Math.round((e.loaded / e.total) * 100) : 0;
+            },
+        });
+        editForm.content = presign.media_url;
+    } catch {
+        editQuestionError.value = 'Media upload failed.';
+    } finally {
+        editMediaUploading.value = false;
+    }
+};
+
 const saveQuestion = async (questionId: number) => {
     editQuestionError.value = null;
     quizSaving.value        = true;
     try {
         const res = await axios.put(`/admin/api/questions/${questionId}`, {
-            content: editForm.content,
-            type:    editForm.type,
-            options: editForm.options,
+            content:     editForm.content,
+            type:        editForm.type,
+            answer_type: editForm.answer_type,
+            options:     editForm.options,
         });
 
         // Update question in local quiz state

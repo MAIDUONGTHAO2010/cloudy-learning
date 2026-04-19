@@ -10,11 +10,13 @@ class Question extends Model
         'quiz_id',
         'content',
         'type',
+        'answer_type',
         'order',
     ];
 
     protected $casts = [
         'type' => 'integer',
+        'answer_type' => 'integer',
         'order' => 'integer',
     ];
 

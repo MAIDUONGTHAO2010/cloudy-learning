@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Enums\Course\EnrollmentStatus;
+use App\Models\Course;
 use App\Models\User;
 use App\Repositories\Contracts\NotificationRepositoryInterface;
 use Illuminate\Support\Str;
@@ -63,6 +65,74 @@ class NotificationService
                 $subject,
                 Str::limit($message, 1000)
             ),
+            'is_read' => false,
+        ]);
+    }
+
+    public function notifyCourseEnrollmentRequested(User $student, Course $course): void
+    {
+        $this->notificationRepository->create([
+            'user_id' => $student->id,
+            'target' => 'user',
+            'type' => 'course_enrollment_request_user',
+            'title' => 'Enrollment request submitted',
+            'body' => "Your request to join {$course->title} has been sent and is waiting for approval.",
+            'is_read' => false,
+        ]);
+
+        $this->notificationRepository->create([
+            'user_id' => $course->user_id,
+            'target' => 'user',
+            'type' => 'course_enrollment_request_instructor',
+            'title' => 'New enrollment request',
+            'body' => "{$student->name} ({$student->email}) requested to join {$course->title}.",
+            'is_read' => false,
+        ]);
+
+        $this->notificationRepository->create([
+            'user_id' => null,
+            'target' => 'admin',
+            'type' => 'course_enrollment_request_admin',
+            'title' => 'Course enrollment request',
+            'body' => "{$student->name} requested enrollment in {$course->title}.",
+            'is_read' => false,
+        ]);
+    }
+
+    public function notifyCourseEnrollmentReviewed(User $student, Course $course, int $status, ?string $note = null): void
+    {
+        $statusLabel = match ($status) {
+            EnrollmentStatus::APPROVED => 'approved',
+            EnrollmentStatus::CANCELED => 'canceled',
+            default => 'updated',
+        };
+
+        $noteText = $note ? " Reason: {$note}" : '';
+
+        $this->notificationRepository->create([
+            'user_id' => $student->id,
+            'target' => 'user',
+            'type' => 'course_enrollment_review_user',
+            'title' => 'Enrollment status updated',
+            'body' => "Your enrollment for {$course->title} was {$statusLabel}.{$noteText}",
+            'is_read' => false,
+        ]);
+
+        $this->notificationRepository->create([
+            'user_id' => $course->user_id,
+            'target' => 'user',
+            'type' => 'course_enrollment_review_instructor',
+            'title' => 'Enrollment review recorded',
+            'body' => "Enrollment for {$student->name} in {$course->title} was {$statusLabel}.{$noteText}",
+            'is_read' => false,
+        ]);
+
+        $this->notificationRepository->create([
+            'user_id' => null,
+            'target' => 'admin',
+            'type' => 'course_enrollment_review_admin',
+            'title' => 'Enrollment status changed',
+            'body' => "{$student->name}'s request for {$course->title} was {$statusLabel}.{$noteText}",
             'is_read' => false,
         ]);
     }

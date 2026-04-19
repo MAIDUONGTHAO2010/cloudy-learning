@@ -1,13 +1,13 @@
 <template>
-  <section class="relative flex min-h-screen overflow-hidden bg-slate-950 text-white">
-    <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(59,130,246,0.35),transparent_30%),radial-gradient(circle_at_bottom_right,rgba(16,185,129,0.22),transparent_28%)]"></div>
+  <section class="relative flex min-h-screen overflow-hidden bg-gray-50 text-gray-900">
+    <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(249,115,22,0.06),transparent_30%),radial-gradient(circle_at_bottom_right,rgba(15,36,96,0.04),transparent_28%)]"></div>
 
     <div class="relative grid min-h-screen w-full lg:grid-cols-[1.1fr_0.9fr]">
       <!-- Left panel -->
-      <div class="hidden border-r border-white/10 lg:flex lg:flex-col lg:justify-between lg:px-14 lg:py-12">
+      <div class="hidden bg-gradient-to-br from-[#1a1a4e] via-[#0f2460] to-[#0c1d50] border-r border-white/10 lg:flex lg:flex-col lg:justify-between lg:px-14 lg:py-12">
         <div>
           <RouterLink to="/" class="flex items-center gap-3">
-            <div class="grid h-12 w-12 place-items-center rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-400 font-black text-slate-950">
+            <div class="grid h-12 w-12 place-items-center rounded-2xl bg-gradient-to-br from-orange-500 to-orange-400 font-black text-white">
               CL
             </div>
             <div>
@@ -17,7 +17,7 @@
           </RouterLink>
 
           <div class="mt-16 max-w-xl">
-            <p class="text-sm font-semibold uppercase tracking-[0.35em] text-blue-300">Your learning journey</p>
+            <p class="text-sm font-semibold uppercase tracking-[0.35em] text-orange-300">Your learning journey</p>
             <h2 class="mt-5 text-5xl font-semibold leading-tight text-white">
               Unlock thousands of courses taught by real experts.
             </h2>
@@ -46,7 +46,7 @@
 
           <!-- Mobile logo -->
           <RouterLink to="/" class="mb-6 flex items-center gap-2 lg:hidden">
-            <div class="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-blue-500 to-cyan-400 font-black text-white text-sm">
+            <div class="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-orange-500 to-orange-400 font-black text-white text-sm">
               CL
             </div>
             <span class="text-sm font-semibold text-slate-600">Cloudy Learning</span>
@@ -68,7 +68,7 @@
                 autocomplete="email"
                 required
                 placeholder="you@example.com"
-                class="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+                class="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-orange-400 focus:ring-2 focus:ring-orange-100"
                 :class="{ 'border-rose-400 focus:border-rose-400 focus:ring-rose-100': errors.email }"
               />
               <p v-if="errors.email" class="mt-1.5 text-xs text-rose-500">{{ errors.email }}</p>
@@ -84,7 +84,7 @@
                 autocomplete="current-password"
                 required
                 placeholder="Your password"
-                class="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+                class="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-orange-400 focus:ring-2 focus:ring-orange-100"
                 :class="{ 'border-rose-400 focus:border-rose-400 focus:ring-rose-100': errors.password }"
               />
               <p v-if="errors.password" class="mt-1.5 text-xs text-rose-500">{{ errors.password }}</p>
@@ -95,7 +95,7 @@
                 v-model="form.remember"
                 id="remember"
                 type="checkbox"
-                class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-400"
+                class="h-4 w-4 rounded border-slate-300 text-orange-500 focus:ring-orange-400"
               />
               <label for="remember" class="text-sm text-slate-600">Remember me</label>
             </div>
@@ -107,7 +107,7 @@
             <button
               type="submit"
               :disabled="loading"
-              class="w-full rounded-2xl bg-slate-900 py-3.5 text-sm font-semibold text-white transition hover:bg-slate-700 disabled:opacity-50"
+              class="w-full rounded-2xl bg-[#1a1a4e] py-3.5 text-sm font-semibold text-white transition hover:bg-[#0f2460] disabled:opacity-50"
             >
               {{ loading ? 'Signing in…' : 'Sign in' }}
             </button>
@@ -115,7 +115,7 @@
 
           <p class="mt-6 text-center text-sm text-slate-500">
             Don't have an account?
-            <RouterLink to="/register" class="font-semibold text-blue-600 hover:text-blue-700">
+            <RouterLink to="/register" class="font-semibold text-orange-500 hover:text-orange-600">
               Create one
             </RouterLink>
           </p>
@@ -153,7 +153,7 @@ const submit = async () => {
     try {
         const { data } = await axios.post('/auth/login', form);
         setUser(data.user);
-        router.push('/dashboard');
+        router.push(data.user.role === 2 ? '/my-courses' : '/dashboard');
     } catch (err: any) {
         const data = err?.response?.data;
         if (data?.errors) {

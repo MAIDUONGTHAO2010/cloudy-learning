@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\Lesson\PresignLessonVideoUploadRequest;
 use App\Http\Requests\Admin\Lesson\ReorderLessonRequest;
 use App\Http\Requests\Admin\Lesson\StoreLessonRequest;
 use App\Http\Requests\Admin\Lesson\UpdateLessonRequest;
@@ -35,6 +36,13 @@ class LessonController extends Controller
         $this->lessonService->delete($id);
 
         return response()->json(['message' => 'Deleted successfully']);
+    }
+
+    public function presignVideoUpload(PresignLessonVideoUploadRequest $request)
+    {
+        return response()->json(
+            $this->lessonService->presignVideoUpload($request->validated())
+        );
     }
 
     public function reorder(ReorderLessonRequest $request, int $courseId)

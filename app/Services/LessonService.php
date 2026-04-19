@@ -5,10 +5,15 @@ namespace App\Services;
 use App\Models\Lesson;
 use App\Repositories\Contracts\CourseRepositoryInterface;
 use App\Repositories\Contracts\LessonRepositoryInterface;
+use Aws\S3\S3Client;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class LessonService
 {
+    public const MAX_VIDEO_SIZE = 1610612736;
+
     public function __construct(
         protected LessonRepositoryInterface $lessonRepository,
         protected CourseRepositoryInterface $courseRepository,
@@ -29,14 +34,33 @@ class LessonService
         $data['course_id'] = $courseId;
         $data['slug'] = $this->uniqueSlug(Str::slug($data['title']));
 
-        return $this->lessonRepository->create($data);
+        $lesson = $this->lessonRepository->create($data);
+
+        Log::info('Admin created lesson', [
+            'admin_id' => Auth::id(),
+            'course_id' => $courseId,
+            'lesson_id' => $lesson->id,
+            'title' => $lesson->title,
+            'video_url' => $lesson->video_url,
+        ]);
+
+        return $lesson;
     }
 
     public function update(int $id, array $data): mixed
     {
         $data['slug'] = $this->uniqueSlug(Str::slug($data['title']), $id);
 
-        return $this->lessonRepository->update($data, $id);
+        $lesson = $this->lessonRepository->update($data, $id);
+
+        Log::info('Admin updated lesson', [
+            'admin_id' => Auth::id(),
+            'lesson_id' => $id,
+            'title' => $lesson->title,
+            'video_url' => $lesson->video_url,
+        ]);
+
+        return $lesson;
     }
 
     public function delete(int $id): void
@@ -49,6 +73,72 @@ class LessonService
         $this->lessonRepository->reorder($items);
     }
 
+    public function presignVideoUpload(array $data): array
+    {
+        $extension = strtolower(pathinfo($data['file_name'], PATHINFO_EXTENSION) ?: 'mp4');
+        $name = Str::slug(pathinfo($data['file_name'], PATHINFO_FILENAME) ?: 'lesson-video');
+        $path = 'lessons/videos/' . now()->format('Y/m') . '/' . Str::uuid() . '-' . $name . '.' . $extension;
+
+        Log::info('Admin requested lesson video upload', [
+            'admin_id' => Auth::id(),
+            'file_name' => $data['file_name'],
+            'content_type' => $data['content_type'],
+            'file_size' => $data['file_size'],
+            'path' => $path,
+        ]);
+
+        try {
+            $diskConfig = config('filesystems.disks.s3');
+            $publicEndpoint = rtrim((string) ($diskConfig['public_endpoint'] ?: $diskConfig['endpoint']), '/');
+            $publicBaseUrl = rtrim((string) $diskConfig['url'], '/');
+
+            $client = new S3Client([
+                'version' => 'latest',
+                'region' => $diskConfig['region'],
+                'endpoint' => $publicEndpoint,
+                'use_path_style_endpoint' => (bool) $diskConfig['use_path_style_endpoint'],
+                'credentials' => [
+                    'key' => $diskConfig['key'],
+                    'secret' => $diskConfig['secret'],
+                ],
+            ]);
+
+            $command = $client->getCommand('PutObject', [
+                'Bucket' => $diskConfig['bucket'],
+                'Key' => $path,
+                'ContentType' => $data['content_type'],
+            ]);
+
+            $request = $client->createPresignedRequest($command, '+15 minutes');
+
+            $result = [
+                'path' => $path,
+                'upload_url' => (string) $request->getUri(),
+                'headers' => [
+                    'Content-Type' => $data['content_type'],
+                ],
+                'video_url' => $publicBaseUrl . '/' . $path,
+                'max_file_size' => self::MAX_VIDEO_SIZE,
+            ];
+
+            Log::info('Admin lesson video upload URL generated', [
+                'admin_id' => Auth::id(),
+                'path' => $path,
+                'video_url' => $result['video_url'],
+            ]);
+
+            return $result;
+        } catch (\Throwable $e) {
+            Log::error('Admin lesson video upload presign failed', [
+                'admin_id' => Auth::id(),
+                'file_name' => $data['file_name'],
+                'error' => $e->getMessage(),
+            ]);
+
+            throw $e;
+        }
+    }
+
     private function uniqueSlug(string $slug, ?int $excludeId = null): string
     {
         $original = $slug;
@@ -56,14 +146,14 @@ class LessonService
 
         while (true) {
             $exists = Lesson::where('slug', $slug)
-                ->when($excludeId, fn ($q) => $q->where('id', '!=', $excludeId))
+                ->when($excludeId, fn($q) => $q->where('id', '!=', $excludeId))
                 ->exists();
 
             if (! $exists) {
                 break;
             }
 
-            $slug = $original.'-'.$count++;
+            $slug = $original . '-' . $count++;
         }
 
         return $slug;

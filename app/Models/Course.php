@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Course extends Model
 {
@@ -45,5 +46,12 @@ class Course extends Model
     public function reviews()
     {
         return $this->hasMany(CourseReview::class);
+    }
+
+    public function students(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class)
+            ->withPivot(['status', 'note', 'approved_at', 'cancelled_at'])
+            ->withTimestamps();
     }
 }

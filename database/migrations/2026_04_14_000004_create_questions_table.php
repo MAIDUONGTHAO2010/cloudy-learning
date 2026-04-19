@@ -16,8 +16,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('quiz_id')->constrained('quizzes')->onDelete('cascade');
             $table->text('content');
-            $table->tinyInteger('type')->default(QuestionType::SINGLE)
-                ->comment('1 = single (one correct answer: A/B/C/D), 2 = multiple (multiple correct answers e.g. A,B)');
+            $table->tinyInteger('type')->default(QuestionType::TEXT)->comment('1 = text, 2 = image, 3 = audio, 4 = video');
             $table->integer('order')->default(0);
             $table->timestamps();
         });

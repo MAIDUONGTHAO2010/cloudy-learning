@@ -7,7 +7,9 @@ use App\Models\QuestionOption;
 use App\Models\Quiz;
 use App\Repositories\Contracts\LessonRepositoryInterface;
 use App\Repositories\Contracts\QuizRepositoryInterface;
+use Aws\S3\S3Client;
 use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Support\Str;
 
 class QuizService
 {
@@ -35,7 +37,7 @@ class QuizService
 
         $quiz = Quiz::create([
             'lesson_id' => $lesson->id,
-            'title' => 'Quiz: '.$lesson->title,
+            'title' => 'Quiz: ' . $lesson->title,
             'description' => null,
             'time_limit' => 10,
             'passing_score' => 70,
@@ -43,24 +45,25 @@ class QuizService
 
         for ($i = 0; $i < 3; $i++) {
             $question = Question::create([
-                'quiz_id' => $quiz->id,
-                'content' => 'Question '.($i + 1),
-                'type' => 1,
-                'order' => $i,
+                'quiz_id'     => $quiz->id,
+                'content'     => 'Question ' . ($i + 1),
+                'type'        => 1,
+                'answer_type' => 1,
+                'order'       => $i,
             ]);
 
             foreach ([1, 2, 3, 4] as $label) {
                 QuestionOption::create([
                     'question_id' => $question->id,
                     'label' => $label,
-                    'content' => 'Option '.['A', 'B', 'C', 'D'][$label - 1],
+                    'content' => 'Option ' . ['A', 'B', 'C', 'D'][$label - 1],
                     'is_correct' => $label === 1,
                 ]);
             }
         }
 
-        $quiz->load(['questions' => fn ($q) => $q->orderBy('order')
-            ->with(['options' => fn ($o) => $o->orderBy('label')])]);
+        $quiz->load(['questions' => fn($q) => $q->orderBy('order')
+            ->with(['options' => fn($o) => $o->orderBy('label')])]);
 
         return $quiz;
     }
@@ -70,28 +73,31 @@ class QuizService
         $this->quizRepository->delete($quizId);
     }
 
-    public function addQuestion(int $quizId): object
+    public function addQuestion(int $quizId, array $data = []): object
     {
         $quiz = $this->quizRepository->find($quizId);
         $order = $quiz->questions()->max('order') ?? -1;
 
         $question = Question::create([
-            'quiz_id' => $quiz->id,
-            'content' => 'New question',
-            'type' => 1,
-            'order' => $order + 1,
+            'quiz_id'     => $quiz->id,
+            'content'     => $data['content'] ?? 'New question',
+            'type'        => $data['type'] ?? 1,
+            'answer_type' => $data['answer_type'] ?? 1,
+            'order'       => $order + 1,
         ]);
 
+        $optionContents = $data['options'] ?? [];
         foreach ([1, 2, 3, 4] as $label) {
+            $opt = collect($optionContents)->firstWhere('label', $label);
             QuestionOption::create([
                 'question_id' => $question->id,
                 'label' => $label,
-                'content' => 'Option '.['A', 'B', 'C', 'D'][$label - 1],
-                'is_correct' => $label === 1,
+                'content' => $opt['content'] ?? 'Option ' . ['A', 'B', 'C', 'D'][$label - 1],
+                'is_correct' => $opt['is_correct'] ?? $label === 1,
             ]);
         }
 
-        $question->load(['options' => fn ($o) => $o->orderBy('label')]);
+        $question->load(['options' => fn($o) => $o->orderBy('label')]);
 
         return $question;
     }
@@ -105,8 +111,9 @@ class QuizService
     {
         $question = Question::findOrFail($questionId);
         $question->update([
-            'content' => $data['content'],
-            'type' => $data['type'],
+            'content'     => $data['content'],
+            'type'        => $data['type'],
+            'answer_type' => $data['answer_type'],
         ]);
 
         foreach ($data['options'] as $opt) {
@@ -116,8 +123,44 @@ class QuizService
             ]);
         }
 
-        $question->load(['options' => fn ($o) => $o->orderBy('label')]);
+        $question->load(['options' => fn($o) => $o->orderBy('label')]);
 
         return $question;
+    }
+
+    public function presignMediaUpload(array $data): array
+    {
+        $extension = strtolower(pathinfo($data['file_name'] ?? 'media', PATHINFO_EXTENSION) ?: 'bin');
+        $name      = Str::slug(pathinfo($data['file_name'] ?? 'media', PATHINFO_FILENAME) ?: 'question-media');
+        $path      = 'questions/media/' . now()->format('Y/m') . '/' . Str::uuid() . '-' . $name . '.' . $extension;
+
+        $diskConfig     = config('filesystems.disks.s3');
+        $publicEndpoint = rtrim((string) ($diskConfig['public_endpoint'] ?: $diskConfig['endpoint']), '/');
+        $publicBaseUrl  = rtrim((string) $diskConfig['url'], '/');
+
+        $client = new S3Client([
+            'version'                 => 'latest',
+            'region'                  => $diskConfig['region'],
+            'endpoint'                => $publicEndpoint,
+            'use_path_style_endpoint' => (bool) $diskConfig['use_path_style_endpoint'],
+            'credentials'             => [
+                'key'    => $diskConfig['key'],
+                'secret' => $diskConfig['secret'],
+            ],
+        ]);
+
+        $command = $client->getCommand('PutObject', [
+            'Bucket'      => $diskConfig['bucket'],
+            'Key'         => $path,
+            'ContentType' => $data['content_type'] ?? 'application/octet-stream',
+        ]);
+
+        $presigned = $client->createPresignedRequest($command, '+15 minutes');
+
+        return [
+            'path'       => $path,
+            'upload_url' => (string) $presigned->getUri(),
+            'media_url'  => $publicBaseUrl . '/' . $path,
+        ];
     }
 }

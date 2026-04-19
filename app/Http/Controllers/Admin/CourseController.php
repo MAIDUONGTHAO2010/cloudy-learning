@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\Course\PresignCourseThumbnailUploadRequest;
 use App\Http\Requests\Admin\Course\ReorderCourseRequest;
 use App\Http\Requests\Admin\Course\StoreCourseRequest;
 use App\Http\Requests\Admin\Course\UpdateCourseRequest;
@@ -42,6 +43,13 @@ class CourseController extends Controller
         $this->courseService->delete($id);
 
         return response()->json(['message' => 'Deleted successfully']);
+    }
+
+    public function presignThumbnailUpload(PresignCourseThumbnailUploadRequest $request)
+    {
+        return response()->json(
+            $this->courseService->presignThumbnailUpload($request->validated())
+        );
     }
 
     public function reorder(ReorderCourseRequest $request)

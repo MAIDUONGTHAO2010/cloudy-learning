@@ -25,6 +25,14 @@ const currentPage = ref(1);
 const lastPage    = ref(1);
 const total       = ref(0);
 
+export type PresignedCourseThumbnailUpload = {
+    upload_url: string;
+    headers: Record<string, string>;
+    path: string;
+    thumbnail_url: string;
+    max_file_size: number;
+};
+
 const API_BASE = '/admin/api/courses';
 
 export const useCourses = () => {
@@ -77,9 +85,19 @@ export const useCourses = () => {
         }
     };
 
+    const presignThumbnailUpload = async (file: File) => {
+        const res = await axios.post(`${API_BASE}/presign-thumbnail`, {
+            file_name: file.name,
+            content_type: file.type || 'image/png',
+            file_size: file.size,
+        });
+
+        return res.data as PresignedCourseThumbnailUpload;
+    };
+
     const reorder = async (orderedItems: { id: number; order: number }[]) => {
         await axios.post(`${API_BASE}/reorder`, { items: orderedItems });
     };
 
-    return { items, loading, currentPage, lastPage, total, fetch, create, update, remove, reorder };
+    return { items, loading, currentPage, lastPage, total, fetch, create, update, remove, reorder, presignThumbnailUpload };
 };

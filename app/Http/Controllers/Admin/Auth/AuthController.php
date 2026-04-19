@@ -14,9 +14,9 @@ class AuthController extends Controller
         $credentials = $request->safe()->only(['email', 'password']);
         $remember = $request->boolean('remember');
 
-        if (Auth::attempt($credentials, $remember)) {
+        if (Auth::guard('admin')->attempt($credentials, $remember)) {
             $request->session()->regenerate();
-            $user = $request->user();
+            $user = Auth::guard('admin')->user();
 
             if ($request->expectsJson()) {
                 return response()->json([
@@ -48,7 +48,7 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
-        Auth::logout();
+        Auth::guard('admin')->logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 

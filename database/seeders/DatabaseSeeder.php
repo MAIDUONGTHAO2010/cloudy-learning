@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Enums\User\UserRole;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -21,6 +22,7 @@ class DatabaseSeeder extends Seeder
             'name' => 'Test User',
             'email' => 'content@cloudylearning.com',
             'password' => 'Aa@123456789',
+            'role' => UserRole::ADMIN,
         ]);
 
         $this->call([

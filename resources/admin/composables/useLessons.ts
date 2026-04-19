@@ -19,6 +19,14 @@ export type LessonCourse = {
     is_active: boolean;
 };
 
+export type PresignedLessonVideoUpload = {
+    upload_url: string;
+    headers: Record<string, string>;
+    path: string;
+    video_url: string;
+    max_file_size: number;
+};
+
 const items   = ref<Lesson[]>([]);
 const course  = ref<LessonCourse | null>(null);
 const loading = ref(false);
@@ -71,9 +79,19 @@ export const useLessons = () => {
         }
     };
 
+    const presignVideoUpload = async (file: File) => {
+        const res = await axios.post('/admin/api/lessons/presign-upload', {
+            file_name: file.name,
+            content_type: file.type || 'video/mp4',
+            file_size: file.size,
+        });
+
+        return res.data as PresignedLessonVideoUpload;
+    };
+
     const reorder = async (courseId: number, orderedItems: { id: number; order: number }[]) => {
         await axios.post(`${API_BASE}/${courseId}/lessons/reorder`, { items: orderedItems });
     };
 
-    return { items, course, loading, fetch, create, update, remove, reorder };
+    return { items, course, loading, fetch, create, update, remove, reorder, presignVideoUpload };
 };

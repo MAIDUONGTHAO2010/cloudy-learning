@@ -20,7 +20,7 @@ class EnsureAdminValid
             return $next($request);
         }
 
-        $user = Auth::user();
+        $user = Auth::guard('admin')->user();
 
         if (! $user || ! $user->isAdmin()) {
             if ($request->expectsJson()) {

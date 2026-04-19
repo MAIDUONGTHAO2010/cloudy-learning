@@ -80,7 +80,10 @@
               <!-- Title -->
               <td class="px-6 py-4">
                 <div class="flex items-center gap-3">
-                  <div class="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-blue-50 text-xs font-bold uppercase text-blue-600">
+                  <div v-if="course.thumbnail" class="h-9 w-9 shrink-0 overflow-hidden rounded-xl bg-slate-100">
+                    <img :src="course.thumbnail" :alt="course.title" class="h-full w-full object-cover" />
+                  </div>
+                  <div v-else class="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-blue-50 text-xs font-bold uppercase text-blue-600">
                     {{ (course.title ?? '').slice(0, 2) }}
                   </div>
                   <div>
@@ -202,7 +205,7 @@
     <Teleport to="body">
       <div v-if="showModal" class="fixed inset-0 z-50 flex items-center justify-center p-4">
         <div class="absolute inset-0 bg-slate-950/40 backdrop-blur-sm" @click="closeModal"></div>
-        <div class="relative z-10 w-full max-w-lg rounded-[2rem] bg-white p-8 shadow-2xl">
+        <div class="relative z-10 w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-[2rem] bg-white p-8 shadow-2xl">
 
           <h3 class="text-xl font-semibold text-slate-900">
             {{ editingCourse ? 'Edit Course' : 'Add Course' }}
@@ -232,6 +235,27 @@
                 placeholder="Short description (optional)"
                 class="w-full resize-none rounded-2xl border border-slate-200 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
               ></textarea>
+            </div>
+
+            <!-- Thumbnail -->
+            <div>
+              <label class="mb-1.5 block text-sm font-medium text-slate-700">Thumbnail</label>
+              <input
+                type="file"
+                accept="image/*"
+                @change="onThumbnailSelected"
+                class="w-full rounded-2xl border border-dashed border-slate-300 px-4 py-3 text-sm text-slate-700 file:mr-4 file:rounded-xl file:border-0 file:bg-slate-900 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-white"
+              />
+              <p class="mt-2 text-xs text-slate-500">Upload a course cover image. Recommended size under 10 MB.</p>
+
+              <div v-if="uploadingThumbnail" class="mt-3 overflow-hidden rounded-full bg-slate-100">
+                <div class="h-2 bg-blue-600 transition-all" :style="{ width: `${thumbnailUploadProgress}%` }"></div>
+              </div>
+              <p v-if="uploadingThumbnail" class="mt-2 text-xs text-blue-600">Uploading thumbnail… {{ thumbnailUploadProgress }}%</p>
+
+              <div v-if="form.thumbnail" class="mt-3 overflow-hidden rounded-2xl border border-slate-200 bg-slate-50">
+                <img :src="form.thumbnail" alt="Thumbnail preview" class="h-40 w-full object-cover" />
+              </div>
             </div>
 
             <!-- Instructor -->
@@ -327,10 +351,10 @@
             <div class="flex gap-3 pt-2">
               <button
                 type="submit"
-                :disabled="loading"
+                :disabled="loading || uploadingThumbnail"
                 class="flex-1 rounded-2xl bg-slate-900 py-3 text-sm font-semibold text-white transition hover:bg-slate-700 disabled:opacity-50"
               >
-                {{ loading ? 'Saving…' : (editingCourse ? 'Save Changes' : 'Create') }}
+                {{ uploadingThumbnail ? 'Uploading thumbnail…' : (loading ? 'Saving…' : (editingCourse ? 'Save Changes' : 'Create')) }}
               </button>
               <button
                 type="button"
@@ -472,7 +496,7 @@ import { ref, reactive, computed, onMounted } from 'vue';
 import axios from 'axios';
 import { useCourses, type Course } from '../composables/useCourses';
 
-const { items, loading, currentPage, lastPage, total, fetch, create, update, remove, reorder } = useCourses();
+const { items, loading, currentPage, lastPage, total, fetch, create, update, remove, reorder, presignThumbnailUpload } = useCourses();
 
 // ── Instructors ──────────────────────────────────────────────────────────────
 type Instructor = { id: number; name: string; email: string };
@@ -580,13 +604,17 @@ const onDrop = async () => {
 };
 
 // ── Create / Edit modal ──────────────────────────────────────────────────────
-const showModal    = ref(false);
+const showModal = ref(false);
 const editingCourse = ref<Course | null>(null);
-const formError    = ref<string | null>(null);
+const formError = ref<string | null>(null);
+const uploadingThumbnail = ref(false);
+const thumbnailUploadProgress = ref(0);
+const MAX_THUMBNAIL_SIZE = 10 * 1024 * 1024;
 
 const form = reactive({
     title:       '',
     description: '',
+    thumbnail:   '',
     user_id:     0 as number,
     category_id: null as number | null,
     tags:        [] as string[],
@@ -594,41 +622,101 @@ const form = reactive({
 });
 
 const openCreateModal = () => {
-    editingCourse.value  = null;
-    form.title           = '';
-    form.description     = '';
-    form.user_id         = instructors.value[0]?.id ?? 0;
-    form.category_id     = null;
-    form.tags            = [];
-    form.is_active       = true;
-    tagInput.value       = '';
-    formError.value      = null;
-    showModal.value      = true;
+    editingCourse.value = null;
+    form.title = '';
+    form.description = '';
+    form.thumbnail = '';
+    form.user_id = instructors.value[0]?.id ?? 0;
+    form.category_id = null;
+    form.tags = [];
+    form.is_active = true;
+    tagInput.value = '';
+    formError.value = null;
+    uploadingThumbnail.value = false;
+    thumbnailUploadProgress.value = 0;
+    showModal.value = true;
 };
 
 const openEditModal = (course: Course) => {
-    editingCourse.value  = course;
-    form.title           = course.title;
-    form.description     = course.description ?? '';
-    form.user_id         = course.user_id;
-    form.category_id     = course.category_id ?? null;
-    form.tags            = course.tags?.map((t) => t.name) ?? [];
-    form.is_active       = course.is_active ?? true;
-    tagInput.value       = '';
-    formError.value      = null;
-    showModal.value      = true;
+    editingCourse.value = course;
+    form.title = course.title;
+    form.description = course.description ?? '';
+    form.thumbnail = course.thumbnail ?? '';
+    form.user_id = course.instructor?.id ?? course.user_id;
+    form.category_id = course.category?.id ?? course.category_id ?? null;
+    form.tags = course.tags?.map((t) => t.name) ?? [];
+    form.is_active = course.is_active ?? true;
+    tagInput.value = '';
+    formError.value = null;
+    uploadingThumbnail.value = false;
+    thumbnailUploadProgress.value = 0;
+    showModal.value = true;
 };
 
 const closeModal = () => {
     showModal.value = false;
+    uploadingThumbnail.value = false;
+    thumbnailUploadProgress.value = 0;
+};
+
+const onThumbnailSelected = async (event: Event) => {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+
+    if (!file) {
+        return;
+    }
+
+    if (file.size > MAX_THUMBNAIL_SIZE) {
+        formError.value = 'Thumbnail size must be 10 MB or smaller.';
+        input.value = '';
+        return;
+    }
+
+    formError.value = null;
+    uploadingThumbnail.value = true;
+    thumbnailUploadProgress.value = 0;
+
+    try {
+        const presigned = await presignThumbnailUpload(file);
+        const safeHeaders = Object.fromEntries(
+            Object.entries(presigned.headers ?? {}).filter(([key]) => !['host', 'content-length'].includes(key.toLowerCase()))
+        );
+
+        await axios.put(presigned.upload_url, file, {
+            headers: {
+                ...safeHeaders,
+                'Content-Type': file.type || 'image/png',
+            },
+            onUploadProgress: (progressEvent) => {
+                if (progressEvent.total) {
+                    thumbnailUploadProgress.value = Math.round((progressEvent.loaded / progressEvent.total) * 100);
+                }
+            },
+        });
+
+        form.thumbnail = presigned.thumbnail_url;
+    } catch (err: any) {
+        formError.value = err?.response?.data?.message ?? err?.message ?? 'Thumbnail upload failed.';
+    } finally {
+        uploadingThumbnail.value = false;
+        input.value = '';
+    }
 };
 
 const submitModal = async () => {
     formError.value = null;
+
+    if (uploadingThumbnail.value) {
+        formError.value = 'Please wait for the thumbnail upload to finish.';
+        return;
+    }
+
     try {
         const payload = {
             title:       form.title,
             description: form.description,
+            thumbnail:   form.thumbnail || undefined,
             user_id:     form.user_id,
             category_id: form.category_id,
             tags:        form.tags,

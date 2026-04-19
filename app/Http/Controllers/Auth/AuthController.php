@@ -78,18 +78,20 @@ class AuthController extends Controller
 
     public function me(Request $request)
     {
-        if (! Auth::check()) {
+        $user = Auth::user();
+
+        if (! $user || $user->isAdmin()) {
             return response()->json(null);
         }
 
-        return response()->json($this->userPayload(Auth::user()));
+        return response()->json($this->userPayload($user));
     }
 
     public function updateProfile(Request $request)
     {
         $data = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email,'.Auth::id(),
+            'email' => 'required|email|unique:users,email,' . Auth::id(),
             'password' => 'nullable|string|min:8|confirmed',
             'password_confirmation' => 'nullable|string',
             'date_of_birth' => 'nullable|date|before:today',

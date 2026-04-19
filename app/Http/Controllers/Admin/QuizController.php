@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Quiz\UpdateQuizQuestionRequest;
 use App\Services\QuizService;
+use Illuminate\Http\Request;
 
 class QuizController extends Controller
 {
@@ -42,5 +43,10 @@ class QuizController extends Controller
     public function updateQuestion(UpdateQuizQuestionRequest $request, int $questionId)
     {
         return response()->json($this->quizService->updateQuestion($questionId, $request->validated()));
+    }
+
+    public function presignMedia(Request $request)
+    {
+        return response()->json($this->quizService->presignMediaUpload($request->all()));
     }
 }

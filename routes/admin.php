@@ -54,6 +54,7 @@ Route::middleware('admin.valid')->group(function () {
         Route::get('tags', [TagController::class, 'index']);
 
         // Courses — reorder must come before {id} wildcard
+        Route::post('courses/presign-thumbnail', [CourseController::class, 'presignThumbnailUpload']);
         Route::post('courses/reorder', [CourseController::class, 'reorder']);
         Route::get('courses', [CourseController::class, 'index']);
         Route::get('courses/{id}', [CourseController::class, 'show']);
@@ -65,6 +66,7 @@ Route::middleware('admin.valid')->group(function () {
         Route::get('courses/{courseId}/reviews', [CourseReviewController::class, 'index']);
 
         // Lessons (scoped to course) — reorder must come before {courseId}/lessons wildcard
+        Route::post('lessons/presign-upload', [LessonController::class, 'presignVideoUpload']);
         Route::post('courses/{courseId}/lessons/reorder', [LessonController::class, 'reorder']);
         Route::get('courses/{courseId}/lessons', [LessonController::class, 'index']);
         Route::post('courses/{courseId}/lessons', [LessonController::class, 'store']);
@@ -72,6 +74,7 @@ Route::middleware('admin.valid')->group(function () {
         Route::delete('lessons/{id}', [LessonController::class, 'destroy']);
 
         // Quiz (scoped to lesson)
+        Route::post('questions/presign-media', [QuizController::class, 'presignMedia']);
         Route::get('lessons/{lessonId}/quiz', [QuizController::class, 'show']);
         Route::post('lessons/{lessonId}/quiz', [QuizController::class, 'store']);
         Route::delete('quizzes/{quizId}', [QuizController::class, 'destroy']);

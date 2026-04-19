@@ -6,7 +6,11 @@ use BenSampo\Enum\Enum;
 
 final class QuestionType extends Enum
 {
-    const SINGLE = 1;
+    const TEXT = 1;
 
-    const MULTIPLE = true;
+    const IMAGE = 2;
+
+    const AUDIO = 3;
+
+    const VIDEO = 4;
 }

@@ -1,4 +1,28 @@
 <template>
+    <!-- Logout overlay -->
+    <Transition name="fade">
+        <div
+            v-if="loggingOut"
+            class="fixed inset-0 z-[9999] flex flex-col items-center justify-center gap-4 bg-slate-950/90 backdrop-blur-sm"
+        >
+            <template v-if="logoutSuccess">
+                <div class="grid h-14 w-14 place-items-center rounded-full bg-emerald-500/20">
+                    <svg class="h-7 w-7 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                </div>
+                <p class="text-base font-semibold text-white">{{ t('nav.logoutSuccess') }}</p>
+            </template>
+            <template v-else>
+                <svg class="h-10 w-10 animate-spin text-slate-400" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                </svg>
+                <p class="text-sm text-slate-400">{{ t('nav.loggingOut') }}</p>
+            </template>
+        </div>
+    </Transition>
+
     <header class="sticky top-0 z-50 border-b border-white/10 bg-slate-950/90 backdrop-blur-sm">
         <div class="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
             <!-- Logo -->
@@ -33,12 +57,20 @@
                     {{ t('nav.contact') }}
                 </RouterLink>
                 <RouterLink
-                    v-if="user"
+                    v-if="user && user.role !== 2"
                     to="/dashboard"
                     class="text-sm text-slate-400 transition hover:text-white"
                     active-class="text-white"
                 >
                     {{ t('nav.myLearning') }}
+                </RouterLink>
+                <RouterLink
+                    v-if="user && user.role === 2"
+                    to="/my-courses"
+                    class="text-sm text-slate-400 transition hover:text-white"
+                    active-class="text-white"
+                >
+                    My Courses
                 </RouterLink>
             </nav>
 
@@ -196,8 +228,29 @@ onMounted(() => {
 onBeforeUnmount(() => document.removeEventListener('click', onClickOutside));
 
 // ── Auth ────────────────────────────────────────────────
+const loggingOut = ref(false);
+const logoutSuccess = ref(false);
+
 const handleLogout = async () => {
+    loggingOut.value = true;
+    logoutSuccess.value = false;
     await logout();
-    router.push('/');
+    logoutSuccess.value = true;
+    setTimeout(() => {
+        loggingOut.value = false;
+        logoutSuccess.value = false;
+        router.push('/');
+    }, 1200);
 };
 </script>
+
+<style scoped>
+.fade-enter-active,
+.fade-leave-active {
+    transition: opacity 0.2s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+    opacity: 0;
+}
+</style>

@@ -1,13 +1,13 @@
 <template>
-    <div class="min-h-screen bg-slate-950 text-white">
+    <div class="min-h-screen bg-gray-50 text-gray-900">
         <Navbar />
 
         <!-- Hero -->
-        <section class="bg-gradient-to-b from-slate-900 to-slate-950 py-20 text-center">
+        <section class="bg-gradient-to-br from-[#1a1a4e] via-[#0f2460] to-[#0c1d50] py-20 text-center">
             <div class="mx-auto max-w-3xl px-6">
-                <span class="inline-block rounded-full bg-sky-500/10 px-4 py-1 text-xs font-semibold uppercase tracking-widest text-sky-400">{{ t('contact.badge') }}</span>
-                <h1 class="mt-4 text-4xl font-bold">{{ t('contact.headline') }}</h1>
-                <p class="mt-4 text-slate-400 text-lg">{{ t('contact.subtitle') }}</p>
+                <span class="inline-block rounded-full bg-orange-500/10 px-4 py-1 text-xs font-semibold uppercase tracking-widest text-orange-400">{{ t('contact.badge') }}</span>
+                <h1 class="mt-4 text-4xl font-bold text-white">{{ t('contact.headline') }}</h1>
+                <p class="mt-4 text-blue-100/80 text-lg">{{ t('contact.subtitle') }}</p>
             </div>
         </section>
 
@@ -17,69 +17,69 @@
                 <!-- Contact info -->
                 <div class="space-y-6">
                     <h2 class="text-xl font-semibold">{{ t('contact.reachUs') }}</h2>
-                    <div v-for="item in contactInfo" :key="item.label" class="flex items-start gap-4 rounded-2xl border border-white/10 bg-slate-900 p-5">
-                        <div class="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-sky-500/10 text-sky-400">
+                    <div v-for="item in contactInfo" :key="item.label" class="flex items-start gap-4 rounded-2xl border border-gray-200 bg-white p-5">
+                        <div class="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-orange-500/10 text-orange-500">
                             <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" :d="item.icon" />
                             </svg>
                         </div>
                         <div>
-                            <p class="text-xs font-semibold uppercase tracking-widest text-slate-400">{{ item.label }}</p>
-                            <p class="mt-1 text-sm text-white">{{ item.value }}</p>
+                            <p class="text-xs font-semibold uppercase tracking-widest text-gray-500">{{ item.label }}</p>
+                            <p class="mt-1 text-sm text-gray-900">{{ item.value }}</p>
                         </div>
                     </div>
 
-                    <div class="rounded-2xl border border-white/10 bg-slate-900 p-5">
-                        <p class="text-xs font-semibold uppercase tracking-widest text-slate-400">{{ t('contact.businessHours') }}</p>
-                        <p class="mt-2 text-sm text-white">{{ t('contact.hoursValue') }}</p>
-                        <p class="text-sm text-slate-400">{{ t('contact.hoursNote') }}</p>
+                    <div class="rounded-2xl border border-gray-200 bg-white p-5">
+                        <p class="text-xs font-semibold uppercase tracking-widest text-gray-500">{{ t('contact.businessHours') }}</p>
+                        <p class="mt-2 text-sm text-gray-900">{{ t('contact.hoursValue') }}</p>
+                        <p class="text-sm text-gray-500">{{ t('contact.hoursNote') }}</p>
                     </div>
                 </div>
 
                 <!-- Contact form -->
-                <div class="rounded-2xl border border-white/10 bg-slate-900 p-8">
+                <div class="rounded-2xl border border-gray-200 bg-white p-8">
                     <h2 class="mb-6 text-xl font-semibold">{{ t('contact.form.title') }}</h2>
 
                     <div v-if="sent" class="flex flex-col items-center py-12 text-center">
-                        <div class="mb-4 grid h-14 w-14 place-items-center rounded-full bg-emerald-500/10 text-emerald-400">
+                        <div class="mb-4 grid h-14 w-14 place-items-center rounded-full bg-emerald-50 text-emerald-600">
                             <svg class="h-7 w-7" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
                             </svg>
                         </div>
-                        <p class="font-semibold text-white">{{ t('contact.form.sentTitle') }}</p>
-                        <p class="mt-1 text-sm text-slate-400">{{ t('contact.form.sentBody') }}</p>
-                        <button @click="sent = false" class="mt-5 text-sm text-sky-400 hover:underline">{{ t('contact.form.sendAnother') }}</button>
+                        <p class="font-semibold text-gray-900">{{ t('contact.form.sentTitle') }}</p>
+                        <p class="mt-1 text-sm text-gray-500">{{ t('contact.form.sentBody') }}</p>
+                        <button @click="sent = false" class="mt-5 text-sm text-orange-500 hover:underline">{{ t('contact.form.sendAnother') }}</button>
                     </div>
 
                     <form v-else @submit.prevent="submit" class="space-y-4">
                         <div class="grid gap-4 sm:grid-cols-2">
                             <div>
-                                <label class="mb-1.5 block text-xs font-semibold uppercase tracking-widest text-slate-400">{{ t('contact.form.name') }}</label>
+                                <label class="mb-1.5 block text-xs font-semibold uppercase tracking-widest text-gray-500">{{ t('contact.form.name') }}</label>
                                 <input
                                     v-model="form.name"
                                     type="text"
                                     required
                                     :placeholder="t('contact.form.name')"
-                                    class="w-full rounded-xl border border-white/10 bg-slate-800 px-4 py-2.5 text-sm text-white placeholder-slate-500 outline-none transition focus:border-sky-500/60 focus:ring-1 focus:ring-sky-500/30"
+                                    class="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm text-gray-900 placeholder-gray-400 outline-none transition focus:border-orange-400/60 focus:ring-1 focus:ring-orange-400/30"
                                 />
                             </div>
                             <div>
-                                <label class="mb-1.5 block text-xs font-semibold uppercase tracking-widest text-slate-400">{{ t('contact.form.email') }}</label>
+                                <label class="mb-1.5 block text-xs font-semibold uppercase tracking-widest text-gray-500">{{ t('contact.form.email') }}</label>
                                 <input
                                     v-model="form.email"
                                     type="email"
                                     required
                                     placeholder="you@example.com"
-                                    class="w-full rounded-xl border border-white/10 bg-slate-800 px-4 py-2.5 text-sm text-white placeholder-slate-500 outline-none transition focus:border-sky-500/60 focus:ring-1 focus:ring-sky-500/30"
+                                    class="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm text-gray-900 placeholder-gray-400 outline-none transition focus:border-orange-400/60 focus:ring-1 focus:ring-orange-400/30"
                                 />
                             </div>
                         </div>
 
                         <div>
-                            <label class="mb-1.5 block text-xs font-semibold uppercase tracking-widest text-slate-400">{{ t('contact.form.subject') }}</label>
+                            <label class="mb-1.5 block text-xs font-semibold uppercase tracking-widest text-gray-500">{{ t('contact.form.subject') }}</label>
                             <select
                                 v-model="form.subject"
-                                class="w-full rounded-xl border border-white/10 bg-slate-800 px-4 py-2.5 text-sm text-white outline-none transition focus:border-sky-500/60 focus:ring-1 focus:ring-sky-500/30"
+                                class="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm text-gray-900 outline-none transition focus:border-orange-400/60 focus:ring-1 focus:ring-orange-400/30"
                             >
                                 <option value="">{{ t('contact.form.selectTopic') }}</option>
                                 <option v-for="topic in topics" :key="topic" :value="topic">{{ topic }}</option>
@@ -87,20 +87,20 @@
                         </div>
 
                         <div>
-                            <label class="mb-1.5 block text-xs font-semibold uppercase tracking-widest text-slate-400">{{ t('contact.form.message') }}</label>
+                            <label class="mb-1.5 block text-xs font-semibold uppercase tracking-widest text-gray-500">{{ t('contact.form.message') }}</label>
                             <textarea
                                 v-model="form.message"
                                 required
                                 rows="5"
                                 :placeholder="t('contact.form.messagePlaceholder')"
-                                class="w-full rounded-xl border border-white/10 bg-slate-800 px-4 py-2.5 text-sm text-white placeholder-slate-500 outline-none transition focus:border-sky-500/60 focus:ring-1 focus:ring-sky-500/30 resize-none"
+                                class="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm text-gray-900 placeholder-gray-400 outline-none transition focus:border-orange-400/60 focus:ring-1 focus:ring-orange-400/30 resize-none"
                             />
                         </div>
 
                         <button
                             type="submit"
                             :disabled="loading"
-                            class="w-full rounded-xl bg-sky-600 py-3 text-sm font-semibold text-white transition hover:bg-sky-500 disabled:opacity-50"
+                            class="w-full rounded-xl bg-orange-500 py-3 text-sm font-semibold text-white transition hover:bg-orange-600 disabled:opacity-50"
                         >
                             {{ loading ? t('contact.form.sending') : t('contact.form.send') }}
                         </button>
@@ -108,6 +108,7 @@
                 </div>
             </div>
         </main>
+        <AppFooter />
     </div>
 </template>
 
@@ -116,6 +117,7 @@ import axios from 'axios';
 import { ref, reactive, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import Navbar from '../components/Navbar.vue';
+import AppFooter from '../components/Footer.vue';
 
 const { t, tm } = useI18n();
 

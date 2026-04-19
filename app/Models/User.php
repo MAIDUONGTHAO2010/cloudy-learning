@@ -7,6 +7,7 @@ namespace App\Models;
 use App\Enums\User\UserRole;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -67,6 +68,13 @@ class User extends Authenticatable
     public function courseReviews(): HasManyThrough
     {
         return $this->hasManyThrough(CourseReview::class, Course::class, 'user_id', 'course_id');
+    }
+
+    public function enrolledCourses(): BelongsToMany
+    {
+        return $this->belongsToMany(Course::class)
+            ->withPivot(['status', 'note', 'approved_at', 'cancelled_at'])
+            ->withTimestamps();
     }
 
     public function isAdmin(): bool
