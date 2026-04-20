@@ -37,8 +37,13 @@ jobs:
             sed -i 's/^APP_DEBUG=.*/APP_DEBUG=false/' .env
             sed -i 's|^APP_URL=.*|APP_URL=http://${{ secrets.EC2_HOST }}|' .env
 
-            echo "==> Building and restarting containers..."
+            echo "==> Building Docker images..."
             docker compose build --pull
+
+            echo "==> Installing PHP dependencies..."
+            docker compose run --no-deps --rm -T workspace composer install --no-interaction --no-dev --optimize-autoloader
+
+            echo "==> Starting containers..."
             docker compose up -d --remove-orphans
 
             echo "==> Waiting for workspace container to be healthy..."
@@ -55,9 +60,6 @@ jobs:
               echo "  still waiting... ($STATUS)"
               sleep 10
             done
-
-            echo "==> Installing PHP dependencies..."
-            docker compose exec -T workspace composer install --no-dev --optimize-autoloader
 
             echo "==> Installing Node dependencies & building assets..."
             docker compose exec -T workspace npm ci

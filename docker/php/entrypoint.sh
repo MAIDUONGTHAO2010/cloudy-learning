@@ -17,6 +17,22 @@ if [ "$OWNER" != "www-data" ]; then
     chmod -R 775 storage bootstrap/cache
 fi
 
+# If arguments are provided for a custom command (e.g. "composer install"), run them
+# directly and exit. Do not short-circuit the normal PHP-FPM startup path, because we
+# still need to ensure dependencies are installed before launching PHP-FPM.
+if [ "$#" -gt 0 ]; then
+    case "$1" in
+        php-fpm)
+            ;;
+        -*)
+            set -- php-fpm "$@"
+            ;;
+        *)
+            exec "$@"
+            ;;
+    esac
+fi
+
 # Install Composer dependencies if vendor directory is missing
 if [ ! -f vendor/autoload.php ]; then
     echo "vendor/ not found — running composer install..."
@@ -28,4 +44,4 @@ if [ ! -f vendor/autoload.php ]; then
 fi
 
 # Start PHP-FPM
-exec php-fpm
+exec "$@"
