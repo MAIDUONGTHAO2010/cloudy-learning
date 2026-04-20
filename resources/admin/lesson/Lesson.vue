@@ -731,12 +731,14 @@ const onVideoSelected = async (event: Event) => {
                 'Content-Type': file.type || 'video/mp4',
             },
             onUploadProgress: (progressEvent) => {
-                if (progressEvent.total) {
-                    uploadProgress.value = Math.round((progressEvent.loaded / progressEvent.total) * 100);
+                const total = progressEvent.total || file.size;
+                if (total) {
+                    uploadProgress.value = Math.round((progressEvent.loaded / total) * 100);
                 }
             },
         });
 
+        uploadProgress.value = 100;
         form.video_url = presigned.video_url;
     } catch (err: any) {
         formError.value = err?.response?.data?.message ?? err?.message ?? 'Video upload failed.';
@@ -903,9 +905,11 @@ const handleEditMediaChange = async (event: Event) => {
             headers: { 'Content-Type': file.type },
             withCredentials: false,
             onUploadProgress: (e) => {
-                editMediaProgress.value = e.total ? Math.round((e.loaded / e.total) * 100) : 0;
+                const total = e.total || file.size;
+                editMediaProgress.value = total ? Math.round((e.loaded / total) * 100) : 0;
             },
         });
+        editMediaProgress.value = 100;
         editForm.content = presign.media_url;
     } catch {
         editQuestionError.value = 'Media upload failed.';

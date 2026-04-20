@@ -689,12 +689,14 @@ const onThumbnailSelected = async (event: Event) => {
                 'Content-Type': file.type || 'image/png',
             },
             onUploadProgress: (progressEvent) => {
-                if (progressEvent.total) {
-                    thumbnailUploadProgress.value = Math.round((progressEvent.loaded / progressEvent.total) * 100);
+                const total = progressEvent.total || file.size;
+                if (total) {
+                    thumbnailUploadProgress.value = Math.round((progressEvent.loaded / total) * 100);
                 }
             },
         });
 
+        thumbnailUploadProgress.value = 100;
         form.thumbnail = presigned.thumbnail_url;
     } catch (err: any) {
         formError.value = err?.response?.data?.message ?? err?.message ?? 'Thumbnail upload failed.';

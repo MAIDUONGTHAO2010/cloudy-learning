@@ -654,10 +654,12 @@ const handleVideoChange = async (event: Event) => {
             headers: { 'Content-Type': file.type },
             withCredentials: false,
             onUploadProgress: (e) => {
-                videoProgress.value = e.total ? Math.round((e.loaded / e.total) * 100) : 0;
+                const total = e.total || file.size;
+                videoProgress.value = total ? Math.round((e.loaded / total) * 100) : 0;
             },
         });
 
+        videoProgress.value = 100;
         lessonForm.value.video_url = presign.video_url;
     } catch {
         lessonFormError.value = 'Video upload failed.';
@@ -819,9 +821,11 @@ const handleNewMediaChange = async (event: Event) => {
             headers: { 'Content-Type': file.type },
             withCredentials: false,
             onUploadProgress: (e) => {
-                newMediaProgress.value = e.total ? Math.round((e.loaded / e.total) * 100) : 0;
+                const total = e.total || file.size;
+                newMediaProgress.value = total ? Math.round((e.loaded / total) * 100) : 0;
             },
         });
+        newMediaProgress.value = 100;
         newQuestionForm.value.content = presign.media_url;
     } catch {
         quizFeedback.value = { type: 'error', message: 'Media upload failed.' };
@@ -883,9 +887,11 @@ const handleEditMediaChange = async (event: Event) => {
             headers: { 'Content-Type': file.type },
             withCredentials: false,
             onUploadProgress: (e) => {
-                editMediaProgress.value = e.total ? Math.round((e.loaded / e.total) * 100) : 0;
+                const total = e.total || file.size;
+                editMediaProgress.value = total ? Math.round((e.loaded / total) * 100) : 0;
             },
         });
+        editMediaProgress.value = 100;
         editForm.value.content = presign.media_url;
     } catch {
         quizFeedback.value = { type: 'error', message: 'Media upload failed.' };
