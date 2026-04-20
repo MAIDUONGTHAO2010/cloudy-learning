@@ -17,6 +17,14 @@ if [ "$OWNER" != "www-data" ]; then
     chmod -R 775 storage bootstrap/cache
 fi
 
+# If arguments are provided (e.g. "composer install"), run them directly and exit.
+# This is used by "docker compose run workspace composer install" in CI/CD so that
+# vendor is installed on the host bind-mount before the main container starts,
+# preventing a delayed PHP-FPM startup that would cause a 502 error.
+if [ "$#" -gt 0 ]; then
+    exec "$@"
+fi
+
 # Install Composer dependencies if vendor directory is missing
 if [ ! -f vendor/autoload.php ]; then
     echo "vendor/ not found — running composer install..."
