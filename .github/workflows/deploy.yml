@@ -41,6 +41,21 @@ jobs:
             docker compose build --pull
             docker compose up -d --remove-orphans
 
+            echo "==> Waiting for workspace container to be healthy..."
+            for i in $(seq 1 30); do
+              STATUS=$(docker inspect --format "{{.State.Health.Status}}" cloudy_workspace 2>/dev/null || echo "not_found")
+              if [ "$STATUS" = "healthy" ]; then
+                echo "  workspace is healthy"
+                break
+              fi
+              if [ "$i" = "30" ]; then
+                echo "ERROR: workspace did not become healthy within 300s" >&2
+                exit 1
+              fi
+              echo "  still waiting... ($STATUS)"
+              sleep 10
+            done
+
             echo "==> Installing PHP dependencies..."
             docker compose exec -T workspace composer install --no-dev --optimize-autoloader
 
