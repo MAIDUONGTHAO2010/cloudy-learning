@@ -137,7 +137,7 @@ class QuizService
         $diskConfig       = config('filesystems.disks.s3');
         $internalEndpoint = rtrim((string) $diskConfig['endpoint'], '/');
         $publicEndpoint   = rtrim((string) ($diskConfig['public_endpoint'] ?: $diskConfig['endpoint']), '/');
-        $publicBaseUrl    = rtrim((string) $diskConfig['url'], '/');
+        $parsedPublic     = parse_url($publicEndpoint);
 
         $client = new S3Client([
             'version'                 => 'latest',
@@ -150,26 +150,36 @@ class QuizService
             ],
         ]);
 
-        $command = $client->getCommand('PutObject', [
+        $putCommand = $client->getCommand('PutObject', [
             'Bucket'      => $diskConfig['bucket'],
             'Key'         => $path,
             'ContentType' => $data['content_type'] ?? 'application/octet-stream',
         ]);
+        $putRequest = $client->createPresignedRequest($putCommand, '+15 minutes');
+        $uploadUrl  = $this->buildPublicPresignedUrl($putRequest->getUri(), $parsedPublic);
 
-        $presigned    = $client->createPresignedRequest($command, '+15 minutes');
-        $rawUrl       = (string) $presigned->getUri();
-        $parsedRaw    = parse_url($rawUrl);
-        $parsedPublic = parse_url($publicEndpoint);
-        $uploadUrl    = ($parsedPublic['scheme'] ?? 'http') . '://'
-            . ($parsedPublic['host'] ?? 'localhost')
-            . (isset($parsedPublic['port']) ? ':' . $parsedPublic['port'] : '')
-            . ($parsedRaw['path'] ?? '')
-            . (isset($parsedRaw['query']) ? '?' . $parsedRaw['query'] : '');
+        $getCommand = $client->getCommand('GetObject', [
+            'Bucket' => $diskConfig['bucket'],
+            'Key'    => $path,
+        ]);
+        $getRequest = $client->createPresignedRequest($getCommand, '+1 hour');
+        $mediaUrl   = $this->buildPublicPresignedUrl($getRequest->getUri(), $parsedPublic);
 
         return [
             'path'       => $path,
             'upload_url' => $uploadUrl,
-            'media_url'  => $publicBaseUrl . '/' . $path,
+            'media_url'  => $mediaUrl,
         ];
+    }
+
+    private function buildPublicPresignedUrl(\Psr\Http\Message\UriInterface $uri, array $parsedPublic): string
+    {
+        $parsedRaw = parse_url((string) $uri);
+
+        return ($parsedPublic['scheme'] ?? 'http') . '://'
+            . ($parsedPublic['host'] ?? 'localhost')
+            . (isset($parsedPublic['port']) ? ':' . $parsedPublic['port'] : '')
+            . ($parsedRaw['path'] ?? '')
+            . (isset($parsedRaw['query']) ? '?' . $parsedRaw['query'] : '');
     }
 }

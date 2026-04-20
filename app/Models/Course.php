@@ -2,11 +2,15 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasS3PresignedUrl;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Course extends Model
 {
+    use HasS3PresignedUrl;
+
     protected $fillable = [
         'user_id',
         'category_id',
@@ -22,6 +26,13 @@ class Course extends Model
         'is_active' => 'boolean',
         'order' => 'integer',
     ];
+
+    protected function thumbnail(): Attribute
+    {
+        return Attribute::make(
+            get: fn(?string $value) => static::presignedGetUrl($value)
+        );
+    }
 
     public function instructor()
     {
