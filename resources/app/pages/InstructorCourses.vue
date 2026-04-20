@@ -150,8 +150,8 @@
                     <!-- Thumbnail upload -->
                     <div>
                         <label class="mb-1 block text-xs text-gray-500">Thumbnail</label>
-                        <div v-if="form.thumbnail" class="mb-2">
-                            <img :src="form.thumbnail" class="h-24 w-auto rounded-xl object-cover" />
+                        <div v-if="thumbnailPreviewUrl" class="mb-2">
+                            <img :src="thumbnailPreviewUrl" class="h-24 w-auto rounded-xl object-cover" />
                         </div>
                         <input
                             type="file"
@@ -315,6 +315,7 @@ const formSubmitting = ref(false);
 const formError      = ref('');
 const tagsInput      = ref('');
 const thumbnailUploading = ref(false);
+const thumbnailPreviewUrl = ref<string>('');
 const form = ref({
     title: '',
     description: '',
@@ -369,6 +370,7 @@ const fetchCategories = async () => {
 const openCreate = () => {
     editingCourse.value = null;
     form.value = { title: '', description: '', category_id: null, thumbnail: null, is_active: false };
+    thumbnailPreviewUrl.value = '';
     tagsInput.value = '';
     formError.value = '';
     showForm.value = true;
@@ -380,9 +382,10 @@ const openEdit = (course: Course) => {
         title: course.title,
         description: course.description ?? '',
         category_id: course.category_id,
-        thumbnail: course.thumbnail,
+        thumbnail: null,
         is_active: course.is_active,
     };
+    thumbnailPreviewUrl.value = course.thumbnail ?? '';
     tagsInput.value = course.tags.map((t) => t.name).join(', ');
     formError.value = '';
     showForm.value = true;
@@ -391,6 +394,7 @@ const openEdit = (course: Course) => {
 const closeForm = () => {
     showForm.value = false;
     editingCourse.value = null;
+    thumbnailPreviewUrl.value = '';
 };
 
 const handleThumbnailChange = async (event: Event) => {
@@ -410,7 +414,8 @@ const handleThumbnailChange = async (event: Event) => {
             withCredentials: false,
         });
 
-        form.value.thumbnail = presign.thumbnail_url;
+        form.value.thumbnail = presign.path;
+        thumbnailPreviewUrl.value = presign.thumbnail_url;
     } catch {
         formError.value = 'Thumbnail upload failed.';
     } finally {
@@ -427,7 +432,18 @@ const submitForm = async () => {
         .map((t) => t.trim())
         .filter(Boolean);
 
-    const payload = { ...form.value, tags };
+    const payload: Record<string, unknown> = {
+        title:       form.value.title,
+        description: form.value.description,
+        category_id: form.value.category_id,
+        is_active:   form.value.is_active,
+        tags,
+    };
+    // Only include thumbnail when a new file was uploaded in this session.
+    // Omitting it prevents accidentally overwriting or clearing the existing thumbnail.
+    if (form.value.thumbnail !== null) {
+        payload.thumbnail = form.value.thumbnail;
+    }
 
     try {
         if (editingCourse.value) {
