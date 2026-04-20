@@ -29,9 +29,6 @@ jobs:
             echo "==> Pulling latest code..."
             git pull origin main
 
-            echo "==> Copying .env file..."
-            cp ${{ secrets.EC2_ENV_PATH }} .env
-
             echo "==> Building and restarting containers..."
             docker compose build workspace
             docker compose up -d --remove-orphans
