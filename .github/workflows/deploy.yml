@@ -29,11 +29,16 @@ jobs:
             echo "==> Pulling latest code..."
             git pull origin main
 
-            echo "==> Copying .env file..."
-            cp ${{ secrets.EC2_ENV_PATH }} .env
+            echo "==> Copying .env from .env.example (if .env does not exist)..."
+            [ -f .env ] || cp .env.example .env
+
+            echo "==> Updating .env values..."
+            sed -i 's/^APP_ENV=.*/APP_ENV=production/' .env
+            sed -i 's/^APP_DEBUG=.*/APP_DEBUG=false/' .env
+            sed -i 's|^APP_URL=.*|APP_URL=http://${{ secrets.EC2_HOST }}|' .env
 
             echo "==> Building and restarting containers..."
-            docker compose build workspace
+            docker compose build --pull
             docker compose up -d --remove-orphans
 
             echo "==> Installing PHP dependencies..."
