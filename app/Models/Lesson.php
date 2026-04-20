@@ -2,10 +2,14 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasS3PresignedUrl;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 
 class Lesson extends Model
 {
+    use HasS3PresignedUrl;
+
     protected $fillable = [
         'course_id',
         'title',
@@ -22,6 +26,13 @@ class Lesson extends Model
         'order' => 'integer',
         'duration' => 'integer',
     ];
+
+    protected function videoUrl(): Attribute
+    {
+        return Attribute::make(
+            get: fn(?string $value) => static::presignedGetUrl($value)
+        );
+    }
 
     public function course()
     {
