@@ -29,6 +29,9 @@ jobs:
             echo "==> Pulling latest code..."
             git pull origin main
 
+            echo "==> Copying .env from .env.example (if .env does not exist)..."
+            [ -f .env ] || cp .env.example .env
+
             echo "==> Building and restarting containers..."
             docker compose build workspace
             docker compose up -d --remove-orphans
