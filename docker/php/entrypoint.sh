@@ -44,4 +44,8 @@ if [ ! -f vendor/autoload.php ]; then
 fi
 
 # Start PHP-FPM
-exec "$@"
+if [ "$#" -gt 0 ]; then
+    exec "$@"
+else
+    exec php-fpm
+fi
