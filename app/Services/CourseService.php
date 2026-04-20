@@ -273,7 +273,7 @@ class CourseService
         $diskConfig = config('filesystems.disks.s3');
         $internalEndpoint = rtrim((string) $diskConfig['endpoint'], '/');
         $publicEndpoint = rtrim((string) ($diskConfig['public_endpoint'] ?: $diskConfig['endpoint']), '/');
-        $publicBaseUrl = rtrim((string) $diskConfig['url'], '/');
+        $parsedPublic = parse_url($publicEndpoint);
 
         $client = new S3Client([
             'version' => 'latest',
@@ -292,23 +292,23 @@ class CourseService
             'ContentType' => $data['content_type'],
         ]);
 
-        $request = $client->createPresignedRequest($command, '+15 minutes');
-        $rawUrl       = (string) $request->getUri();
-        $parsedRaw    = parse_url($rawUrl);
-        $parsedPublic = parse_url($publicEndpoint);
-        $uploadUrl    = ($parsedPublic['scheme'] ?? 'http') . '://'
-            . ($parsedPublic['host'] ?? 'localhost')
-            . (isset($parsedPublic['port']) ? ':' . $parsedPublic['port'] : '')
-            . ($parsedRaw['path'] ?? '')
-            . (isset($parsedRaw['query']) ? '?' . $parsedRaw['query'] : '');
+        $putRequest   = $client->createPresignedRequest($command, '+15 minutes');
+        $uploadUrl    = $this->buildPublicPresignedUrl($putRequest->getUri(), $parsedPublic);
+
+        $getCommand  = $client->getCommand('GetObject', [
+            'Bucket' => $diskConfig['bucket'],
+            'Key'    => $path,
+        ]);
+        $getRequest  = $client->createPresignedRequest($getCommand, '+1 hour');
+        $thumbnailUrl = $this->buildPublicPresignedUrl($getRequest->getUri(), $parsedPublic);
 
         return [
-            'path' => $path,
-            'upload_url' => $uploadUrl,
-            'headers' => [
+            'path'         => $path,
+            'upload_url'   => $uploadUrl,
+            'headers'      => [
                 'Content-Type' => $data['content_type'],
             ],
-            'thumbnail_url' => $publicBaseUrl . '/' . $path,
+            'thumbnail_url' => $thumbnailUrl,
             'max_file_size' => self::MAX_THUMBNAIL_SIZE,
         ];
     }
@@ -358,6 +358,17 @@ class CourseService
             EnrollmentStatus::CANCELED => 'canceled',
             default => null,
         };
+    }
+
+    private function buildPublicPresignedUrl(\Psr\Http\Message\UriInterface $uri, array $parsedPublic): string
+    {
+        $parsedRaw = parse_url((string) $uri);
+
+        return ($parsedPublic['scheme'] ?? 'http') . '://'
+            . ($parsedPublic['host'] ?? 'localhost')
+            . (isset($parsedPublic['port']) ? ':' . $parsedPublic['port'] : '')
+            . ($parsedRaw['path'] ?? '')
+            . (isset($parsedRaw['query']) ? '?' . $parsedRaw['query'] : '');
     }
 
     private function uniqueSlug(string $slug, ?int $excludeId = null): string
