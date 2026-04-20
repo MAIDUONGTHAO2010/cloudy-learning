@@ -22,4 +22,8 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www/html
 
+RUN mkdir -p bootstrap/cache storage && \
+    chmod -R 775 bootstrap storage && \
+    chown -R www-data:www-data bootstrap storage
+
 EXPOSE 9000
