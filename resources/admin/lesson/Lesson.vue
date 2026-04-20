@@ -730,6 +730,7 @@ const onVideoSelected = async (event: Event) => {
                 ...safeHeaders,
                 'Content-Type': file.type || 'video/mp4',
             },
+            withCredentials: false,
             onUploadProgress: (progressEvent) => {
                 const total = progressEvent.total || file.size;
                 if (total) {

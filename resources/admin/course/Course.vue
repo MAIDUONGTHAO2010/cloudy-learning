@@ -692,6 +692,7 @@ const onThumbnailSelected = async (event: Event) => {
                 ...safeHeaders,
                 'Content-Type': file.type || 'image/png',
             },
+            withCredentials: false,
             onUploadProgress: (progressEvent) => {
                 const total = progressEvent.total || file.size;
                 if (total) {
