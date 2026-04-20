@@ -766,6 +766,7 @@ const handleThumbnailChange = async (event: Event) => {
         });
 
         await axios.put(presign.upload_url, file, {
+            adapter:         'xhr',
             headers:         { 'Content-Type': file.type },
             withCredentials: false,
             onUploadProgress: (e) => {
@@ -870,6 +871,7 @@ const handleVideoChange = async (event: Event) => {
         });
 
         await axios.put(presign.upload_url, file, {
+            adapter:         'xhr',
             headers:         { 'Content-Type': file.type },
             withCredentials: false,
             onUploadProgress: (e) => {
@@ -1065,6 +1067,7 @@ const handleNewMediaChange = async (event: Event) => {
             content_type: file.type,
         });
         await axios.put(presign.upload_url, file, {
+            adapter: 'xhr',
             headers: { 'Content-Type': file.type },
             withCredentials: false,
             onUploadProgress: (e) => {
@@ -1110,6 +1113,7 @@ const handleEditMediaChange = async (event: Event) => {
             content_type: file.type,
         });
         await axios.put(presign.upload_url, file, {
+            adapter: 'xhr',
             headers: { 'Content-Type': file.type },
             withCredentials: false,
             onUploadProgress: (e) => {
