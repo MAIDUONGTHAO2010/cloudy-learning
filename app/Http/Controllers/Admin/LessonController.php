@@ -35,7 +35,7 @@ class LessonController extends Controller
     {
         $this->lessonService->delete($id);
 
-        return response()->json(['message' => 'Deleted successfully']);
+        return response()->noContent();
     }
 
     public function presignVideoUpload(PresignLessonVideoUploadRequest $request)

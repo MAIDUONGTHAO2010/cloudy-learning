@@ -25,7 +25,7 @@ class AuthController extends Controller
             return response()->json([
                 'message' => 'These credentials do not match our records.',
                 'errors' => ['email' => ['These credentials do not match our records.']],
-            ], 422);
+            ], 401);
         }
 
         $request->session()->regenerate();
