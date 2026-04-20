@@ -363,10 +363,12 @@ class CourseService
     private function buildPublicPresignedUrl(\Psr\Http\Message\UriInterface $uri, array $parsedPublic): string
     {
         $parsedRaw = parse_url((string) $uri);
+        $basePath  = rtrim($parsedPublic['path'] ?? '', '/');
 
         return ($parsedPublic['scheme'] ?? 'http') . '://'
             . ($parsedPublic['host'] ?? 'localhost')
             . (isset($parsedPublic['port']) ? ':' . $parsedPublic['port'] : '')
+            . $basePath
             . ($parsedRaw['path'] ?? '')
             . (isset($parsedRaw['query']) ? '?' . $parsedRaw['query'] : '');
     }

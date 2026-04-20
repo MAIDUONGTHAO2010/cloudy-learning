@@ -87,10 +87,12 @@ trait HasS3PresignedUrl
     {
         $parsedRaw    = parse_url($presignedUri);
         $parsedPublic = parse_url($publicEndpoint);
+        $basePath     = rtrim($parsedPublic['path'] ?? '', '/');
 
         return ($parsedPublic['scheme'] ?? 'http') . '://'
             . ($parsedPublic['host'] ?? 'localhost')
             . (isset($parsedPublic['port']) ? ':' . $parsedPublic['port'] : '')
+            . $basePath
             . ($parsedRaw['path'] ?? '')
             . (isset($parsedRaw['query']) ? '?' . $parsedRaw['query'] : '');
     }
