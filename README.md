@@ -41,7 +41,12 @@ Only three things are required on the host:
 Run the bootstrap script once after provisioning the instance:
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/MAIDUONGTHAO2010/cloudy-learning/main/scripts/setup-server.sh | bash
+# Recommended: download, review, then execute
+curl -fsSL https://raw.githubusercontent.com/MAIDUONGTHAO2010/cloudy-learning/main/scripts/setup-server.sh \
+    -o setup-server.sh
+# Review the script before running it
+cat setup-server.sh
+bash setup-server.sh
 ```
 
 Or clone the repo first and run it locally:
@@ -49,6 +54,8 @@ Or clone the repo first and run it locally:
 ```sh
 git clone https://github.com/MAIDUONGTHAO2010/cloudy-learning.git
 cd cloudy-learning
+# Review the script before running it
+cat scripts/setup-server.sh
 bash scripts/setup-server.sh
 ```
 

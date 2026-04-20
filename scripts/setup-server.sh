@@ -45,6 +45,22 @@ sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg \
     -o "$DOCKER_GPG_KEY"
 sudo chmod a+r "$DOCKER_GPG_KEY"
 
+# Verify the GPG key fingerprint matches Docker's documented value:
+# 9DC8 5822 9FC7 DD38 854A  E2D8 8D81 803C 0EBF CD88
+EXPECTED_FP="9DC858229FC7DD38854AE2D88D81803C0EBFCD88"
+ACTUAL_FP=$(gpg --no-default-keyring --keyring "gnupg-ring:${DOCKER_GPG_KEY}" \
+    --fingerprint 2>/dev/null \
+    | grep -A1 "^pub" \
+    | tail -1 \
+    | tr -d ' ')
+if [ "$ACTUAL_FP" != "$EXPECTED_FP" ]; then
+    echo "ERROR: Docker GPG key fingerprint mismatch!" >&2
+    echo "  Expected : $EXPECTED_FP" >&2
+    echo "  Got      : $ACTUAL_FP" >&2
+    exit 1
+fi
+echo "==> GPG key fingerprint verified."
+
 # ---------------------------------------------------------------------------
 # 5. Docker stable repository
 # ---------------------------------------------------------------------------
