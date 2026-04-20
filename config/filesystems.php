@@ -55,7 +55,7 @@ return [
             'bucket' => env('AWS_BUCKET', 'cloudy-learning'),
             'url' => env('AWS_URL', 'http://localhost:9000/'.env('AWS_BUCKET', 'cloudy-learning')),
             'endpoint' => env('AWS_ENDPOINT', 'http://minio:9000'),
-            'public_endpoint' => env('AWS_PUBLIC_ENDPOINT', 'http://localhost:9000'),
+            'public_endpoint' => env('AWS_PUBLIC_ENDPOINT', rtrim(env('APP_URL', 'http://localhost'), '/').'/minio-proxy'),
             'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', true),
             'throw' => false,
             'report' => false,
