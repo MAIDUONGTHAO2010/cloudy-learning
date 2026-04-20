@@ -89,13 +89,14 @@ class LessonService
 
         try {
             $diskConfig = config('filesystems.disks.s3');
+            $internalEndpoint = rtrim((string) $diskConfig['endpoint'], '/');
             $publicEndpoint = rtrim((string) ($diskConfig['public_endpoint'] ?: $diskConfig['endpoint']), '/');
             $publicBaseUrl = rtrim((string) $diskConfig['url'], '/');
 
             $client = new S3Client([
                 'version' => 'latest',
                 'region' => $diskConfig['region'],
-                'endpoint' => $publicEndpoint,
+                'endpoint' => $internalEndpoint,
                 'use_path_style_endpoint' => (bool) $diskConfig['use_path_style_endpoint'],
                 'credentials' => [
                     'key' => $diskConfig['key'],
@@ -110,10 +111,18 @@ class LessonService
             ]);
 
             $request = $client->createPresignedRequest($command, '+15 minutes');
+            $rawUrl       = (string) $request->getUri();
+            $parsedRaw    = parse_url($rawUrl);
+            $parsedPublic = parse_url($publicEndpoint);
+            $uploadUrl    = ($parsedPublic['scheme'] ?? 'http') . '://'
+                . ($parsedPublic['host'] ?? 'localhost')
+                . (isset($parsedPublic['port']) ? ':' . $parsedPublic['port'] : '')
+                . ($parsedRaw['path'] ?? '')
+                . (isset($parsedRaw['query']) ? '?' . $parsedRaw['query'] : '');
 
             $result = [
                 'path' => $path,
-                'upload_url' => (string) $request->getUri(),
+                'upload_url' => $uploadUrl,
                 'headers' => [
                     'Content-Type' => $data['content_type'],
                 ],
