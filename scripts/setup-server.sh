@@ -48,8 +48,8 @@ sudo chmod a+r "$DOCKER_GPG_KEY"
 # Verify the GPG key fingerprint matches Docker's documented value:
 # 9DC8 5822 9FC7 DD38 854A  E2D8 8D81 803C 0EBF CD88
 EXPECTED_FP="9DC858229FC7DD38854AE2D88D81803C0EBFCD88"
-ACTUAL_FP=$(gpg --no-default-keyring --keyring "gnupg-ring:${DOCKER_GPG_KEY}" \
-    --fingerprint 2>/dev/null \
+# Use --show-keys which reads ASCII-armored (.asc) files directly (GnuPG >= 2.1.13)
+ACTUAL_FP=$(gpg --show-keys "$DOCKER_GPG_KEY" 2>/dev/null \
     | grep -A1 "^pub" \
     | tail -1 \
     | tr -d ' ')
