@@ -41,7 +41,7 @@ jobs:
             docker compose build --pull
 
             echo "==> Installing PHP dependencies..."
-            docker compose run --no-deps --rm -T workspace composer install --no-dev --optimize-autoloader
+            docker compose run --no-deps --rm -T workspace composer install --no-interaction --no-dev --optimize-autoloader
 
             echo "==> Starting containers..."
             docker compose up -d --remove-orphans
