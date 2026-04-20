@@ -25,7 +25,7 @@ class QuizController extends Controller
     {
         $this->quizService->deleteQuiz($quizId);
 
-        return response()->json(['message' => 'Quiz deleted successfully']);
+        return response()->noContent();
     }
 
     public function addQuestion(int $quizId)
@@ -37,7 +37,7 @@ class QuizController extends Controller
     {
         $this->quizService->deleteQuestion($questionId);
 
-        return response()->json(['message' => 'Question deleted successfully']);
+        return response()->noContent();
     }
 
     public function updateQuestion(UpdateQuizQuestionRequest $request, int $questionId)

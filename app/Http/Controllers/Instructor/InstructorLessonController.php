@@ -51,7 +51,7 @@ class InstructorLessonController extends Controller
         $this->authoriseCourse($request->user()->id, (int) $courseId);
         $this->lessonService->delete((int) $id);
 
-        return response()->json(['message' => 'Lesson deleted.']);
+        return response()->noContent();
     }
 
     public function presignVideo(PresignLessonVideoUploadRequest $request, string $courseId): JsonResponse
@@ -82,7 +82,7 @@ class InstructorLessonController extends Controller
         $this->authoriseCourse($request->user()->id, (int) $courseId);
         $this->quizService->deleteQuiz((int) $quizId);
 
-        return response()->json(['message' => 'Quiz deleted.']);
+        return response()->noContent();
     }
 
     public function addQuestion(Request $request, string $courseId, string $quizId): JsonResponse
@@ -104,7 +104,7 @@ class InstructorLessonController extends Controller
         $this->authoriseCourse($request->user()->id, (int) $courseId);
         $this->quizService->deleteQuestion((int) $questionId);
 
-        return response()->json(['message' => 'Question deleted.']);
+        return response()->noContent();
     }
 
     public function presignQuestionMedia(Request $request, string $courseId): JsonResponse

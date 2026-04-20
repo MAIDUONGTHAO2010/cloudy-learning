@@ -35,6 +35,6 @@ class CourseReviewController extends Controller
     {
         $this->courseReviewService->destroy($reviewId, $request->user()->id);
 
-        return response()->json(['message' => 'Review deleted successfully']);
+        return response()->noContent();
     }
 }

@@ -42,7 +42,7 @@ class CourseController extends Controller
     {
         $this->courseService->delete($id);
 
-        return response()->json(['message' => 'Deleted successfully']);
+        return response()->noContent();
     }
 
     public function presignThumbnailUpload(PresignCourseThumbnailUploadRequest $request)

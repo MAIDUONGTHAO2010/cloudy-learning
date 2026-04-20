@@ -47,7 +47,7 @@ class InstructorCourseController extends Controller
     {
         $this->courseService->deleteForInstructor($request->user()->id, $id);
 
-        return response()->json(['message' => 'Course deleted successfully.']);
+        return response()->noContent();
     }
 
     public function students(Request $request, int $id): JsonResponse
@@ -61,7 +61,7 @@ class InstructorCourseController extends Controller
     {
         $this->courseService->removeStudentFromCourse($request->user()->id, $id, $userId);
 
-        return response()->json(['message' => 'Student removed successfully.']);
+        return response()->noContent();
     }
 
     public function addStudent(Request $request, int $id): JsonResponse

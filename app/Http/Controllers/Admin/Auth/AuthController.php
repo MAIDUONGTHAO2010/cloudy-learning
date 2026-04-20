@@ -38,7 +38,7 @@ class AuthController extends Controller
                 'errors' => [
                     'email' => ['The provided credentials do not match our records.'],
                 ],
-            ], 422);
+            ], 401);
         }
 
         return back()->withErrors([
