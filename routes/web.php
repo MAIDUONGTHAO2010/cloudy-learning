@@ -93,6 +93,3 @@ Route::prefix('api/instructor')->middleware(['auth', 'instructor'])->group(funct
 Route::get('/{any}', function () {
     return view('app');
 })->where('any', '^(?!admin(?:/|$)).*')->name('app');
-Route::get('/{any}', function () {
-    return view('app');
-})->where('any', '^(?!admin(?:/|$)).*')->name('app');

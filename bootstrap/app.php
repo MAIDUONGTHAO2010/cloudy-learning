@@ -20,6 +20,11 @@ return Application::configure(basePath: dirname(__DIR__))
         },
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->validateCsrfTokens(except: [
+            'auth/*',
+            'api/*',
+        ]);
+
         $middleware->alias([
             'admin.valid' => EnsureAdminValid::class,
             'user.site'   => EnsureUserSiteAccess::class,
