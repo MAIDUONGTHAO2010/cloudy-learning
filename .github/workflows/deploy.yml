@@ -38,7 +38,7 @@ jobs:
             sed -i 's|^APP_URL=.*|APP_URL=http://${{ secrets.EC2_HOST }}|' .env
 
             echo "==> Building and restarting containers..."
-            docker compose build workspace
+            docker compose build --pull
             docker compose up -d --remove-orphans
 
             echo "==> Installing PHP dependencies..."
