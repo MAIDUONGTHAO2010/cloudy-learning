@@ -28,6 +28,39 @@ An e-learning platform built with **Laravel 12** and **Vue 3**, featuring a publ
 - [Docker](https://www.docker.com/) & [Docker Compose](https://docs.docker.com/compose/)
 - (Optional) [Colima](https://github.com/abiosoft/colima) for improved Docker performance on macOS
 
+## Server Setup (Ubuntu 24.04 — e.g. AWS EC2 t3.small)
+
+Only three things are required on the host:
+
+| Dependency | Purpose |
+|---|---|
+| **Git** | `git pull` to fetch updates |
+| **Docker Engine** | runs containers |
+| **Docker Compose Plugin** | `docker compose` (v2) |
+
+Run the bootstrap script once after provisioning the instance:
+
+```sh
+# Recommended: download, review, then execute
+curl -fsSL https://raw.githubusercontent.com/MAIDUONGTHAO2010/cloudy-learning/main/scripts/setup-server.sh \
+    -o setup-server.sh
+# Review the script before running it
+cat setup-server.sh
+bash setup-server.sh
+```
+
+Or clone the repo first and run it locally:
+
+```sh
+git clone https://github.com/MAIDUONGTHAO2010/cloudy-learning.git
+cd cloudy-learning
+# Review the script before running it
+cat scripts/setup-server.sh
+bash scripts/setup-server.sh
+```
+
+After the script finishes, **log out and back in** (or run `newgrp docker`) so the `docker` group membership takes effect, then follow the [Getting Started](#getting-started) steps below.
+
 ## Getting Started
 
 1. **Clone the repository:**
