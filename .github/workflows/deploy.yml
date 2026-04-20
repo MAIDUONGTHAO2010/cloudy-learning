@@ -62,15 +62,18 @@ jobs:
             done
 
             echo "==> Installing Node dependencies & building assets..."
-            docker compose exec -T workspace npm ci
-            docker compose exec -T workspace npm run build
+            docker compose run --no-deps --rm -T workspace sh -c "npm ci && npm run build"
 
             echo "==> Running migrations..."
             docker compose exec -T workspace php artisan migrate --force
 
             echo "==> Clearing & caching config..."
+            docker compose exec -T workspace php artisan storage:link --force
             docker compose exec -T workspace php artisan config:cache
             docker compose exec -T workspace php artisan route:cache
             docker compose exec -T workspace php artisan view:cache
+
+            echo "==> Reloading PHP-FPM workers..."
+            docker compose exec -T workspace bash -c "kill -USR2 \$(cat /usr/local/var/run/php-fpm.pid 2>/dev/null) 2>/dev/null || kill -USR2 1 2>/dev/null || true"
 
             echo "==> Done!"
