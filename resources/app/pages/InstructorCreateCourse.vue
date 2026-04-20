@@ -92,9 +92,9 @@
                     <!-- Thumbnail -->
                     <div>
                         <label class="mb-1 block text-xs text-gray-500">Thumbnail</label>
-                        <div v-if="courseForm.thumbnail" class="mb-2 flex items-center gap-3">
-                            <img :src="courseForm.thumbnail" class="h-20 w-36 rounded-xl object-cover border border-gray-200" />
-                            <button type="button" @click="courseForm.thumbnail = ''" class="text-xs text-rose-500 hover:text-rose-700">Remove</button>
+                        <div v-if="thumbnailPreviewUrl" class="mb-2 flex items-center gap-3">
+                            <img :src="thumbnailPreviewUrl" class="h-20 w-36 rounded-xl object-cover border border-gray-200" />
+                            <button type="button" @click="removeThumbnail" class="text-xs text-rose-500 hover:text-rose-700">Remove</button>
                         </div>
                         <input
                             v-else
@@ -749,6 +749,7 @@ const courseFormError      = ref('');
 const courseFormSubmitting = ref(false);
 const thumbnailUploading   = ref(false);
 const thumbnailProgress    = ref(0);
+const thumbnailPreviewUrl  = ref('');
 
 const handleThumbnailChange = async (event: Event) => {
     const file = (event.target as HTMLInputElement).files?.[0];
@@ -774,12 +775,18 @@ const handleThumbnailChange = async (event: Event) => {
             },
         });
 
-        courseForm.value.thumbnail = presign.thumbnail_url;
+        courseForm.value.thumbnail = presign.path;
+        thumbnailPreviewUrl.value  = presign.thumbnail_url;
     } catch {
         courseFormError.value = 'Thumbnail upload failed.';
     } finally {
         thumbnailUploading.value = false;
     }
+};
+
+const removeThumbnail = () => {
+    courseForm.value.thumbnail = '';
+    thumbnailPreviewUrl.value  = '';
 };
 
 const submitCourseInfo = async () => {

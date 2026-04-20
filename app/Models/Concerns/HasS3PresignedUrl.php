@@ -31,7 +31,17 @@ trait HasS3PresignedUrl
         // Extract the S3 object key from the stored value.
         if (str_starts_with($value, 'http')) {
             // Plain URL or presigned URL — strip the host/bucket prefix to get the key.
-            $urlPath   = ltrim(parse_url($value, PHP_URL_PATH) ?? '', '/');
+            $urlPath = ltrim(parse_url($value, PHP_URL_PATH) ?? '', '/');
+
+            // Strip the public-endpoint base path (e.g. "minio-proxy/") when the
+            // stored URL was built against the public proxy rather than the
+            // internal MinIO endpoint (e.g. http://host/minio-proxy/bucket/key).
+            $publicEndpoint  = rtrim((string) ($diskConfig['public_endpoint'] ?: $diskConfig['endpoint']), '/');
+            $publicBasePath  = ltrim(parse_url($publicEndpoint, PHP_URL_PATH) ?? '', '/');
+            if ($publicBasePath !== '' && str_starts_with($urlPath, $publicBasePath . '/')) {
+                $urlPath = substr($urlPath, strlen($publicBasePath) + 1);
+            }
+
             $objectKey = str_starts_with($urlPath, $bucket . '/')
                 ? substr($urlPath, strlen($bucket) + 1)
                 : $urlPath;

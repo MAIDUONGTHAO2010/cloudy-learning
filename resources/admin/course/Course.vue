@@ -253,8 +253,8 @@
               </div>
               <p v-if="uploadingThumbnail" class="mt-2 text-xs text-blue-600">Uploading thumbnail… {{ thumbnailUploadProgress }}%</p>
 
-              <div v-if="form.thumbnail" class="mt-3 overflow-hidden rounded-2xl border border-slate-200 bg-slate-50">
-                <img :src="form.thumbnail" alt="Thumbnail preview" class="h-40 w-full object-cover" />
+              <div v-if="thumbnailPreviewUrl" class="mt-3 overflow-hidden rounded-2xl border border-slate-200 bg-slate-50">
+                <img :src="thumbnailPreviewUrl" alt="Thumbnail preview" class="h-40 w-full object-cover" />
               </div>
             </div>
 
@@ -609,6 +609,7 @@ const editingCourse = ref<Course | null>(null);
 const formError = ref<string | null>(null);
 const uploadingThumbnail = ref(false);
 const thumbnailUploadProgress = ref(0);
+const thumbnailPreviewUrl = ref<string>('');
 const MAX_THUMBNAIL_SIZE = 10 * 1024 * 1024;
 
 const form = reactive({
@@ -626,6 +627,7 @@ const openCreateModal = () => {
     form.title = '';
     form.description = '';
     form.thumbnail = '';
+    thumbnailPreviewUrl.value = '';
     form.user_id = instructors.value[0]?.id ?? 0;
     form.category_id = null;
     form.tags = [];
@@ -641,7 +643,8 @@ const openEditModal = (course: Course) => {
     editingCourse.value = course;
     form.title = course.title;
     form.description = course.description ?? '';
-    form.thumbnail = course.thumbnail ?? '';
+    form.thumbnail = '';
+    thumbnailPreviewUrl.value = course.thumbnail ?? '';
     form.user_id = course.instructor?.id ?? course.user_id;
     form.category_id = course.category?.id ?? course.category_id ?? null;
     form.tags = course.tags?.map((t) => t.name) ?? [];
@@ -657,6 +660,7 @@ const closeModal = () => {
     showModal.value = false;
     uploadingThumbnail.value = false;
     thumbnailUploadProgress.value = 0;
+    thumbnailPreviewUrl.value = '';
 };
 
 const onThumbnailSelected = async (event: Event) => {
@@ -697,7 +701,8 @@ const onThumbnailSelected = async (event: Event) => {
         });
 
         thumbnailUploadProgress.value = 100;
-        form.thumbnail = presigned.thumbnail_url;
+        form.thumbnail = presigned.path;
+        thumbnailPreviewUrl.value = presigned.thumbnail_url;
     } catch (err: any) {
         formError.value = err?.response?.data?.message ?? err?.message ?? 'Thumbnail upload failed.';
     } finally {
