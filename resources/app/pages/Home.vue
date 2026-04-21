@@ -10,46 +10,80 @@
                     <div class="absolute bottom-0 left-1/4 h-64 w-64 rounded-full bg-orange-400/8 blur-3xl"></div>
                 </div>
                 <div class="relative mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8 lg:py-28">
-                    <div class="mx-auto max-w-3xl text-center">
-                        <div class="inline-flex items-center gap-2 rounded-full border border-orange-400/30 bg-orange-400/10 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.28em] text-orange-200">
-                            <span class="h-2 w-2 rounded-full bg-orange-400"></span>
-                            {{ slides[activeSlide].eyebrow }}
+                    <div class="grid gap-12 lg:grid-cols-2 lg:items-center">
+                        <!-- Left: hero text -->
+                        <div class="text-center lg:text-left">
+                            <div class="inline-flex items-center gap-2 rounded-full border border-orange-400/30 bg-orange-400/10 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.28em] text-orange-200">
+                                <span class="h-2 w-2 rounded-full bg-orange-400"></span>
+                                {{ slides[activeSlide].eyebrow }}
+                            </div>
+
+                            <h1 class="mt-6 text-4xl font-black leading-tight text-white sm:text-5xl lg:text-6xl">
+                                Smart Study <span class="text-orange-400">Where Knowledge</span> Meets the Web
+                            </h1>
+                            <p class="mt-5 text-lg leading-8 text-blue-100/80">
+                                {{ slides[activeSlide].subtitle }}
+                            </p>
+
+                            <!-- Search Bar -->
+                            <form class="mx-auto mt-8 flex max-w-xl overflow-hidden rounded-full border border-white/10 bg-white/10 shadow-lg backdrop-blur lg:mx-0" @submit.prevent="goSearch">
+                                <input
+                                    v-model="searchQuery"
+                                    type="text"
+                                    :placeholder="t('courses.searchPlaceholder')"
+                                    class="flex-1 bg-transparent px-6 py-4 text-sm text-white placeholder-white/50 focus:outline-none"
+                                    @keydown.enter.prevent="goSearch"
+                                />
+                                <button
+                                    type="button"
+                                    @click="goSearch"
+                                    class="m-1.5 rounded-full bg-orange-500 px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-orange-600"
+                                >
+                                    {{ t('home.hero.cta') }}
+                                </button>
+                            </form>
+
+                            <div class="mt-6 flex flex-wrap items-center justify-center gap-3 lg:justify-start">
+                                <span
+                                    v-for="item in heroHighlights"
+                                    :key="item.label"
+                                    class="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/8 px-4 py-2 text-sm text-blue-100"
+                                >
+                                    <span>{{ item.icon }}</span>
+                                    {{ item.label }}
+                                </span>
+                            </div>
                         </div>
 
-                        <h1 class="mt-6 text-4xl font-black leading-tight text-white sm:text-5xl lg:text-6xl">
-                            Smart Study <span class="text-orange-400">Where Knowledge</span> Meets the Web
-                        </h1>
-                        <p class="mt-5 text-lg leading-8 text-blue-100/80">
-                            {{ slides[activeSlide].subtitle }}
-                        </p>
-
-                        <!-- Search Bar -->
-                        <form class="mx-auto mt-8 flex max-w-xl overflow-hidden rounded-full border border-white/10 bg-white/10 shadow-lg backdrop-blur" @submit.prevent="goSearch">
-                            <input
-                                v-model="searchQuery"
-                                type="text"
-                                :placeholder="t('courses.searchPlaceholder')"
-                                class="flex-1 bg-transparent px-6 py-4 text-sm text-white placeholder-white/50 focus:outline-none"
-                                @keydown.enter.prevent="goSearch"
-                            />
-                            <button
-                                type="button"
-                                @click="goSearch"
-                                class="m-1.5 rounded-full bg-orange-500 px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-orange-600"
-                            >
-                                {{ t('home.hero.cta') }}
-                            </button>
-                        </form>
-
-                        <div class="mt-6 flex flex-wrap items-center justify-center gap-3">
-                            <span
-                                v-for="item in heroHighlights"
-                                :key="item.label"
-                                class="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/8 px-4 py-2 text-sm text-blue-100"
-                            >
-                                <span>{{ item.icon }}</span>
-                                {{ item.label }}
-                            </span>
+                        <!-- Right: hero image (desktop only) -->
+                        <div class="relative hidden lg:block">
+                            <div class="relative overflow-hidden rounded-3xl shadow-2xl ring-1 ring-white/10">
+                                <img
+                                    src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=640&h=480&fit=crop&auto=format&q=80"
+                                    alt="Students learning together"
+                                    class="h-auto w-full object-cover"
+                                    loading="lazy"
+                                />
+                                <!-- Floating stats card (bottom-left) -->
+                                <div class="absolute bottom-5 left-5 flex items-center gap-3 rounded-2xl bg-white/90 p-4 shadow-lg backdrop-blur">
+                                    <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-orange-500 text-xl text-white">🎓</div>
+                                    <div>
+                                        <p class="text-sm font-bold text-gray-900">941 Active Learners</p>
+                                        <p class="text-xs text-gray-500">Join our community today</p>
+                                    </div>
+                                </div>
+                                <!-- Floating rating card (top-right) -->
+                                <div class="absolute right-5 top-5 rounded-2xl bg-white/90 px-4 py-3 shadow-lg backdrop-blur">
+                                    <p class="text-xs font-semibold text-gray-500">Average rating</p>
+                                    <div class="mt-0.5 flex items-center gap-1">
+                                        <span class="text-base text-amber-400">★★★★★</span>
+                                        <span class="text-sm font-bold text-gray-900">4.9</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Decorative blob behind image -->
+                            <div class="pointer-events-none absolute -right-6 -top-6 h-48 w-48 rounded-full bg-orange-500/20 blur-2xl"></div>
+                            <div class="pointer-events-none absolute -bottom-6 -left-6 h-40 w-40 rounded-full bg-blue-400/20 blur-2xl"></div>
                         </div>
                     </div>
                 </div>
@@ -114,6 +148,42 @@
                             <h3 class="mt-4 text-base font-bold text-gray-900">{{ feature.title }}</h3>
                             <p class="mt-2 text-sm leading-6 text-gray-500">{{ feature.description }}</p>
                         </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Browse Categories Section -->
+            <section class="bg-gray-50 px-4 py-16 sm:px-6 lg:px-8">
+                <div class="mx-auto max-w-7xl">
+                    <div class="mb-10 text-center">
+                        <p class="text-sm font-semibold uppercase tracking-[0.3em] text-orange-500">{{ t('home.categories.label') }}</p>
+                        <h2 class="mt-3 text-3xl font-black text-gray-900 md:text-4xl">{{ t('home.categories.title') }}</h2>
+                        <p class="mt-2 text-base text-gray-500">{{ t('home.categories.subtitle') }}</p>
+                    </div>
+                    <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                        <RouterLink
+                            v-for="cat in categoryCards"
+                            :key="cat.name"
+                            :to="cat.link"
+                            :style="{ background: cat.bg }"
+                            class="group relative overflow-hidden rounded-2xl p-6 text-white shadow-sm transition duration-200 hover:-translate-y-1 hover:shadow-xl"
+                        >
+                            <div class="flex items-start justify-between">
+                                <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/20 text-3xl backdrop-blur">
+                                    {{ cat.icon }}
+                                </div>
+                                <span class="rounded-full bg-white/20 px-3 py-1 text-xs font-semibold backdrop-blur">
+                                    {{ cat.count }}+ {{ t('home.categories.courses') }}
+                                </span>
+                            </div>
+                            <h3 class="mt-5 text-lg font-bold">{{ cat.name }}</h3>
+                            <p class="mt-1 text-sm text-white/75">{{ cat.desc }}</p>
+                            <div class="mt-4 flex items-center gap-1 text-sm font-semibold">
+                                {{ t('common.learnMore') }}
+                                <span class="transition duration-200 group-hover:translate-x-1">→</span>
+                            </div>
+                            <div class="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full bg-white/5"></div>
+                        </RouterLink>
                     </div>
                 </div>
             </section>
@@ -292,6 +362,41 @@
                 <div v-else class="mt-8 rounded-2xl border border-dashed border-gray-200 bg-gray-50 p-8 text-center text-sm text-gray-400">{{ t('common.noData') }}</div>
             </section>
 
+            <!-- Testimonials Section -->
+            <section class="bg-gray-50 px-4 py-16 sm:px-6 lg:px-8">
+                <div class="mx-auto max-w-7xl">
+                    <div class="mb-10 text-center">
+                        <p class="text-sm font-semibold uppercase tracking-[0.3em] text-orange-500">{{ t('home.testimonials.label') }}</p>
+                        <h2 class="mt-3 text-3xl font-black text-gray-900 md:text-4xl">{{ t('home.testimonials.title') }}</h2>
+                        <p class="mt-2 text-base text-gray-500">{{ t('home.testimonials.subtitle') }}</p>
+                    </div>
+                    <div class="grid gap-6 md:grid-cols-3">
+                        <div
+                            v-for="testimonial in testimonials"
+                            :key="testimonial.name"
+                            class="flex flex-col rounded-2xl border border-gray-100 bg-white p-8 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
+                        >
+                            <div class="flex gap-0.5 text-amber-400">
+                                <span v-for="n in testimonial.rating" :key="n" class="text-lg">★</span>
+                            </div>
+                            <p class="mt-4 flex-1 text-sm leading-7 text-gray-600 italic">"{{ testimonial.quote }}"</p>
+                            <div class="mt-6 flex items-center gap-3 border-t border-gray-100 pt-6">
+                                <div
+                                    :style="{ background: testimonial.avatarBg }"
+                                    class="grid h-12 w-12 shrink-0 place-items-center rounded-full text-base font-bold text-white ring-4 ring-gray-100"
+                                >
+                                    {{ testimonial.initials }}
+                                </div>
+                                <div>
+                                    <p class="text-sm font-bold text-gray-900">{{ testimonial.name }}</p>
+                                    <p class="text-xs text-gray-500">{{ testimonial.role }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             <!-- CTA Banner -->
             <section class="bg-gradient-to-br from-[#1a1a4e] via-[#0f2460] to-[#0c1d50] px-4 py-20 sm:px-6 lg:px-8">
                 <div class="mx-auto max-w-3xl text-center">
@@ -412,6 +517,42 @@ const featureCards = computed(() => [
     { icon: '⚡', title: t('home.features.flexibleTitle'), description: t('home.features.flexibleDesc') },
     { icon: '🌟', title: t('home.features.expertTitle'), description: t('home.features.expertDesc') },
 ]);
+
+const categoryCards = computed(() => [
+    { icon: '💻', name: t('home.categories.webDev'), desc: t('home.categories.webDevDesc'), count: 42, bg: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)', link: '/courses' },
+    { icon: '🎨', name: t('home.categories.design'), desc: t('home.categories.designDesc'), count: 28, bg: 'linear-gradient(135deg, #ec4899 0%, #e11d48 100%)', link: '/courses' },
+    { icon: '📊', name: t('home.categories.dataScience'), desc: t('home.categories.dataScienceDesc'), count: 35, bg: 'linear-gradient(135deg, #10b981 0%, #0f766e 100%)', link: '/courses' },
+    { icon: '📱', name: t('home.categories.mobileApps'), desc: t('home.categories.mobileAppsDesc'), count: 19, bg: 'linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)', link: '/courses' },
+    { icon: '🎯', name: t('home.categories.marketing'), desc: t('home.categories.marketingDesc'), count: 23, bg: 'linear-gradient(135deg, #f59e0b 0%, #ea580c 100%)', link: '/courses' },
+    { icon: '🌐', name: t('home.categories.languages'), desc: t('home.categories.languagesDesc'), count: 15, bg: 'linear-gradient(135deg, #14b8a6 0%, #0891b2 100%)', link: '/courses' },
+]);
+
+const testimonials = [
+    {
+        name: 'Sarah Mitchell',
+        role: 'Frontend Developer',
+        quote: 'The courses here completely transformed my career. The instructors are top-notch and the content is always up-to-date with real-world examples.',
+        rating: 5,
+        initials: 'SM',
+        avatarBg: 'linear-gradient(135deg, #a78bfa 0%, #7c3aed 100%)',
+    },
+    {
+        name: 'David Nguyen',
+        role: 'UI/UX Designer',
+        quote: 'I enrolled in 3 design courses and landed my dream job within 6 months. The hands-on projects and instructor feedback made all the difference.',
+        rating: 5,
+        initials: 'DN',
+        avatarBg: 'linear-gradient(135deg, #60a5fa 0%, #2563eb 100%)',
+    },
+    {
+        name: 'Aiko Tanaka',
+        role: 'Data Analyst',
+        quote: 'Flexible schedules and expert instructors — this platform is perfect for busy professionals who want to upskill without disrupting their daily life.',
+        rating: 5,
+        initials: 'AT',
+        avatarBg: 'linear-gradient(135deg, #34d399 0%, #0d9488 100%)',
+    },
+];
 
 const stats = computed(() => [
     { value: '500+', label: t('home.stats.courses') },
