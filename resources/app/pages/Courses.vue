@@ -2,16 +2,40 @@
     <div class="min-h-screen bg-gray-50 text-gray-900">
         <Navbar />
 
-        <main class="mx-auto max-w-7xl px-6 py-10">
+        <main class="mx-auto max-w-7xl px-4 py-8 sm:px-6">
             <!-- Header -->
             <div class="mb-6">
                 <h1 class="text-2xl font-semibold">All Courses</h1>
                 <p class="mt-1 text-sm text-gray-500">{{ total }} course{{ total !== 1 ? 's' : '' }} found</p>
             </div>
 
+            <!-- Mobile filter toggle -->
+            <button
+                @click="filtersOpen = !filtersOpen"
+                class="mb-4 flex w-full items-center justify-between rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-medium text-gray-700 shadow-sm transition hover:bg-gray-50 lg:hidden"
+            >
+                <span class="flex items-center gap-2">
+                    <svg class="h-4 w-4 text-orange-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L13 13.414V19a1 1 0 01-.553.894l-4 2A1 1 0 017 21v-7.586L3.293 6.707A1 1 0 013 6V4z"/>
+                    </svg>
+                    Filters
+                    <span v-if="hasActiveFilters" class="rounded-full bg-orange-500 px-1.5 py-0.5 text-[10px] font-bold text-white leading-none">ON</span>
+                </span>
+                <svg
+                    class="h-4 w-4 text-gray-400 transition-transform"
+                    :class="filtersOpen ? 'rotate-180' : ''"
+                    fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"
+                >
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                </svg>
+            </button>
+
             <div class="flex flex-col gap-6 lg:flex-row">
                 <!-- ── Sidebar filters ── -->
-                <aside class="w-full shrink-0 lg:w-64">
+                <aside
+                    class="w-full shrink-0 lg:w-64"
+                    :class="filtersOpen ? 'block' : 'hidden lg:block'"
+                >
                     <!-- Search -->
                     <div class="mb-4">
                         <div class="relative">
@@ -177,6 +201,8 @@ import { useRoute } from 'vue-router';
 import axios from 'axios';
 import Navbar from '../components/Navbar.vue';
 import AppFooter from '../components/Footer.vue';
+
+const filtersOpen = ref(false);
 
 interface Course {
     id: number;

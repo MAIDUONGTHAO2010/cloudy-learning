@@ -27,6 +27,7 @@ export default {
 
     // ─── Navbar (user site) ─────────────────────────────────────────
     nav: {
+        home: 'Trang chủ',
         courses: 'Khóa học',
         about: 'Giới thiệu',
         contact: 'Liên hệ',

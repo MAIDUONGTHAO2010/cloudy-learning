@@ -25,6 +25,7 @@ export default {
     },
 
     nav: {
+        home: 'Home',
         courses: 'Courses',
         about: 'About',
         contact: 'Contact',

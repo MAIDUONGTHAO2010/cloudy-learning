@@ -25,6 +25,7 @@ export default {
     },
 
     nav: {
+        home: 'ホーム',
         courses: 'コース',
         about: '概要',
         contact: 'お問い合わせ',
