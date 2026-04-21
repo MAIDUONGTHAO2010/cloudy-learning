@@ -76,7 +76,11 @@ class LessonService
     public function presignVideoUpload(array $data): array
     {
         $extension = strtolower(pathinfo($data['file_name'], PATHINFO_EXTENSION) ?: 'mp4');
-        $name = Str::slug(pathinfo($data['file_name'], PATHINFO_FILENAME) ?: 'lesson-video');
+        $name = Str::limit(
+            Str::slug(pathinfo($data['file_name'], PATHINFO_FILENAME) ?: 'lesson-video'),
+            80,
+            ''
+        ) ?: 'lesson-video';
         $path = 'lessons/videos/' . now()->format('Y/m') . '/' . Str::uuid() . '-' . $name . '.' . $extension;
 
         Log::info('Admin requested lesson video upload', [
