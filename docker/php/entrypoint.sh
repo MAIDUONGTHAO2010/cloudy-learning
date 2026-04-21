@@ -43,6 +43,22 @@ if [ ! -f vendor/autoload.php ]; then
     fi
 fi
 
+# Generate application key if not set
+if [ -f .env ] && grep -qE "^APP_KEY=\s*$" .env; then
+    echo "APP_KEY is empty — generating..."
+    php artisan key:generate --force
+fi
+
+# Run database migrations (opt-in via AUTO_MIGRATE=true, always on in non-production)
+if [ "${AUTO_MIGRATE:-true}" = "true" ]; then
+    php artisan migrate --force --no-interaction
+fi
+
+# Create the public storage symlink if it doesn't exist
+if [ ! -L public/storage ]; then
+    php artisan storage:link --force
+fi
+
 # Start PHP-FPM
 if [ "$#" -gt 0 ]; then
     exec "$@"
