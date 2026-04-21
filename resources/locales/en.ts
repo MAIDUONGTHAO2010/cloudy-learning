@@ -195,6 +195,21 @@ export default {
             label: 'Student Reviews',
             title: 'What Our Learners Say',
             subtitle: 'Hear from students who have transformed their skills with us',
+            t1: {
+                name: 'Sarah Mitchell',
+                role: 'Frontend Developer',
+                quote: 'The courses here completely transformed my career. The instructors are top-notch and the content is always up-to-date with real-world examples.',
+            },
+            t2: {
+                name: 'David Nguyen',
+                role: 'UI/UX Designer',
+                quote: 'I enrolled in 3 design courses and landed my dream job within 6 months. The hands-on projects and instructor feedback made all the difference.',
+            },
+            t3: {
+                name: 'Aiko Tanaka',
+                role: 'Data Analyst',
+                quote: 'Flexible schedules and expert instructors — this platform is perfect for busy professionals who want to upskill without disrupting their daily life.',
+            },
         },
     },
 

@@ -198,6 +198,21 @@ export default {
             label: 'Đánh giá học viên',
             title: 'Học viên nói gì về chúng tôi',
             subtitle: 'Nghe từ những học viên đã chuyển đổi kỹ năng với chúng tôi',
+            t1: {
+                name: 'Sarah Mitchell',
+                role: 'Lập trình viên Frontend',
+                quote: 'Các khóa học ở đây đã hoàn toàn thay đổi sự nghiệp của tôi. Giảng viên rất chuyên nghiệp và nội dung luôn được cập nhật với ví dụ thực tế.',
+            },
+            t2: {
+                name: 'David Nguyen',
+                role: 'Nhà thiết kế UI/UX',
+                quote: 'Tôi đã học 3 khóa thiết kế và có được công việc mơ ước trong vòng 6 tháng. Các dự án thực hành và phản hồi từ giảng viên đã tạo ra sự khác biệt.',
+            },
+            t3: {
+                name: 'Aiko Tanaka',
+                role: 'Chuyên viên Phân tích Dữ liệu',
+                quote: 'Lịch học linh hoạt và giảng viên chuyên nghiệp — nền tảng này hoàn hảo cho những chuyên gia bận rộn muốn nâng cao kỹ năng.',
+            },
         },
     },
 

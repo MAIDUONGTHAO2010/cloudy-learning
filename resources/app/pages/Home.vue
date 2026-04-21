@@ -68,7 +68,7 @@
                                 <div class="absolute bottom-5 left-5 flex items-center gap-3 rounded-2xl bg-white/90 p-4 shadow-lg backdrop-blur">
                                     <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-orange-500 text-xl text-white">🎓</div>
                                     <div>
-                                        <p class="text-sm font-bold text-gray-900">941 Active Learners</p>
+                                        <p class="text-sm font-bold text-gray-900">{{ heroStats[3].value }}+ {{ heroStats[3].label }}</p>
                                         <p class="text-xs text-gray-500">Join our community today</p>
                                     </div>
                                 </div>
@@ -172,9 +172,6 @@
                                 <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/20 text-3xl backdrop-blur">
                                     {{ cat.icon }}
                                 </div>
-                                <span class="rounded-full bg-white/20 px-3 py-1 text-xs font-semibold backdrop-blur">
-                                    {{ cat.count }}+ {{ t('home.categories.courses') }}
-                                </span>
                             </div>
                             <h3 class="mt-5 text-lg font-bold">{{ cat.name }}</h3>
                             <p class="mt-1 text-sm text-white/75">{{ cat.desc }}</p>
@@ -379,7 +376,7 @@
                             <div class="flex gap-0.5 text-amber-400">
                                 <span v-for="n in testimonial.rating" :key="n" class="text-lg">★</span>
                             </div>
-                            <p class="mt-4 flex-1 text-sm leading-7 text-gray-600 italic">"{{ testimonial.quote }}"</p>
+                            <p class="mt-4 flex-1 text-sm leading-7 text-gray-600 italic">"{{ t(testimonial.quoteKey) }}"</p>
                             <div class="mt-6 flex items-center gap-3 border-t border-gray-100 pt-6">
                                 <div
                                     :style="{ background: testimonial.avatarBg }"
@@ -388,8 +385,8 @@
                                     {{ testimonial.initials }}
                                 </div>
                                 <div>
-                                    <p class="text-sm font-bold text-gray-900">{{ testimonial.name }}</p>
-                                    <p class="text-xs text-gray-500">{{ testimonial.role }}</p>
+                                    <p class="text-sm font-bold text-gray-900">{{ t(testimonial.nameKey) }}</p>
+                                    <p class="text-xs text-gray-500">{{ t(testimonial.roleKey) }}</p>
                                 </div>
                             </div>
                         </div>
@@ -519,35 +516,35 @@ const featureCards = computed(() => [
 ]);
 
 const categoryCards = computed(() => [
-    { icon: '💻', name: t('home.categories.webDev'), desc: t('home.categories.webDevDesc'), count: 42, bg: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)', link: '/courses' },
-    { icon: '🎨', name: t('home.categories.design'), desc: t('home.categories.designDesc'), count: 28, bg: 'linear-gradient(135deg, #ec4899 0%, #e11d48 100%)', link: '/courses' },
-    { icon: '📊', name: t('home.categories.dataScience'), desc: t('home.categories.dataScienceDesc'), count: 35, bg: 'linear-gradient(135deg, #10b981 0%, #0f766e 100%)', link: '/courses' },
-    { icon: '📱', name: t('home.categories.mobileApps'), desc: t('home.categories.mobileAppsDesc'), count: 19, bg: 'linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)', link: '/courses' },
-    { icon: '🎯', name: t('home.categories.marketing'), desc: t('home.categories.marketingDesc'), count: 23, bg: 'linear-gradient(135deg, #f59e0b 0%, #ea580c 100%)', link: '/courses' },
-    { icon: '🌐', name: t('home.categories.languages'), desc: t('home.categories.languagesDesc'), count: 15, bg: 'linear-gradient(135deg, #14b8a6 0%, #0891b2 100%)', link: '/courses' },
+    { icon: '💻', name: t('home.categories.webDev'), desc: t('home.categories.webDevDesc'), bg: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)', link: '/courses' },
+    { icon: '🎨', name: t('home.categories.design'), desc: t('home.categories.designDesc'), bg: 'linear-gradient(135deg, #ec4899 0%, #e11d48 100%)', link: '/courses' },
+    { icon: '📊', name: t('home.categories.dataScience'), desc: t('home.categories.dataScienceDesc'), bg: 'linear-gradient(135deg, #10b981 0%, #0f766e 100%)', link: '/courses' },
+    { icon: '📱', name: t('home.categories.mobileApps'), desc: t('home.categories.mobileAppsDesc'), bg: 'linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)', link: '/courses' },
+    { icon: '🎯', name: t('home.categories.marketing'), desc: t('home.categories.marketingDesc'), bg: 'linear-gradient(135deg, #f59e0b 0%, #ea580c 100%)', link: '/courses' },
+    { icon: '🌐', name: t('home.categories.languages'), desc: t('home.categories.languagesDesc'), bg: 'linear-gradient(135deg, #14b8a6 0%, #0891b2 100%)', link: '/courses' },
 ]);
 
 const testimonials = [
     {
-        name: 'Sarah Mitchell',
-        role: 'Frontend Developer',
-        quote: 'The courses here completely transformed my career. The instructors are top-notch and the content is always up-to-date with real-world examples.',
+        nameKey: 'home.testimonials.t1.name',
+        roleKey: 'home.testimonials.t1.role',
+        quoteKey: 'home.testimonials.t1.quote',
         rating: 5,
         initials: 'SM',
         avatarBg: 'linear-gradient(135deg, #a78bfa 0%, #7c3aed 100%)',
     },
     {
-        name: 'David Nguyen',
-        role: 'UI/UX Designer',
-        quote: 'I enrolled in 3 design courses and landed my dream job within 6 months. The hands-on projects and instructor feedback made all the difference.',
+        nameKey: 'home.testimonials.t2.name',
+        roleKey: 'home.testimonials.t2.role',
+        quoteKey: 'home.testimonials.t2.quote',
         rating: 5,
         initials: 'DN',
         avatarBg: 'linear-gradient(135deg, #60a5fa 0%, #2563eb 100%)',
     },
     {
-        name: 'Aiko Tanaka',
-        role: 'Data Analyst',
-        quote: 'Flexible schedules and expert instructors — this platform is perfect for busy professionals who want to upskill without disrupting their daily life.',
+        nameKey: 'home.testimonials.t3.name',
+        roleKey: 'home.testimonials.t3.role',
+        quoteKey: 'home.testimonials.t3.quote',
         rating: 5,
         initials: 'AT',
         avatarBg: 'linear-gradient(135deg, #34d399 0%, #0d9488 100%)',
