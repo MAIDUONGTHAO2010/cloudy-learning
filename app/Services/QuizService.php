@@ -13,6 +13,8 @@ use Illuminate\Support\Str;
 
 class QuizService
 {
+    private const MAX_SLUG_LENGTH = 80;
+
     public function __construct(
         protected QuizRepositoryInterface $quizRepository,
         protected LessonRepositoryInterface $lessonRepository,
@@ -131,7 +133,11 @@ class QuizService
     public function presignMediaUpload(array $data): array
     {
         $extension = strtolower(pathinfo($data['file_name'] ?? 'media', PATHINFO_EXTENSION) ?: 'bin');
-        $name      = Str::slug(pathinfo($data['file_name'] ?? 'media', PATHINFO_FILENAME) ?: 'question-media');
+        $name      = Str::limit(
+            Str::slug(pathinfo($data['file_name'] ?? 'media', PATHINFO_FILENAME) ?: 'question-media'),
+            self::MAX_SLUG_LENGTH,
+            ''
+        ) ?: 'question-media';
         $path      = 'questions/media/' . now()->format('Y/m') . '/' . Str::uuid() . '-' . $name . '.' . $extension;
 
         $diskConfig       = config('filesystems.disks.s3');

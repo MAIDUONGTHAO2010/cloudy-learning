@@ -19,6 +19,8 @@ class CourseService
 {
     public const MAX_THUMBNAIL_SIZE = 10485760;
 
+    private const MAX_SLUG_LENGTH = 80;
+
     public function __construct(
         protected CourseRepositoryInterface $courseRepository,
         protected UserRepositoryInterface $userRepository,
@@ -257,7 +259,7 @@ class CourseService
         $extension = strtolower(pathinfo($data['file_name'], PATHINFO_EXTENSION) ?: 'png');
         $name = Str::limit(
             Str::slug(pathinfo($data['file_name'], PATHINFO_FILENAME) ?: 'course-thumbnail'),
-            80,
+            self::MAX_SLUG_LENGTH,
             ''
         ) ?: 'course-thumbnail';
         $path = 'courses/thumbnails/' . now()->format('Y/m') . '/' . Str::uuid() . '-' . $name . '.' . $extension;
