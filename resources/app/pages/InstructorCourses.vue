@@ -205,7 +205,7 @@
                     <button
                         type="submit"
                         :disabled="addStudentLoading"
-                        class="shrink-0 rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-white hover:bg-orange-600 disabled:opacity-50"
+                        class="shrink-0 rounded-xl bg-orange-500 px-5 py-2 text-sm font-semibold text-white hover:bg-orange-600 disabled:opacity-50"
                     >
                         {{ addStudentLoading ? '…' : 'Add' }}
                     </button>

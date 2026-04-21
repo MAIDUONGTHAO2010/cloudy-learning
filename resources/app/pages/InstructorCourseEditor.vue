@@ -28,7 +28,7 @@
                     </div>
                     <button
                         @click="openAddLesson"
-                        class="shrink-0 rounded-xl bg-orange-500 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-orange-600"
+                        class="shrink-0 rounded-xl bg-orange-500 px-5 py-2 text-sm font-semibold text-white hover:bg-orange-600"
                     >
                         + Add Lesson
                     </button>

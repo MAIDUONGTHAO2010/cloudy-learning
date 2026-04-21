@@ -69,7 +69,7 @@
                             v-if="user && course.enrollment_status_label !== 'request' && !course.can_access_full_course"
                             @click="enrollCourse"
                             :disabled="enrolling"
-                            class="rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-orange-600 disabled:opacity-60"
+                            class="rounded-xl bg-orange-500 px-5 py-2 text-sm font-semibold text-white hover:bg-orange-600 disabled:opacity-50"
                         >
                             {{ enrolling ? t('courses.enrolling') : (course.enrollment_status_label === 'canceled' ? t('courses.reapplyEnrollment') : t('courses.enrollNow')) }}
                         </button>
@@ -193,7 +193,7 @@
                         <button
                             @click="submitReview"
                             :disabled="reviewSubmitting || reviewForm.rating === 0"
-                            class="rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-orange-600 disabled:opacity-60"
+                            class="rounded-xl bg-orange-500 px-5 py-2 text-sm font-semibold text-white hover:bg-orange-600 disabled:opacity-50"
                         >
                             {{ reviewSubmitting ? t('courses.submittingReview') : (myReview ? t('courses.updateReview') : t('courses.submitReview')) }}
                         </button>

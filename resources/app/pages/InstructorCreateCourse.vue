@@ -134,7 +134,7 @@
                     </div>
                     <button
                         @click="openAddLesson"
-                        class="rounded-xl bg-orange-500 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-orange-600"
+                        class="rounded-xl bg-orange-500 px-5 py-2 text-sm font-semibold text-white hover:bg-orange-600"
                     >
                         + Add Lesson
                     </button>
@@ -250,7 +250,7 @@
                         <button
                             @click="finish(true)"
                             :disabled="publishing"
-                            class="rounded-xl bg-orange-500 px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-orange-600 disabled:opacity-50"
+                            class="rounded-xl bg-orange-500 px-5 py-2 text-sm font-semibold text-white hover:bg-orange-600 disabled:opacity-50"
                         >
                             {{ publishing ? 'Publishing…' : 'Publish Course 🚀' }}
                         </button>
@@ -280,7 +280,7 @@
                 <button
                     @click="finish(true)"
                     :disabled="!isStepComplete(2) || publishing"
-                    class="rounded-xl bg-orange-500 px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-orange-600 disabled:opacity-40 disabled:cursor-not-allowed"
+                    class="rounded-xl bg-orange-500 px-5 py-2 text-sm font-semibold text-white hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                     {{ publishing ? 'Publishing…' : 'Publish Course' }}
                 </button>
