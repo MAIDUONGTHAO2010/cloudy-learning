@@ -416,8 +416,8 @@ const handleThumbnailChange = async (event: Event) => {
 
         form.value.thumbnail = presign.path;
         thumbnailPreviewUrl.value = presign.thumbnail_url;
-    } catch {
-        formError.value = 'Thumbnail upload failed.';
+    } catch (err: any) {
+        formError.value = err?.response?.data?.message ?? err?.message ?? 'Thumbnail upload failed.';
     } finally {
         thumbnailUploading.value = false;
     }

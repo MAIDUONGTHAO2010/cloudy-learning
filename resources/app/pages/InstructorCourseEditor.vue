@@ -664,8 +664,8 @@ const handleVideoChange = async (event: Event) => {
 
         videoProgress.value = 100;
         lessonForm.value.video_url = presign.path;
-    } catch {
-        lessonFormError.value = 'Video upload failed.';
+    } catch (err: any) {
+        lessonFormError.value = err?.response?.data?.message ?? err?.message ?? 'Video upload failed.';
     } finally {
         videoUploading.value = false;
     }
@@ -832,8 +832,8 @@ const handleNewMediaChange = async (event: Event) => {
         });
         newMediaProgress.value = 100;
         newQuestionForm.value.content = presign.path;
-    } catch {
-        quizFeedback.value = { type: 'error', message: 'Media upload failed.' };
+    } catch (err: any) {
+        quizFeedback.value = { type: 'error', message: err?.response?.data?.message ?? err?.message ?? 'Media upload failed.' };
     } finally {
         newMediaUploading.value = false;
     }
@@ -898,8 +898,8 @@ const handleEditMediaChange = async (event: Event) => {
         });
         editMediaProgress.value = 100;
         editForm.value.content = presign.path;
-    } catch {
-        quizFeedback.value = { type: 'error', message: 'Media upload failed.' };
+    } catch (err: any) {
+        quizFeedback.value = { type: 'error', message: err?.response?.data?.message ?? err?.message ?? 'Media upload failed.' };
     } finally {
         editMediaUploading.value = false;
     }

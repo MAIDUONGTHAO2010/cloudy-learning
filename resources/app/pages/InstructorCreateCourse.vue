@@ -777,8 +777,8 @@ const handleThumbnailChange = async (event: Event) => {
 
         courseForm.value.thumbnail = presign.path;
         thumbnailPreviewUrl.value  = presign.thumbnail_url;
-    } catch {
-        courseFormError.value = 'Thumbnail upload failed.';
+    } catch (err: any) {
+        courseFormError.value = err?.response?.data?.message ?? err?.message ?? 'Thumbnail upload failed.';
     } finally {
         thumbnailUploading.value = false;
     }
@@ -887,8 +887,8 @@ const handleVideoChange = async (event: Event) => {
         });
 
         lessonForm.value.video_url = presign.video_url;
-    } catch {
-        lessonFormError.value = 'Video upload failed.';
+    } catch (err: any) {
+        lessonFormError.value = err?.response?.data?.message ?? err?.message ?? 'Video upload failed.';
     } finally {
         videoUploading.value = false;
     }
@@ -1082,8 +1082,8 @@ const handleNewMediaChange = async (event: Event) => {
             },
         });
         newQuestionForm.value.content = presign.media_url;
-    } catch {
-        quizFeedback.value = { type: 'error', message: 'Media upload failed.' };
+    } catch (err: any) {
+        quizFeedback.value = { type: 'error', message: err?.response?.data?.message ?? err?.message ?? 'Media upload failed.' };
     } finally {
         newMediaUploading.value = false;
     }
@@ -1128,8 +1128,8 @@ const handleEditMediaChange = async (event: Event) => {
             },
         });
         editForm.value.content = presign.media_url;
-    } catch {
-        quizFeedback.value = { type: 'error', message: 'Media upload failed.' };
+    } catch (err: any) {
+        quizFeedback.value = { type: 'error', message: err?.response?.data?.message ?? err?.message ?? 'Media upload failed.' };
     } finally {
         editMediaUploading.value = false;
     }
