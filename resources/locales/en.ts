@@ -328,7 +328,18 @@ export default {
             sentBody: 'Thank you for reaching out. We\'ll get back to you soon.',
             sendAnother: 'Send another message',
         },
-        topics: ['General inquiry', 'Course question', 'Technical support', 'Billing & payments', 'Become an instructor', 'Other'],
+        topics: ['General inquiry', 'Course question', 'Technical support', 'Billing & payments', 'Become an instructor', 'Custom software / app / website development', 'Other'],
+        customDev: {
+            title: 'Custom software development available',
+            body: 'Beyond our learning platform, our team also offers custom software, app, and website development services tailored to your business or personal needs.',
+            services: [
+                'Mobile apps (iOS & Android)',
+                'Websites & content management systems',
+                'Business management software (ERP, CRM, LMS…)',
+                'APIs & system integrations',
+            ],
+            cta: 'Use the contact form to get a free consultation!',
+        },
     },
 
     policy: {

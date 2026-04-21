@@ -34,6 +34,28 @@
                         <p class="mt-2 text-sm text-gray-900">{{ t('contact.hoursValue') }}</p>
                         <p class="text-sm text-gray-500">{{ t('contact.hoursNote') }}</p>
                     </div>
+
+                    <!-- Custom development service banner -->
+                    <div class="rounded-2xl border border-orange-200 bg-gradient-to-br from-orange-50 to-amber-50 p-5">
+                        <div class="flex items-start gap-3">
+                            <div class="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-orange-500 text-white">
+                                <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M17.25 6.75 22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3-4.5 16.5" />
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="text-sm font-bold text-orange-600">{{ t('contact.customDev.title') }}</p>
+                                <p class="mt-1 text-sm text-gray-700">{{ t('contact.customDev.body') }}</p>
+                                <ul class="mt-3 space-y-1">
+                                    <li v-for="item in (tm('contact.customDev.services') as string[])" :key="item" class="flex items-center gap-2 text-sm text-gray-700">
+                                        <span class="h-1.5 w-1.5 shrink-0 rounded-full bg-orange-500"></span>
+                                        {{ item }}
+                                    </li>
+                                </ul>
+                                <p class="mt-3 text-xs text-gray-500">{{ t('contact.customDev.cta') }}</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Contact form -->

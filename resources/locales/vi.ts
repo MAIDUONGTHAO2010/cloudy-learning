@@ -336,7 +336,18 @@ export default {
             sentBody: 'Cảm ơn bạn đã liên hệ. Chúng tôi sẽ phản hồi sớm nhất có thể.',
             sendAnother: 'Gửi tin nhắn khác',
         },
-        topics: ['Câu hỏi chung', 'Câu hỏi về khóa học', 'Hỗ trợ kỹ thuật', 'Thanh toán & hóa đơn', 'Trở thành giảng viên', 'Khác'],
+        topics: ['Câu hỏi chung', 'Câu hỏi về khóa học', 'Hỗ trợ kỹ thuật', 'Thanh toán & hóa đơn', 'Trở thành giảng viên', 'Phát triển phần mềm/App/Website theo yêu cầu', 'Khác'],
+        customDev: {
+            title: 'Nhận phát triển phần mềm theo yêu cầu',
+            body: 'Ngoài nền tảng học trực tuyến, đội ngũ chúng tôi còn cung cấp dịch vụ phát triển phần mềm, ứng dụng và website theo yêu cầu riêng của doanh nghiệp và cá nhân.',
+            services: [
+                'Ứng dụng di động (iOS & Android)',
+                'Website & hệ thống quản lý nội dung',
+                'Phần mềm quản lý doanh nghiệp (ERP, CRM, LMS…)',
+                'API & tích hợp hệ thống',
+            ],
+            cta: 'Hãy liên hệ với chúng tôi qua form bên cạnh để được tư vấn miễn phí!',
+        },
     },
 
     // ─── Policy ─────────────────────────────────────────────────────
