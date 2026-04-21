@@ -491,6 +491,9 @@
               </div>
 
               <!-- Add Question button -->
+              <div v-if="deleteQuestionError" class="rounded-2xl bg-rose-50 px-4 py-3 text-sm text-rose-600">
+                {{ deleteQuestionError }}
+              </div>
               <button
                 @click="addQuestion"
                 :disabled="quizActionLoading"
@@ -558,6 +561,146 @@
                 </button>
               </template>
             </template>
+          </div>
+        </div>
+      </div>
+    </Teleport>
+
+    <!-- New Question Modal -->
+    <Teleport to="body">
+      <div v-if="showAddQuestionModal" class="fixed inset-0 z-[60] flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-slate-950/40 backdrop-blur-sm" @click="showAddQuestionModal = false"></div>
+        <div class="relative z-10 w-full max-w-lg rounded-[2rem] bg-white p-8 shadow-2xl" style="max-height:90vh;overflow-y:auto;">
+          <h2 class="text-xl font-semibold text-slate-900">New Question</h2>
+
+          <!-- Question Type -->
+          <div class="mt-5">
+            <label class="mb-1 block text-xs font-medium text-slate-600">Question Type</label>
+            <div class="flex flex-wrap gap-2">
+              <label
+                v-for="qt in [{ val: 1, label: 'Text' }, { val: 2, label: 'Image' }, { val: 3, label: 'Audio' }, { val: 4, label: 'Video' }]"
+                :key="qt.val"
+                class="flex cursor-pointer items-center gap-1.5 rounded-xl border px-3 py-2 text-xs font-medium transition"
+                :class="newQuestionForm.type === qt.val ? 'border-indigo-400 bg-indigo-50 text-indigo-700' : 'border-slate-200 text-slate-500 hover:bg-slate-50'"
+              >
+                <input type="radio" :value="qt.val" v-model="newQuestionForm.type" class="sr-only" />
+                {{ qt.label }}
+              </label>
+            </div>
+          </div>
+
+          <!-- Answer Type -->
+          <div class="mt-4">
+            <label class="mb-1 block text-xs font-medium text-slate-600">Answer Type</label>
+            <div class="flex gap-3">
+              <label
+                class="flex cursor-pointer items-center gap-2 rounded-2xl border px-4 py-2.5 text-sm transition"
+                :class="newQuestionForm.answer_type === 1 ? 'border-blue-400 bg-blue-50 text-blue-700' : 'border-slate-200 text-slate-600 hover:bg-slate-50'"
+              >
+                <input type="radio" :value="1" v-model="newQuestionForm.answer_type" class="sr-only" />
+                Single Choice
+              </label>
+              <label
+                class="flex cursor-pointer items-center gap-2 rounded-2xl border px-4 py-2.5 text-sm transition"
+                :class="newQuestionForm.answer_type === 2 ? 'border-violet-400 bg-violet-50 text-violet-700' : 'border-slate-200 text-slate-600 hover:bg-slate-50'"
+              >
+                <input type="radio" :value="2" v-model="newQuestionForm.answer_type" class="sr-only" />
+                Multiple Choice
+              </label>
+            </div>
+          </div>
+
+          <!-- Question Content -->
+          <div class="mt-4">
+            <label class="mb-1 block text-xs font-medium text-slate-600">
+              {{ newQuestionForm.type === 1 ? 'Question Text' : 'Question Media' }}
+            </label>
+            <textarea
+              v-if="newQuestionForm.type === 1"
+              v-model="newQuestionForm.content"
+              rows="3"
+              placeholder="Enter question text…"
+              class="w-full resize-none rounded-2xl border border-slate-200 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+            ></textarea>
+            <div v-else class="space-y-2">
+              <div v-if="newQuestionForm.content" class="flex items-center gap-2 rounded-xl bg-slate-50 px-3 py-2 text-xs text-slate-600">
+                <span class="truncate">{{ newQuestionForm.content }}</span>
+              </div>
+              <label class="flex cursor-pointer items-center gap-2 rounded-2xl border-2 border-dashed border-slate-200 px-4 py-3 text-xs text-slate-500 hover:border-indigo-300 hover:text-indigo-500 transition">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                </svg>
+                {{ newMediaUploading ? `Uploading ${newMediaProgress}%…` : (newQuestionForm.content ? 'Replace file' : 'Upload file') }}
+                <input
+                  type="file"
+                  class="sr-only"
+                  :accept="newQuestionForm.type === 2 ? 'image/*' : newQuestionForm.type === 3 ? 'audio/*' : 'video/*'"
+                  @change="handleNewMediaChange"
+                  :disabled="newMediaUploading"
+                />
+              </label>
+            </div>
+          </div>
+
+          <!-- Answer Options -->
+          <div class="mt-4 space-y-2">
+            <label class="block text-xs font-medium text-slate-600">Answer Options</label>
+            <div
+              v-for="(opt, oi) in newQuestionForm.options"
+              :key="opt.label"
+              class="flex items-center gap-3 rounded-2xl border px-3 py-2.5 transition"
+              :class="opt.is_correct ? 'border-emerald-300 bg-emerald-50' : 'border-slate-200 bg-white'"
+            >
+              <span
+                class="grid h-6 w-6 shrink-0 place-items-center rounded-lg text-xs font-bold"
+                :class="opt.is_correct ? 'bg-emerald-200 text-emerald-800' : 'bg-slate-100 text-slate-600'"
+              >
+                {{ ['A','B','C','D'][oi] }}
+              </span>
+              <input
+                v-model="opt.content"
+                type="text"
+                class="min-w-0 flex-1 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+                :placeholder="`Option ${['A','B','C','D'][oi]}…`"
+              />
+              <label class="flex shrink-0 cursor-pointer items-center gap-1.5 text-xs font-medium" :class="opt.is_correct ? 'text-emerald-600' : 'text-slate-400'">
+                <input
+                  v-if="newQuestionForm.answer_type === 2"
+                  type="checkbox"
+                  :checked="opt.is_correct"
+                  @change="setNewCorrect(oi)"
+                  class="h-4 w-4 rounded accent-emerald-500"
+                />
+                <input
+                  v-else
+                  type="radio"
+                  :checked="opt.is_correct"
+                  @change="setNewCorrect(oi)"
+                  class="h-4 w-4 accent-emerald-500"
+                />
+                Correct
+              </label>
+            </div>
+          </div>
+
+          <div v-if="addQuestionError" class="mt-3 rounded-2xl bg-rose-50 px-4 py-3 text-sm text-rose-600">
+            {{ addQuestionError }}
+          </div>
+
+          <div class="mt-6 flex gap-3">
+            <button
+              @click="submitNewQuestion"
+              :disabled="addQuestionLoading || (!newQuestionForm.content.trim() && newQuestionForm.type === 1)"
+              class="flex-1 rounded-2xl bg-slate-900 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-700 disabled:opacity-50"
+            >
+              {{ addQuestionLoading ? 'Adding…' : 'Add Question' }}
+            </button>
+            <button
+              @click="showAddQuestionModal = false"
+              class="flex-1 rounded-2xl border border-slate-200 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+            >
+              Cancel
+            </button>
           </div>
         </div>
       </div>
@@ -802,15 +945,32 @@ type QuestionOption = { id: number; label: number; content: string; is_correct: 
 type Question       = { id: number; content: string; type: number; answer_type: number; order: number; options: QuestionOption[] };
 type Quiz           = { id: number; title: string; questions: Question[] };
 
-const showQuizPanel     = ref(false);
-const quizLesson        = ref<Lesson | null>(null);
-const quiz              = ref<Quiz | null>(null);
-const quizLoading       = ref(false);
-const quizActionLoading = ref(false);
-const confirmDeleteQuiz = ref(false);
-const editingQuestionId = ref<number | null>(null);
-const quizSaving        = ref(false);
-const editQuestionError = ref<string | null>(null);
+const showQuizPanel        = ref(false);
+const quizLesson           = ref<Lesson | null>(null);
+const quiz                 = ref<Quiz | null>(null);
+const quizLoading          = ref(false);
+const quizActionLoading    = ref(false);
+const confirmDeleteQuiz    = ref(false);
+const editingQuestionId    = ref<number | null>(null);
+const quizSaving           = ref(false);
+const editQuestionError    = ref<string | null>(null);
+const showAddQuestionModal = ref(false);
+const addQuestionLoading   = ref(false);
+const addQuestionError     = ref<string | null>(null);
+const deleteQuestionError  = ref<string | null>(null);
+const newMediaUploading    = ref(false);
+const newMediaProgress     = ref(0);
+const newQuestionForm      = ref({
+    content:     '',
+    type:        1,
+    answer_type: 1,
+    options: [
+        { label: 1, content: '', is_correct: true },
+        { label: 2, content: '', is_correct: false },
+        { label: 3, content: '', is_correct: false },
+        { label: 4, content: '', is_correct: false },
+    ],
+});
 
 const editForm = reactive({
     content:     '',
@@ -841,6 +1001,7 @@ const closeQuizPanel = () => {
     showQuizPanel.value     = false;
     editingQuestionId.value = null;
     confirmDeleteQuiz.value = false;
+    deleteQuestionError.value = null;
 };
 
 const addQuiz = async () => {
@@ -943,6 +1104,87 @@ const saveQuestion = async (questionId: number) => {
         editQuestionError.value = err?.response?.data?.message ?? err?.message ?? 'Save failed.';
     } finally {
         quizSaving.value = false;
+    }
+};
+
+const deleteQuestion = async (questionId: number) => {
+    if (!quiz.value) return;
+    quizActionLoading.value = true;
+    deleteQuestionError.value = null;
+    try {
+        await axios.delete(`/admin/api/questions/${questionId}`);
+        quiz.value.questions = quiz.value.questions.filter((q) => q.id !== questionId);
+    } catch (err: any) {
+        deleteQuestionError.value = err?.response?.data?.message ?? err?.message ?? 'Failed to delete question.';
+    } finally {
+        quizActionLoading.value = false;
+    }
+};
+
+const addQuestion = () => {
+    if (!quiz.value) return;
+    newQuestionForm.value = {
+        content:     '',
+        type:        1,
+        answer_type: 1,
+        options: [
+            { label: 1, content: '', is_correct: true },
+            { label: 2, content: '', is_correct: false },
+            { label: 3, content: '', is_correct: false },
+            { label: 4, content: '', is_correct: false },
+        ],
+    };
+    addQuestionError.value = null;
+    showAddQuestionModal.value = true;
+};
+
+const submitNewQuestion = async () => {
+    if (!quiz.value?.id) return;
+    addQuestionLoading.value = true;
+    addQuestionError.value   = null;
+    try {
+        const res = await axios.post(`/admin/api/quizzes/${quiz.value.id}/questions`, newQuestionForm.value);
+        quiz.value.questions.push(res.data);
+        showAddQuestionModal.value = false;
+    } catch (err: any) {
+        addQuestionError.value = err?.response?.data?.message ?? err?.message ?? 'Failed to add question.';
+    } finally {
+        addQuestionLoading.value = false;
+    }
+};
+
+const setNewCorrect = (index: number) => {
+    if (newQuestionForm.value.answer_type === 1) {
+        newQuestionForm.value.options.forEach((o, i) => { o.is_correct = i === index; });
+    } else {
+        newQuestionForm.value.options[index].is_correct = !newQuestionForm.value.options[index].is_correct;
+    }
+};
+
+const handleNewMediaChange = async (event: Event) => {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (!file) return;
+    newMediaUploading.value = true;
+    newMediaProgress.value  = 0;
+    try {
+        const { data: presign } = await axios.post('/admin/api/questions/presign-media', {
+            file_name:    file.name,
+            content_type: file.type,
+        });
+        await axios.put(presign.upload_url, file, {
+            headers: { 'Content-Type': file.type },
+            withCredentials: false,
+            onUploadProgress: (e) => {
+                const total = e.total || file.size;
+                newMediaProgress.value = total ? Math.round((e.loaded / total) * 100) : 0;
+            },
+        });
+        newMediaProgress.value = 100;
+        newQuestionForm.value.content = presign.media_url;
+    } catch {
+        addQuestionError.value = 'Media upload failed.';
+    } finally {
+        newMediaUploading.value = false;
     }
 };
 </script>
