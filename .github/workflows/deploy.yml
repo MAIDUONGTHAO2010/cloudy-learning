@@ -61,6 +61,10 @@ jobs:
               sleep 10
             done
 
+            echo "==> Fixing storage and bootstrap/cache permissions..."
+            docker compose exec -T workspace chown -R www-data:www-data storage bootstrap/cache
+            docker compose exec -T workspace chmod -R 775 storage bootstrap/cache
+
             echo "==> Installing Node dependencies & building assets..."
             docker compose run --no-deps --rm -T workspace sh -c "npm ci && npm run build"
 

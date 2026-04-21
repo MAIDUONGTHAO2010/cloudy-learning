@@ -10,12 +10,8 @@ mkdir -p \
     storage/logs \
     bootstrap/cache
 
-# Only fix ownership/permissions if the directories are not already owned by www-data
-OWNER=$(stat -c '%U' storage 2>/dev/null || stat -f '%Su' storage 2>/dev/null)
-if [ "$OWNER" != "www-data" ]; then
-    chown -R www-data:www-data storage bootstrap/cache
-    chmod -R 775 storage bootstrap/cache
-fi
+chown -R www-data:www-data storage bootstrap/cache
+chmod -R 775 storage bootstrap/cache
 
 # If arguments are provided for a custom command (e.g. "composer install"), run them
 # directly and exit. Do not short-circuit the normal PHP-FPM startup path, because we
