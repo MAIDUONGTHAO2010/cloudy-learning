@@ -48,14 +48,14 @@
                     <RouterLink
                         v-if="user"
                         :to="`/courses/${course.slug}`"
-                        class="rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-orange-600"
+                        class="rounded-xl bg-orange-500 px-5 py-2 text-sm font-semibold text-white hover:bg-orange-600"
                     >
                         {{ t('courses.enrollNow') }}
                     </RouterLink>
                     <RouterLink
                         v-else
                         to="/login"
-                        class="rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-orange-600"
+                        class="rounded-xl bg-orange-500 px-5 py-2 text-sm font-semibold text-white hover:bg-orange-600"
                     >
                         {{ t('nav.signIn') }}
                     </RouterLink>
