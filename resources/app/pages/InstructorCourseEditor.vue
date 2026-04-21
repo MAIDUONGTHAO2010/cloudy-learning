@@ -382,7 +382,7 @@
         <!-- Add question modal -->
         <Teleport to="body">
             <div v-if="showAddQuestionModal" class="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 p-4">
-                <div class="w-full max-w-lg rounded-2xl border border-gray-200 bg-white p-6 shadow-2xl">
+                <div class="w-full max-w-lg overflow-y-auto rounded-2xl border border-gray-200 bg-white p-6 shadow-2xl" style="max-height:90vh">
                     <h2 class="mb-4 text-lg font-semibold text-gray-900">New Question</h2>
 
                     <!-- Question Type -->
@@ -468,6 +468,8 @@
                             </label>
                         </div>
                     </div>
+
+                    <p v-if="addQuestionModalError" class="mt-3 rounded-xl bg-rose-50 px-3 py-2 text-xs text-rose-600">{{ addQuestionModalError }}</p>
 
                     <div class="mt-5 flex justify-end gap-3">
                         <button @click="showAddQuestionModal = false" class="rounded-xl border border-gray-200 px-4 py-2 text-sm text-gray-500 hover:text-gray-900">Cancel</button>
@@ -580,6 +582,7 @@ const newQuestionForm      = ref({
     ],
 });
 const addQuestionLoading   = ref(false);
+const addQuestionModalError = ref<string | null>(null);
 const newMediaUploading    = ref(false);
 const newMediaProgress     = ref(0);
 
@@ -780,19 +783,21 @@ const addQuestion = () => {
             { label: 4, content: '', is_correct: false },
         ],
     };
+    addQuestionModalError.value = null;
     showAddQuestionModal.value = true;
 };
 
 const submitNewQuestion = async () => {
     if (!currentQuizId.value) return;
     addQuestionLoading.value = true;
+    addQuestionModalError.value = null;
     quizFeedback.value       = null;
     try {
         const { data } = await axios.post(`${BASE}/quizzes/${currentQuizId.value}/questions`, newQuestionForm.value);
         quiz.value!.questions.push(data);
         showAddQuestionModal.value = false;
     } catch (e: any) {
-        quizFeedback.value = { type: 'error', message: e?.response?.data?.message ?? 'Failed to add question.' };
+        addQuestionModalError.value = e?.response?.data?.message ?? e?.message ?? 'Failed to add question.';
     } finally {
         addQuestionLoading.value = false;
     }
