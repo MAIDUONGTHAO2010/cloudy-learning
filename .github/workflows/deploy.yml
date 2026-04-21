@@ -76,4 +76,7 @@ jobs:
             echo "==> Reloading PHP-FPM workers..."
             docker compose exec -T workspace bash -c "kill -USR2 \$(cat /usr/local/var/run/php-fpm.pid 2>/dev/null) 2>/dev/null || kill -USR2 1 2>/dev/null || true"
 
+            echo "==> Restarting all containers..."
+            docker compose restart
+
             echo "==> Done!"

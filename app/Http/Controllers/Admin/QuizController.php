@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\Quiz\StoreQuizQuestionRequest;
 use App\Http\Requests\Admin\Quiz\UpdateQuizQuestionRequest;
 use App\Services\QuizService;
 use Illuminate\Http\Request;
@@ -28,9 +29,9 @@ class QuizController extends Controller
         return response()->noContent();
     }
 
-    public function addQuestion(int $quizId)
+    public function addQuestion(StoreQuizQuestionRequest $request, int $quizId)
     {
-        return response()->json($this->quizService->addQuestion($quizId), 201);
+        return response()->json($this->quizService->addQuestion($quizId, $request->validated()), 201);
     }
 
     public function destroyQuestion(int $questionId)
