@@ -23,8 +23,115 @@
         </div>
     </Transition>
 
+    <!-- Mobile menu backdrop -->
+    <Transition name="fade">
+        <div
+            v-if="mobileOpen"
+            class="fixed inset-0 z-40 bg-slate-950/60 backdrop-blur-sm md:hidden"
+            @click="mobileOpen = false"
+        />
+    </Transition>
+
+    <!-- Mobile menu drawer -->
+    <Transition name="slide-down">
+        <div
+            v-if="mobileOpen"
+            class="fixed inset-x-0 top-0 z-50 border-b border-white/10 bg-slate-950 px-6 pb-6 pt-20 md:hidden"
+        >
+            <nav class="flex flex-col gap-1">
+                <RouterLink
+                    to="/"
+                    class="rounded-xl px-4 py-3 text-sm font-medium text-slate-300 transition hover:bg-white/5 hover:text-white"
+                    active-class="bg-white/10 text-white"
+                    @click="mobileOpen = false"
+                >
+                    {{ t('nav.home') }}
+                </RouterLink>
+                <RouterLink
+                    to="/courses"
+                    class="rounded-xl px-4 py-3 text-sm font-medium text-slate-300 transition hover:bg-white/5 hover:text-white"
+                    active-class="bg-white/10 text-white"
+                    @click="mobileOpen = false"
+                >
+                    {{ t('nav.courses') }}
+                </RouterLink>
+                <RouterLink
+                    to="/about"
+                    class="rounded-xl px-4 py-3 text-sm font-medium text-slate-300 transition hover:bg-white/5 hover:text-white"
+                    active-class="bg-white/10 text-white"
+                    @click="mobileOpen = false"
+                >
+                    {{ t('nav.about') }}
+                </RouterLink>
+                <RouterLink
+                    to="/contact"
+                    class="rounded-xl px-4 py-3 text-sm font-medium text-slate-300 transition hover:bg-white/5 hover:text-white"
+                    active-class="bg-white/10 text-white"
+                    @click="mobileOpen = false"
+                >
+                    {{ t('nav.contact') }}
+                </RouterLink>
+                <RouterLink
+                    v-if="user && user.role !== 2"
+                    to="/dashboard"
+                    class="rounded-xl px-4 py-3 text-sm font-medium text-slate-300 transition hover:bg-white/5 hover:text-white"
+                    active-class="bg-white/10 text-white"
+                    @click="mobileOpen = false"
+                >
+                    {{ t('nav.myLearning') }}
+                </RouterLink>
+                <RouterLink
+                    v-if="user && user.role === 2"
+                    to="/my-courses"
+                    class="rounded-xl px-4 py-3 text-sm font-medium text-slate-300 transition hover:bg-white/5 hover:text-white"
+                    active-class="bg-white/10 text-white"
+                    @click="mobileOpen = false"
+                >
+                    My Courses
+                </RouterLink>
+            </nav>
+
+            <div class="mt-4 border-t border-white/10 pt-4">
+                <template v-if="user">
+                    <RouterLink
+                        to="/profile"
+                        class="flex items-center gap-3 rounded-xl px-4 py-3 text-sm text-white transition hover:bg-white/5"
+                        @click="mobileOpen = false"
+                    >
+                        <span class="grid h-7 w-7 place-items-center rounded-full bg-blue-600 text-xs font-bold">
+                            {{ user?.name?.charAt(0)?.toUpperCase() ?? '?' }}
+                        </span>
+                        {{ user?.name }}
+                    </RouterLink>
+                    <button
+                        @click="mobileOpen = false; handleLogout()"
+                        class="mt-1 w-full rounded-xl px-4 py-3 text-left text-sm text-slate-400 transition hover:bg-white/5 hover:text-white"
+                    >
+                        {{ t('nav.signOut') }}
+                    </button>
+                </template>
+                <template v-else>
+                    <RouterLink
+                        to="/login"
+                        class="block rounded-xl px-4 py-3 text-sm text-slate-300 transition hover:bg-white/5 hover:text-white"
+                        @click="mobileOpen = false"
+                    >
+                        {{ t('nav.signIn') }}
+                    </RouterLink>
+                    <RouterLink
+                        to="/register"
+                        class="mt-2 block rounded-xl bg-blue-600 px-4 py-3 text-center text-sm font-semibold text-white transition hover:bg-blue-700"
+                        @click="mobileOpen = false"
+                    >
+                        {{ t('nav.getStarted') }}
+                    </RouterLink>
+                </template>
+            </div>
+        </div>
+    </Transition>
+
     <header class="sticky top-0 z-50 border-b border-white/10 bg-slate-950/90 backdrop-blur-sm">
-        <div class="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+        <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6">
             <!-- Logo -->
             <RouterLink to="/" class="flex items-center gap-3">
                 <div class="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-blue-500 to-cyan-400 font-black text-slate-950 text-sm">
@@ -33,8 +140,16 @@
                 <span class="font-semibold text-white">Cloudy Learning</span>
             </RouterLink>
 
-            <!-- Nav links -->
+            <!-- Desktop Nav links -->
             <nav class="hidden items-center gap-6 md:flex">
+                <RouterLink
+                    to="/"
+                    class="text-sm text-slate-400 transition hover:text-white"
+                    active-class="text-white"
+                    :exact="true"
+                >
+                    {{ t('nav.home') }}
+                </RouterLink>
                 <RouterLink
                     to="/courses"
                     class="text-sm text-slate-400 transition hover:text-white"
@@ -75,10 +190,9 @@
             </nav>
 
             <!-- Auth actions -->
-            <div class="flex items-center gap-3">
+            <div class="flex items-center gap-2 sm:gap-3">
                 <LanguageSwitcher />
                 <template v-if="!resolved">
-                    <!-- Resolving auth state -->
                     <span class="h-8 w-20 animate-pulse rounded-xl bg-white/5" />
                 </template>
                 <template v-else-if="user">
@@ -100,7 +214,7 @@
                         <!-- Dropdown -->
                         <div
                             v-if="bellOpen"
-                            class="absolute right-0 top-12 z-50 w-80 rounded-2xl border border-white/10 bg-slate-900 shadow-2xl"
+                            class="absolute right-0 top-12 z-50 w-80 max-w-[calc(100vw-2rem)] rounded-2xl border border-white/10 bg-slate-900 shadow-2xl"
                         >
                             <div class="flex items-center justify-between border-b border-white/10 px-4 py-3">
                                 <span class="text-sm font-semibold text-white">{{ t('nav.notifications') }}</span>
@@ -132,7 +246,7 @@
 
                     <RouterLink
                         to="/profile"
-                        class="flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white transition hover:bg-white/10"
+                        class="hidden items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white transition hover:bg-white/10 sm:flex"
                     >
                         <span class="grid h-6 w-6 place-items-center rounded-full bg-blue-600 text-xs font-bold">
                             {{ user?.name?.charAt(0)?.toUpperCase() ?? '?' }}
@@ -141,7 +255,7 @@
                     </RouterLink>
                     <button
                         @click="handleLogout"
-                        class="rounded-xl border border-white/10 px-4 py-2 text-sm text-slate-400 transition hover:text-white"
+                        class="hidden rounded-xl border border-white/10 px-4 py-2 text-sm text-slate-400 transition hover:text-white md:block"
                     >
                         {{ t('nav.signOut') }}
                     </button>
@@ -149,17 +263,32 @@
                 <template v-else>
                     <RouterLink
                         to="/login"
-                        class="text-sm text-slate-400 transition hover:text-white"
+                        class="hidden text-sm text-slate-400 transition hover:text-white md:block"
                     >
                         {{ t('nav.signIn') }}
                     </RouterLink>
                     <RouterLink
                         to="/register"
-                        class="rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700"
+                        class="hidden rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700 md:block"
                     >
                         {{ t('nav.getStarted') }}
                     </RouterLink>
                 </template>
+
+                <!-- Hamburger button (mobile only) -->
+                <button
+                    @click="mobileOpen = !mobileOpen"
+                    class="grid h-9 w-9 place-items-center rounded-xl border border-white/10 bg-white/5 text-slate-400 transition hover:bg-white/10 hover:text-white md:hidden"
+                    :aria-label="mobileOpen ? 'Close menu' : 'Open menu'"
+                    :aria-expanded="mobileOpen"
+                >
+                    <svg v-if="!mobileOpen" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                    <svg v-else class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
             </div>
         </div>
     </header>
@@ -176,6 +305,9 @@ import LanguageSwitcher from './LanguageSwitcher.vue';
 const { t } = useI18n();
 const { user, resolved, logout } = useAuth();
 const router = useRouter();
+
+// ── Mobile menu ─────────────────────────────────────────
+const mobileOpen = ref(false);
 
 // ── Bell / Notifications ────────────────────────────────
 const bellOpen      = ref(false);
@@ -252,5 +384,15 @@ const handleLogout = async () => {
 .fade-enter-from,
 .fade-leave-to {
     opacity: 0;
+}
+
+.slide-down-enter-active,
+.slide-down-leave-active {
+    transition: transform 0.25s ease, opacity 0.25s ease;
+}
+.slide-down-enter-from,
+.slide-down-leave-to {
+    opacity: 0;
+    transform: translateY(-8px);
 }
 </style>
