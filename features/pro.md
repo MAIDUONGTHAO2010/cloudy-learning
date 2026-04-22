@@ -1,87 +1,87 @@
-# 🚀 Bản Pro
+# 🚀 Pro Plan — Coming Soon
 
-Bản **Pro** mở rộng toàn bộ tính năng của bản Normal, bổ sung công cụ kiếm tiền, học tập nâng cao và quản trị mạnh hơn — phù hợp cho trường học, trung tâm đào tạo hoặc solopreneur.
+The **Pro** plan extends everything in Normal with monetization tools, advanced learning features, and stronger administration — ideal for schools, training centers, and solopreneurs.
 
-> ✅ Bao gồm tất cả tính năng của [Normal](./normal.md)
-
----
-
-## 💳 Thanh toán & Kiếm tiền
-
-| Tính năng | Mô tả |
-|-----------|-------|
-| Online Payment | Tích hợp Stripe & PayPal để mua khoá học đơn lẻ |
-| Subscription Plan | Gói đăng ký tháng / năm, tự động gia hạn |
-| Coupon / Discount Code | Tạo mã giảm giá theo %, theo khoá học, theo thời gian |
-| Revenue Dashboard | Báo cáo doanh thu theo ngày / tháng / khoá học |
+> ✅ Includes all features from [Normal](./normal.md)
 
 ---
 
-## 🎓 Học tập nâng cao
+## 💳 Payments & Monetization
 
-| Tính năng | Mô tả |
-|-----------|-------|
-| Certificate Generation | Tự động tạo & gửi chứng chỉ PDF khi hoàn thành khoá học |
-| Advanced Quiz Analytics | Điểm trung bình, câu hỏi sai nhiều nhất, phân bố điểm |
-| Course Drip Content | Mở khoá bài học theo lịch (ngày X sau khi đăng ký) |
-| Assignment / Nộp bài | Học viên nộp file bài tập; instructor chấm điểm thủ công |
-| Live Session | Tích hợp Zoom / Google Meet cho buổi học trực tiếp |
+| Feature | Description |
+|---------|-------------|
+| Online Payment | Stripe & PayPal integration to sell individual courses |
+| Subscription Plan | Monthly / annual subscription with automatic renewal |
+| Coupon / Discount Code | Create discount codes by percentage, course, or time period |
+| Revenue Dashboard | Revenue reports by day / month / course |
 
 ---
 
-## 📧 Thông báo & Xác thực
+## 🎓 Advanced Learning
 
-| Tính năng | Mô tả |
-|-----------|-------|
-| Email Notification | Gửi mail khi có bài mới, kết quả quiz, khoá học sắp hết hạn |
-| Social Login | Đăng nhập qua Google, Facebook, GitHub (OAuth2) |
+| Feature | Description |
+|---------|-------------|
+| Certificate Generation | Automatically generate & deliver a PDF certificate upon course completion |
+| Advanced Quiz Analytics | Average scores, most-missed questions, score distribution |
+| Course Drip Content | Unlock lessons on a schedule (day X after enrollment) |
+| Assignment Submission | Students upload assignment files; instructors grade manually |
+| Live Session | Zoom / Google Meet integration for live class sessions |
+
+---
+
+## 📧 Notifications & Authentication
+
+| Feature | Description |
+|---------|-------------|
+| Email Notification | Send emails for new lessons, quiz results, and expiring courses |
+| Social Login | Sign in with Google, Facebook, or GitHub (OAuth2) |
 
 ---
 
 ## 📥 Import / Export
 
-| Tính năng | Mô tả |
-|-----------|-------|
-| Import / Export Excel/CSV | Nhập/xuất dữ liệu courses, users, kết quả quiz |
+| Feature | Description |
+|---------|-------------|
+| Import / Export Excel/CSV | Bulk import and export of courses, users, and quiz results |
 
 ---
 
-## 👥 Cộng đồng & Tương tác
+## 👥 Community & Interaction
 
-| Tính năng | Mô tả |
-|-----------|-------|
-| Discussion Forum | Hỏi đáp theo từng bài học, hỗ trợ threaded comments |
-| Direct Message | Nhắn tin trực tiếp giữa học viên và instructor |
-| Leaderboard | Xếp hạng học viên theo điểm số / tiến độ hoàn thành |
-| Gamification | Badge, điểm kinh nghiệm (XP), level khi hoàn thành bài |
-
----
-
-## 🔧 Quản trị
-
-| Tính năng | Mô tả |
-|-----------|-------|
-| Advanced Role & Permission | Phân quyền chi tiết: moderator, TA, content editor |
-| Audit Log | Ghi lại mọi hành động admin để kiểm soát bảo mật |
-| Multi-language (i18n) | Hỗ trợ đa ngôn ngữ cho nội dung khoá học |
+| Feature | Description |
+|---------|-------------|
+| Discussion Forum | Per-lesson Q&A with threaded comments |
+| Direct Message | Private messaging between students and instructors |
+| Leaderboard | Rank students by score or course completion progress |
+| Gamification | Badges, experience points (XP), and levels for completing lessons |
 
 ---
 
-## 📊 Analytics & Báo cáo
+## 🔧 Administration
 
-| Tính năng | Mô tả |
-|-----------|-------|
-| Student Progress Report | Báo cáo tiến độ từng học viên, export PDF/Excel |
-| Course Completion Rate | Tỷ lệ hoàn thành, drop-off rate theo từng bài |
-| Google Analytics Integration | Theo dõi hành vi người dùng qua GA4 |
+| Feature | Description |
+|---------|-------------|
+| Advanced Role & Permission | Fine-grained roles: moderator, TA, content editor |
+| Audit Log | Record every admin action for security and compliance |
+| Multi-language (i18n) | Multi-language support for course content |
 
 ---
 
-## ❌ Chưa có trong bản Pro
+## 📊 Analytics & Reporting
+
+| Feature | Description |
+|---------|-------------|
+| Student Progress Report | Per-student progress reports, exportable as PDF / Excel |
+| Course Completion Rate | Completion rate and drop-off rate per lesson |
+| Google Analytics Integration | Track user behaviour via GA4 |
+
+---
+
+## ❌ Not included in Pro
 
 - Affiliate / Referral System
 - Custom Domain / White-label
-- API Access (external)
-- Multi-tenant (nhiều tổ chức trên một hệ thống)
+- External API Access
+- Multi-tenant (multiple organizations on one system)
 
-> Xem **[ultimate.md](./ultimate.md)** để biết thêm các tính năng cấp doanh nghiệp.
+> See **[ultimate.md](./ultimate.md)** for enterprise-grade features.
