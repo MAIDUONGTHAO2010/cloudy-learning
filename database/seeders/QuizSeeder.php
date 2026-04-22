@@ -21,54 +21,54 @@ class QuizSeeder extends Seeder
             $quiz = Quiz::create([
                 'lesson_id' => $lesson->id,
                 'title' => 'Quiz: ' . $lesson->title,
-                'description' => 'Kiểm tra kiến thức bài học: ' . $lesson->title,
+                'description' => 'Test your knowledge: ' . $lesson->title,
                 'time_limit' => 10,
                 'passing_score' => 70,
             ]);
 
-            // Câu 1 – single choice
+            // Question 1 – single choice
             $q1 = Question::create([
                 'quiz_id' => $quiz->id,
-                'content' => 'Nội dung chính của bài học này là gì?',
+                'content' => 'What is the main topic of this lesson?',
                 'type' => QuestionType::TEXT, // 1
                 'order' => 0,
             ]);
 
             $this->createOptions($q1->id, [
-                [1, 'Lý thuyết cơ bản và khái niệm nền tảng', true],
-                [2, 'Cài đặt phần mềm',                        false],
-                [3, 'Thực hành dự án thực tế',                 false],
-                [4, 'Ôn tập kiến thức cũ',                     false],
+                [1, 'Core theory and foundational concepts', true],
+                [2, 'Installing software',                   false],
+                [3, 'Hands-on real-world project',           false],
+                [4, 'Reviewing previous knowledge',          false],
             ]);
 
-            // Câu 2 – single choice
+            // Question 2 – single choice
             $q2 = Question::create([
                 'quiz_id' => $quiz->id,
-                'content' => 'Công cụ nào được đề cập trong bài học?',
+                'content' => 'Which tool is covered in this lesson?',
                 'type' => QuestionType::TEXT,
                 'order' => 1,
             ]);
 
             $this->createOptions($q2->id, [
-                [1, 'Terminal / Command Line', false],
-                [2, 'Công cụ chính được giới thiệu trong bài', true],
-                [3, 'Trình duyệt web',         false],
-                [4, 'IDE như VS Code',          false],
+                [1, 'Terminal / Command Line',                      false],
+                [2, 'The main tool introduced in the lesson',       true],
+                [3, 'Web browser',                                  false],
+                [4, 'IDE such as VS Code',                          false],
             ]);
 
-            // Câu 3 – multiple choice
+            // Question 3 – multiple choice
             $q3 = Question::create([
                 'quiz_id' => $quiz->id,
-                'content' => 'Những điểm nào là quan trọng cần ghi nhớ? (Chọn nhiều đáp án)',
+                'content' => 'Which points are important to remember? (Select all that apply)',
                 'type' => QuestionType::TEXT, // 2
                 'order' => 2,
             ]);
 
             $this->createOptions($q3->id, [
-                [1, 'Nắm vững lý thuyết cơ bản',     true],
-                [2, 'Thực hành đều đặn',              true],
-                [3, 'Bỏ qua phần tài liệu tham khảo', false],
-                [4, 'Áp dụng vào dự án thực tế',     true],
+                [1, 'Master the core theory',                  true],
+                [2, 'Practice regularly',                      true],
+                [3, 'Skip the reference documentation',        false],
+                [4, 'Apply knowledge to real-world projects',  true],
             ]);
         }
     }

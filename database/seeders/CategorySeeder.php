@@ -15,46 +15,46 @@ class CategorySeeder extends Seeder
     {
         $categories = [
             [
-                'name' => 'Lập trình (IT & Software)',
+                'name' => 'Programming (IT & Software)',
                 'icon' => 'fas fa-code',
                 'children' => [
-                    ['name' => 'Lập trình Web', 'icon' => 'fas fa-globe'],
-                    ['name' => 'Lập trình Mobile', 'icon' => 'fas fa-mobile-alt'],
-                    ['name' => 'Khoa học dữ liệu', 'icon' => 'fas fa-database'],
+                    ['name' => 'Web Development', 'icon' => 'fas fa-globe'],
+                    ['name' => 'Mobile Development', 'icon' => 'fas fa-mobile-alt'],
+                    ['name' => 'Data Science', 'icon' => 'fas fa-database'],
                     ['name' => 'Game Development', 'icon' => 'fas fa-gamepad'],
                 ],
             ],
             [
-                'name' => 'Kinh doanh (Business)',
+                'name' => 'Business',
                 'icon' => 'fas fa-chart-line',
                 'children' => [
-                    ['name' => 'Khởi nghiệp', 'icon' => 'fas fa-lightbulb'],
-                    ['name' => 'Quản trị nhân sự', 'icon' => 'fas fa-users'],
-                    ['name' => 'Tài chính kế toán', 'icon' => 'fas fa-calculator'],
+                    ['name' => 'Entrepreneurship', 'icon' => 'fas fa-lightbulb'],
+                    ['name' => 'Human Resources Management', 'icon' => 'fas fa-users'],
+                    ['name' => 'Finance & Accounting', 'icon' => 'fas fa-calculator'],
                 ],
             ],
             [
-                'name' => 'Thiết kế (Design)',
+                'name' => 'Design',
                 'icon' => 'fas fa-paint-brush',
                 'children' => [
-                    ['name' => 'Thiết kế đồ họa', 'icon' => 'fas fa-vector-square'],
-                    ['name' => 'Thiết kế UI/UX', 'icon' => 'fas fa-desktop'],
-                    ['name' => 'Dựng phim & Video', 'icon' => 'fas fa-video'],
+                    ['name' => 'Graphic Design', 'icon' => 'fas fa-vector-square'],
+                    ['name' => 'UI/UX Design', 'icon' => 'fas fa-desktop'],
+                    ['name' => 'Video Production', 'icon' => 'fas fa-video'],
                 ],
             ],
             [
-                'name' => 'Ngoại ngữ (Languages)',
+                'name' => 'Languages',
                 'icon' => 'fas fa-language',
                 'children' => [
-                    ['name' => 'Tiếng Anh', 'icon' => 'fas fa-english-badge'],
-                    ['name' => 'Tiếng Nhật', 'icon' => 'fas fa-torii-gate'],
-                    ['name' => 'Tiếng Hàn', 'icon' => 'fas fa-korea'],
+                    ['name' => 'English', 'icon' => 'fas fa-english-badge'],
+                    ['name' => 'Japanese', 'icon' => 'fas fa-torii-gate'],
+                    ['name' => 'Korean', 'icon' => 'fas fa-korea'],
                 ],
             ],
         ];
 
         foreach ($categories as $index => $item) {
-            // Tạo danh mục cha
+            // Create parent category
             $parent = Category::create([
                 'name' => $item['name'],
                 'slug' => Str::slug($item['name']),
@@ -64,7 +64,7 @@ class CategorySeeder extends Seeder
                 'is_active' => true,
             ]);
 
-            // Tạo danh mục con
+            // Create child categories
             if (isset($item['children'])) {
                 foreach ($item['children'] as $childIndex => $child) {
                     Category::create([
@@ -72,7 +72,7 @@ class CategorySeeder extends Seeder
                         'slug' => Str::slug($child['name']),
                         // 'icon' => $child['icon'],
                         'order' => $childIndex,
-                        'parent_id' => $parent->id, // Gắn ID của thằng cha vừa tạo
+                        'parent_id' => $parent->id, // Attach to the parent just created
                         'is_active' => true,
                     ]);
                 }

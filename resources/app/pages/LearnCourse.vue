@@ -23,7 +23,7 @@
                 <!-- Course progress bar (approved students only) -->
                 <div v-if="courseProgress && course.can_access_full_course" class="min-w-[220px]">
                     <div class="mb-1 flex items-center justify-between text-sm">
-                        <span class="font-medium text-gray-700">Tiến độ khoá học</span>
+                        <span class="font-medium text-gray-700">Course Progress</span>
                         <span class="font-semibold text-orange-500">{{ courseProgress.percentage }}%</span>
                     </div>
                     <div class="h-2.5 w-full overflow-hidden rounded-full bg-gray-200">
@@ -32,7 +32,7 @@
                             :style="{ width: `${courseProgress.percentage}%` }"
                         />
                     </div>
-                    <p class="mt-1 text-xs text-gray-400">{{ courseProgress.completed }}/{{ courseProgress.total }} bài học hoàn thành</p>
+                    <p class="mt-1 text-xs text-gray-400">{{ courseProgress.completed }}/{{ courseProgress.total }} lessons completed</p>
                 </div>
             </div>
 
@@ -145,7 +145,7 @@
                                     />
                                 </div>
                                 <span class="shrink-0 text-xs text-gray-400">{{ localWatchPercent }}%</span>
-                                <span v-if="localWatchPercent >= 80" class="shrink-0 text-xs font-semibold text-emerald-600">✓ Video hoàn thành</span>
+                                <span v-if="localWatchPercent >= 80" class="shrink-0 text-xs font-semibold text-emerald-600">✓ Video completed</span>
                             </div>
                         </div>
                     </div>
@@ -162,7 +162,7 @@
                                     <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                     </svg>
-                                    Bài học hoàn thành
+                                    Lesson completed
                                 </div>
                             </div>
 
@@ -197,18 +197,18 @@
                                 <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
                                 </svg>
-                                Đã vượt qua ({{ currentLessonProgress.quiz_score }}%)
+                                Passed ({{ currentLessonProgress.quiz_score }}%)
                             </span>
                         </div>
 
                         <!-- Must watch video first -->
                         <div v-if="!currentLessonProgress?.video_completed" class="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
-                            ⚠️ Xem ít nhất <strong>80% video</strong> để mở khoá quiz.
+                            ⚠️ Watch at least <strong>80% of the video</strong> to unlock the quiz.
                         </div>
 
                         <!-- Loading -->
                         <div v-else-if="quizLoading" class="py-6 text-center text-sm text-gray-400">
-                            Đang tải quiz…
+                            Loading quiz…
                         </div>
 
                         <!-- Quiz loaded -->
@@ -222,10 +222,10 @@
                                 :class="quizResult.passed ? 'border-emerald-200 bg-emerald-50 text-emerald-800' : 'border-rose-200 bg-rose-50 text-rose-800'"
                             >
                                 <p class="font-semibold">
-                                    {{ quizResult.passed ? '✓ Vượt qua!' : '✗ Chưa đạt' }}
-                                    — {{ quizResult.score }}% (cần {{ quizResult.passing_score }}%)
+                                    {{ quizResult.passed ? '✓ Passed!' : '✗ Not passed' }}
+                                    — {{ quizResult.score }}% (required {{ quizResult.passing_score }}%)
                                 </p>
-                                <p class="mt-0.5">Đúng {{ quizResult.correct }}/{{ quizResult.total }} câu</p>
+                                <p class="mt-0.5">Correct {{ quizResult.correct }}/{{ quizResult.total }}</p>
                             </div>
 
                             <!-- Questions -->
@@ -267,10 +267,10 @@
                                     :disabled="quizSubmitting || !allQuestionsAnswered"
                                     class="rounded-xl bg-violet-600 px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-violet-700 disabled:opacity-40"
                                 >
-                                    {{ quizSubmitting ? 'Đang nộp…' : 'Nộp bài' }}
+                                    {{ quizSubmitting ? 'Submitting…' : 'Submit' }}
                                 </button>
                                 <span v-if="!allQuestionsAnswered" class="text-xs text-gray-400">
-                                    Vui lòng trả lời tất cả {{ quizData.questions.length }} câu
+                                    Please answer all {{ quizData.questions.length }} questions
                                 </span>
                             </div>
                         </div>

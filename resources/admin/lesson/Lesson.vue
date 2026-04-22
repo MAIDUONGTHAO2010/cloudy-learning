@@ -416,12 +416,12 @@
                         <label class="flex cursor-pointer items-center gap-2 rounded-2xl border px-4 py-2.5 text-sm transition"
                           :class="editForm.answer_type === 1 ? 'border-blue-400 bg-blue-50 text-blue-700' : 'border-slate-200 text-slate-600 hover:bg-slate-50'">
                           <input type="radio" :value="1" v-model="editForm.answer_type" class="sr-only" />
-                          Single choice (1 đáp án đúng)
+                          Single choice (1 correct answer)
                         </label>
                         <label class="flex cursor-pointer items-center gap-2 rounded-2xl border px-4 py-2.5 text-sm transition"
                           :class="editForm.answer_type === 2 ? 'border-violet-400 bg-violet-50 text-violet-700' : 'border-slate-200 text-slate-600 hover:bg-slate-50'">
                           <input type="radio" :value="2" v-model="editForm.answer_type" class="sr-only" />
-                          Multiple choice (nhiều đáp án đúng)
+                          Multiple choice (multiple correct answers)
                         </label>
                       </div>
                     </div>
@@ -444,7 +444,7 @@
                           v-model="opt.content"
                           type="text"
                           class="min-w-0 flex-1 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
-                          :placeholder="`Nhập nội dung đáp án ${['A','B','C','D'][oi]}…`"
+                          :placeholder="`Enter option ${['A','B','C','D'][oi]} content…`"
                         />
                         <label class="flex shrink-0 cursor-pointer items-center gap-1.5 text-xs font-medium"
                           :class="opt.is_correct ? 'text-emerald-600' : 'text-slate-400'">
