@@ -28,6 +28,15 @@ class AuthController extends Controller
             ], 401);
         }
 
+        if (! Auth::user()->isActive()) {
+            Auth::logout();
+
+            return response()->json([
+                'message' => 'Your account has been deactivated. Please contact support.',
+                'errors' => ['email' => ['Your account has been deactivated. Please contact support.']],
+            ], 403);
+        }
+
         $request->session()->regenerate();
 
         return response()->json([

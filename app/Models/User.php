@@ -5,6 +5,7 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 
 use App\Enums\User\UserRole;
+use App\Enums\User\UserStatus;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -87,5 +88,10 @@ class User extends Authenticatable
     public function isInstructor(): bool
     {
         return $this->role === UserRole::INSTRUCTOR;
+    }
+
+    public function isActive(): bool
+    {
+        return $this->is_active;
     }
 }
