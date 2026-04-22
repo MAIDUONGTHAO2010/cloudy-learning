@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Repositories\Contracts\UserRepositoryInterface;
+use Illuminate\Support\Facades\DB;
 
 class UserService
 {
@@ -26,5 +27,16 @@ class UserService
     public function listPublicInstructors(): mixed
     {
         return $this->userRepository->getPublicInstructors();
+    }
+
+    public function toggleActive(int $id): mixed
+    {
+        $user = $this->userRepository->toggleActive($id);
+
+        if (! $user->is_active) {
+            DB::table('sessions')->where('user_id', $id)->delete();
+        }
+
+        return $user;
     }
 }

@@ -21,4 +21,11 @@ class UserController extends Controller
     {
         return response()->json($this->userService->stats());
     }
+
+    public function toggleActive(int $id)
+    {
+        $user = $this->userService->toggleActive($id);
+
+        return response()->json($user);
+    }
 }
