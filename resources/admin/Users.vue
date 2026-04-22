@@ -6,7 +6,7 @@
         <p class="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">Users</p>
         <h1 class="mt-2 text-3xl font-semibold text-slate-900">User management</h1>
         <p class="mt-3 max-w-2xl text-sm leading-6 text-slate-500">
-          Browse all registered users, filter by role, or search by name / email.
+          Browse all registered users, filter by role or status, or search by name / email.
         </p>
       </div>
 
@@ -34,6 +34,15 @@
         </div>
       </div>
     </section>
+
+    <!-- Error banner -->
+    <div
+      v-if="toggleError"
+      class="flex items-center justify-between rounded-2xl border border-red-200 bg-red-50 px-5 py-3 text-sm text-red-600"
+    >
+      <span>{{ toggleError }}</span>
+      <button @click="toggleError = null" class="ml-4 text-red-400 hover:text-red-600">✕</button>
+    </div>
 
     <!-- Table section -->
     <section class="overflow-hidden rounded-[2rem] border border-slate-200/80 bg-white shadow-[0_20px_60px_-40px_rgba(15,23,42,0.45)]">
@@ -63,6 +72,16 @@
             <option value="2">Instructor</option>
             <option value="3">Admin</option>
           </select>
+          <!-- Status filter -->
+          <select
+            v-model="statusFilter"
+            @change="fetchUsers(1)"
+            class="rounded-2xl border border-slate-200 px-4 py-2.5 text-sm text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+          >
+            <option value="">All statuses</option>
+            <option value="1">Active</option>
+            <option value="0">Inactive</option>
+          </select>
         </div>
       </div>
 
@@ -89,18 +108,28 @@
             <tr>
               <th class="px-6 py-4">User</th>
               <th class="px-6 py-4">Role</th>
+              <th class="px-6 py-4">Status</th>
               <th class="px-6 py-4">Joined</th>
+              <th class="px-6 py-4">Actions</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-100 bg-white">
-            <tr v-for="user in users" :key="user.id" class="text-sm text-slate-600 transition hover:bg-slate-50/50">
+            <tr
+              v-for="user in users"
+              :key="user.id"
+              class="text-sm text-slate-600 transition hover:bg-slate-50/50"
+              :class="{ 'opacity-50': !user.is_active }"
+            >
               <td class="px-6 py-5">
                 <div class="flex items-center gap-4">
-                  <div class="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-slate-900 font-semibold text-white">
+                  <div
+                    class="grid h-11 w-11 shrink-0 place-items-center rounded-2xl font-semibold text-white"
+                    :class="user.is_active ? 'bg-slate-900' : 'bg-slate-400'"
+                  >
                     {{ initials(user.name) }}
                   </div>
                   <div>
-                    <p class="font-medium text-slate-900">{{ user.name }}</p>
+                    <p class="font-medium" :class="user.is_active ? 'text-slate-900' : 'text-slate-400'">{{ user.name }}</p>
                     <p class="text-slate-500">{{ user.email }}</p>
                   </div>
                 </div>
@@ -110,7 +139,28 @@
                   {{ roleLabel(user.role) }}
                 </span>
               </td>
+              <td class="px-6 py-5">
+                <span
+                  class="rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em]"
+                  :class="user.is_active ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-500'"
+                >
+                  {{ user.is_active ? 'Active' : 'Inactive' }}
+                </span>
+              </td>
               <td class="px-6 py-5 text-slate-400">{{ formatDate(user.created_at) }}</td>
+              <td class="px-6 py-5">
+                <button
+                  @click="toggleActive(user)"
+                  :disabled="togglingId === user.id"
+                  class="rounded-xl border px-3 py-1.5 text-xs font-medium transition disabled:opacity-40"
+                  :class="user.is_active
+                    ? 'border-red-200 text-red-500 hover:bg-red-50'
+                    : 'border-emerald-200 text-emerald-600 hover:bg-emerald-50'"
+                >
+                  <span v-if="togglingId === user.id">…</span>
+                  <span v-else>{{ user.is_active ? 'Deactivate' : 'Activate' }}</span>
+                </button>
+              </td>
             </tr>
           </tbody>
         </table>
@@ -152,17 +202,20 @@ type User = {
     name: string;
     email: string;
     role: number;
+    is_active: boolean;
     created_at: string;
 };
 
 // ── State ─────────────────────────────────────────────────────────────────────
-const users       = ref<User[]>([]);
-const loading     = ref(false);
-const search      = ref('');
-const roleFilter  = ref('');
-const currentPage = ref(1);
-const lastPage    = ref(1);
-const total       = ref(0);
+const users        = ref<User[]>([]);
+const loading      = ref(false);
+const search       = ref('');
+const roleFilter   = ref('');
+const statusFilter = ref('');
+const currentPage  = ref(1);
+const lastPage     = ref(1);
+const total        = ref(0);
+const togglingId   = ref<number | null>(null);
 
 const statsLoading = ref(true);
 const userStats    = ref({ total: 0, students: 0, instructors: 0, admins: 0 });
@@ -174,8 +227,9 @@ const fetchUsers = async (page = 1) => {
     loading.value = true;
     try {
         const params: Record<string, string | number> = { page };
-        if (search.value)     params.search = search.value;
-        if (roleFilter.value) params.role   = roleFilter.value;
+        if (search.value)       params.search    = search.value;
+        if (roleFilter.value)   params.role      = roleFilter.value;
+        if (statusFilter.value) params.is_active = statusFilter.value;
 
         const res = await axios.get('/admin/api/users', { params });
         users.value       = res.data.data;
@@ -194,6 +248,22 @@ const fetchStats = async () => {
         userStats.value = res.data;
     } finally {
         statsLoading.value = false;
+    }
+};
+
+// ── Toggle active status ──────────────────────────────────────────────────────
+const toggleError = ref<string | null>(null);
+
+const toggleActive = async (user: User) => {
+    togglingId.value = user.id;
+    toggleError.value = null;
+    try {
+        const res = await axios.patch(`/admin/api/users/${user.id}/toggle-active`);
+        user.is_active = res.data.is_active;
+    } catch {
+        toggleError.value = `Failed to update status for ${user.name}. Please try again.`;
+    } finally {
+        togglingId.value = null;
     }
 };
 
