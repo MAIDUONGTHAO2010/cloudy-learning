@@ -19,7 +19,7 @@ return new class extends Migration
             $table->text('comment')->nullable();
             $table->timestamps();
 
-            // 1 user chỉ review 1 course 1 lần
+            // Each user can only review a course once
             $table->unique(['course_id', 'user_id']);
         });
     }

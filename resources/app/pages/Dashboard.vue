@@ -169,7 +169,7 @@
                         <!-- Progress bar (approved enrollments) -->
                         <div v-if="course.enrollment_status === APPROVED_STATUS && course.lessons_count > 0" class="mt-3">
                             <div class="mb-1 flex items-center justify-between text-xs">
-                                <span class="text-gray-400">Tiến độ</span>
+                                <span class="text-gray-400">Progress</span>
                                 <span class="font-medium text-gray-600">{{ course.progress ?? 0 }}%</span>
                             </div>
                             <div class="h-1.5 w-full overflow-hidden rounded-full bg-gray-100">

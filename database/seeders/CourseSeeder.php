@@ -13,7 +13,7 @@ class CourseSeeder extends Seeder
 {
     public function run(): void
     {
-        // Tạo 2 instructor nếu chưa tồn tại
+        // Create 2 instructors if they don't exist yet
         $instructorA = User::firstOrCreate(
             ['email' => 'instructor@cloudylearning.com'],
             [
@@ -35,29 +35,29 @@ class CourseSeeder extends Seeder
         $courses = [
             [
                 'user_id' => $instructorA->id,
-                'title' => 'Lập trình Web với Laravel',
-                'description' => 'Học Laravel từ cơ bản đến nâng cao, xây dựng ứng dụng web thực tế với PHP.',
+                'title' => 'Web Development with Laravel',
+                'description' => 'Learn Laravel from beginner to advanced and build real-world web applications with PHP.',
                 'is_active' => true,
                 'order' => 0,
             ],
             [
                 'user_id' => $instructorA->id,
                 'title' => 'Vue.js 3 & TypeScript',
-                'description' => 'Xây dựng giao diện người dùng hiện đại với Vue 3, Composition API và TypeScript.',
+                'description' => 'Build modern user interfaces with Vue 3, Composition API, and TypeScript.',
                 'is_active' => true,
                 'order' => 1,
             ],
             [
                 'user_id' => $instructorB->id,
-                'title' => 'Khoa học dữ liệu với Python',
-                'description' => 'Phân tích dữ liệu, machine learning và trực quan hóa dữ liệu bằng Python.',
+                'title' => 'Data Science with Python',
+                'description' => 'Data analysis, machine learning, and data visualization with Python.',
                 'is_active' => true,
                 'order' => 2,
             ],
             [
                 'user_id' => $instructorB->id,
-                'title' => 'Thiết kế UI/UX hiện đại',
-                'description' => 'Nguyên tắc thiết kế giao diện, trải nghiệm người dùng và công cụ Figma.',
+                'title' => 'Modern UI/UX Design',
+                'description' => 'UI design principles, user experience, and the Figma tool.',
                 'is_active' => false,
                 'order' => 3,
             ],

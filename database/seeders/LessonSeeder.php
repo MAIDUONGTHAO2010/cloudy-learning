@@ -12,31 +12,31 @@ class LessonSeeder extends Seeder
     public function run(): void
     {
         $lessonsByCourse = [
-            'Lập trình Web với Laravel' => [
-                ['title' => 'Giới thiệu Laravel & cài đặt môi trường', 'duration' => 20, 'order' => 0],
-                ['title' => 'Routing & Controller cơ bản',             'duration' => 30, 'order' => 1],
-                ['title' => 'Blade Template Engine',                   'duration' => 25, 'order' => 2],
-                ['title' => 'Eloquent ORM & Migration',                'duration' => 40, 'order' => 3],
-                ['title' => 'Authentication & Authorization',          'duration' => 35, 'order' => 4],
+            'Web Development with Laravel' => [
+                ['title' => 'Introduction to Laravel & Environment Setup', 'duration' => 20, 'order' => 0],
+                ['title' => 'Basic Routing & Controllers',                 'duration' => 30, 'order' => 1],
+                ['title' => 'Blade Template Engine',                       'duration' => 25, 'order' => 2],
+                ['title' => 'Eloquent ORM & Migration',                    'duration' => 40, 'order' => 3],
+                ['title' => 'Authentication & Authorization',              'duration' => 35, 'order' => 4],
             ],
             'Vue.js 3 & TypeScript' => [
-                ['title' => 'Giới thiệu Vue 3 & Vite',        'duration' => 20, 'order' => 0],
+                ['title' => 'Introduction to Vue 3 & Vite',    'duration' => 20, 'order' => 0],
                 ['title' => 'Composition API & ref/reactive',  'duration' => 35, 'order' => 1],
                 ['title' => 'Component & Props',               'duration' => 30, 'order' => 2],
                 ['title' => 'Vue Router',                      'duration' => 25, 'order' => 3],
-                ['title' => 'TypeScript với Vue 3',            'duration' => 40, 'order' => 4],
+                ['title' => 'TypeScript with Vue 3',           'duration' => 40, 'order' => 4],
             ],
-            'Khoa học dữ liệu với Python' => [
-                ['title' => 'Python cơ bản cho Data Science', 'duration' => 30, 'order' => 0],
-                ['title' => 'NumPy & Pandas',                 'duration' => 45, 'order' => 1],
-                ['title' => 'Trực quan hóa với Matplotlib',   'duration' => 35, 'order' => 2],
-                ['title' => 'Machine Learning với Scikit-learn', 'duration' => 60, 'order' => 3],
+            'Data Science with Python' => [
+                ['title' => 'Python Basics for Data Science',          'duration' => 30, 'order' => 0],
+                ['title' => 'NumPy & Pandas',                          'duration' => 45, 'order' => 1],
+                ['title' => 'Data Visualization with Matplotlib',      'duration' => 35, 'order' => 2],
+                ['title' => 'Machine Learning with Scikit-learn',      'duration' => 60, 'order' => 3],
             ],
-            'Thiết kế UI/UX hiện đại' => [
-                ['title' => 'Nguyên tắc thiết kế UI',         'duration' => 25, 'order' => 0],
-                ['title' => 'Figma cơ bản',                   'duration' => 40, 'order' => 1],
-                ['title' => 'Design System & Component',      'duration' => 35, 'order' => 2],
-                ['title' => 'Prototype & User Testing',       'duration' => 30, 'order' => 3],
+            'Modern UI/UX Design' => [
+                ['title' => 'UI Design Principles',       'duration' => 25, 'order' => 0],
+                ['title' => 'Figma Basics',               'duration' => 40, 'order' => 1],
+                ['title' => 'Design System & Components', 'duration' => 35, 'order' => 2],
+                ['title' => 'Prototype & User Testing',   'duration' => 30, 'order' => 3],
             ],
         ];
 

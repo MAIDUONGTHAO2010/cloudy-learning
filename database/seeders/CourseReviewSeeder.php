@@ -14,35 +14,35 @@ class CourseReviewSeeder extends Seeder
         $reviews = [
             [
                 'rating' => 5,
-                'comment' => 'Khóa học rất hay, giải thích rõ ràng và dễ hiểu. Tôi đã áp dụng ngay vào dự án thực tế!',
+                'comment' => 'Excellent course, clear and easy to understand. I applied the knowledge directly to a real-world project!',
             ],
             [
                 'rating' => 4,
-                'comment' => 'Nội dung tốt, giảng viên nhiệt tình. Chỉ cần thêm vài bài tập thực hành nữa thì sẽ tuyệt hơn.',
+                'comment' => 'Great content and enthusiastic instructor. A few more practice exercises would make it even better.',
             ],
             [
                 'rating' => 5,
-                'comment' => 'Xuất sắc! Tôi đã học rất nhiều điều hữu ích từ khóa học này.',
+                'comment' => 'Outstanding! I learned so many useful things from this course.',
             ],
             [
                 'rating' => 3,
-                'comment' => 'Nội dung ổn nhưng tốc độ giảng hơi nhanh, khó theo kịp với người mới bắt đầu.',
+                'comment' => 'The content is decent but the pace is a bit fast, making it hard to keep up for beginners.',
             ],
             [
                 'rating' => 4,
-                'comment' => 'Khóa học bổ ích, tài liệu đầy đủ. Recommend cho ai muốn học nhanh.',
+                'comment' => 'Very useful course with comprehensive materials. Recommended for anyone who wants to learn quickly.',
             ],
             [
                 'rating' => 5,
-                'comment' => 'Cực kỳ chuyên sâu và thực tế. Giảng viên giải thích từng bước rất rõ ràng.',
+                'comment' => 'Extremely in-depth and practical. The instructor explains every step very clearly.',
             ],
             [
                 'rating' => 2,
-                'comment' => 'Kỳ vọng cao hơn. Nội dung còn sơ sài, cần bổ sung thêm ví dụ thực tế.',
+                'comment' => 'Expected more. The content is still shallow and needs more real-world examples.',
             ],
             [
                 'rating' => 4,
-                'comment' => 'Học xong thấy tự tin hơn hẳn. Cảm ơn giảng viên!',
+                'comment' => 'I feel much more confident after finishing this course. Thank you, instructor!',
             ],
         ];
 
@@ -54,12 +54,12 @@ class CourseReviewSeeder extends Seeder
         }
 
         foreach ($courses as $course) {
-            // Mỗi course nhận 3-5 review ngẫu nhiên từ các user khác nhau
+            // Each course receives 3–5 random reviews from different users
             $usedUserIds = [];
             $reviewSample = collect($reviews)->shuffle()->take(rand(3, 5));
 
             foreach ($reviewSample as $review) {
-                // Chọn user chưa review course này
+                // Select a user who hasn't reviewed this course yet
                 $user = $users->whereNotIn('id', $usedUserIds)->first();
 
                 if (! $user) {
