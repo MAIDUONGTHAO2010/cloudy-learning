@@ -18,4 +18,6 @@ interface UserRepositoryInterface extends RepositoryInterface
     public function getPublicInstructors();
 
     public function getTopInstructors(int $limit = 6);
+
+    public function toggleActive(int $id): mixed;
 }

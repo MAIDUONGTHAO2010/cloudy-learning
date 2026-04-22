@@ -27,4 +27,9 @@ class UserService
     {
         return $this->userRepository->getPublicInstructors();
     }
+
+    public function toggleActive(int $id): mixed
+    {
+        return $this->userRepository->toggleActive($id);
+    }
 }

@@ -40,6 +40,7 @@ Route::middleware('admin.valid')->group(function () {
         // Users
         Route::get('users/stats', [UserController::class, 'stats']);
         Route::get('users', [UserController::class, 'index']);
+        Route::patch('users/{id}/toggle-active', [UserController::class, 'toggleActive']);
 
         Route::get('categories', [CategoryController::class, 'index']);
         Route::post('categories', [CategoryController::class, 'store']);

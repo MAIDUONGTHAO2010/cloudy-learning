@@ -16,7 +16,7 @@ class UserRepositoryEloquent extends BaseRepository implements UserRepositoryInt
 
     public function getPaginated(array $filters)
     {
-        $query = User::query()->select('id', 'name', 'email', 'role', 'created_at');
+        $query = User::query()->select('id', 'name', 'email', 'role', 'is_active', 'created_at');
 
         if (! empty($filters['search'])) {
             $search = $filters['search'];
@@ -67,5 +67,14 @@ class UserRepositoryEloquent extends BaseRepository implements UserRepositoryInt
             ->orderByDesc('courses_count')
             ->limit($limit)
             ->get(['id', 'name', 'email', 'created_at']);
+    }
+
+    public function toggleActive(int $id): mixed
+    {
+        $user = User::findOrFail($id);
+        $user->is_active = ! $user->is_active;
+        $user->save();
+
+        return $user;
     }
 }
