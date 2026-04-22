@@ -13,7 +13,7 @@ class UserController extends Controller
     public function index(Request $request)
     {
         return response()->json(
-            $this->userService->list($request->only(['search', 'role']))
+            $this->userService->list($request->only(['search', 'role', 'is_active']))
         );
     }
 

@@ -30,6 +30,10 @@ class UserRepositoryEloquent extends BaseRepository implements UserRepositoryInt
             $query->where('role', (int) $filters['role']);
         }
 
+        if (isset($filters['is_active']) && $filters['is_active'] !== '') {
+            $query->where('is_active', (bool) $filters['is_active']);
+        }
+
         return $query->orderByDesc('created_at')->paginate(10);
     }
 
