@@ -294,9 +294,12 @@ export default {
 
     profile: {
         title: 'マイプロフィール',
+        settings: 'プロフィール設定',
         personalInfo: '個人情報',
         name: '氏名',
+        namePlaceholder: 'お名前',
         email: 'メール',
+        emailAddress: 'メールアドレス',
         password: '新しいパスワード',
         passwordConfirm: 'パスワード確認',
         dateOfBirth: '生年月日',
@@ -306,6 +309,28 @@ export default {
         saveChanges: '変更を保存',
         saving: '保存中…',
         updateSuccess: 'プロフィールを更新しました！',
+        photo: 'プロフィール写真',
+        changePhoto: '写真を変更',
+        uploadPhoto: '写真をアップロード',
+        avatarHint: 'JPG、PNG、GIF・最大5MB',
+        avatarTooLarge: 'ファイルが大きすぎます。最大サイズは5MBです。',
+        avatarInvalidType: '画像ファイルのみ使用できます。',
+        avatarUploadFailed: '写真のアップロードに失敗しました: {msg}。再試行してください。',
+        changePasswordLabel: 'パスワード',
+        changePasswordDesc: 'パスワードは専用ページで変更できます。',
+        changePasswordLink: 'パスワードを変更',
+        tryAgain: '問題が発生しました。再試行してください。',
+    },
+
+    changePassword: {
+        title: 'パスワードを変更',
+        back: '← プロフィール',
+        currentPassword: '現在のパスワード',
+        newPassword: '新しいパスワード',
+        confirmPassword: '新しいパスワードを確認',
+        submit: 'パスワードを更新',
+        saving: '保存中…',
+        error: '問題が発生しました。再試行してください。',
     },
 
     about: {

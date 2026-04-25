@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Auth\ChangePasswordRequest;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\PresignProfileAvatarUploadRequest;
 use App\Http\Requests\Auth\RegisterRequest;
@@ -16,10 +17,12 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use Psr\Http\Message\UriInterface;
 
 class AuthController extends Controller
 {
     public const MAX_AVATAR_SIZE = 5242880; // 5 MB
+
     public function __construct(protected NotificationService $notificationService) {}
 
     public function login(LoginRequest $request)
@@ -102,13 +105,28 @@ class AuthController extends Controller
         return response()->json($this->userPayload($user));
     }
 
+    public function changePassword(ChangePasswordRequest $request): JsonResponse
+    {
+        $user = Auth::user();
+        $data = $request->validated();
+
+        if (! Hash::check($data['current_password'], $user->password)) {
+            return response()->json([
+                'message' => 'The current password is incorrect.',
+                'errors' => ['current_password' => ['The current password is incorrect.']],
+            ], 422);
+        }
+
+        $user->update(['password' => Hash::make($data['password'])]);
+
+        return response()->json(['message' => 'Password changed successfully.']);
+    }
+
     public function updateProfile(Request $request)
     {
         $data = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email,' . Auth::id(),
-            'password' => 'nullable|string|min:8|confirmed',
-            'password_confirmation' => 'nullable|string',
+            'email' => 'required|email|unique:users,email,'.Auth::id(),
             'date_of_birth' => 'nullable|date|before:today',
             'sex' => 'nullable|in:0,1,2',
             'bio' => 'nullable|string|max:500',
@@ -119,11 +137,7 @@ class AuthController extends Controller
 
         $user = Auth::user();
 
-        $updateData = ['name' => $data['name'], 'email' => $data['email']];
-        if (! empty($data['password'])) {
-            $updateData['password'] = Hash::make($data['password']);
-        }
-        $user->update($updateData);
+        $user->update(['name' => $data['name'], 'email' => $data['email']]);
 
         $profileData = [];
         if (array_key_exists('date_of_birth', $data)) {
@@ -153,63 +167,63 @@ class AuthController extends Controller
 
     public function presignAvatar(PresignProfileAvatarUploadRequest $request): JsonResponse
     {
-        $user    = Auth::user();
+        $user = Auth::user();
         $profile = $user->profile;
 
-        $data      = $request->validated();
+        $data = $request->validated();
         $extension = strtolower(pathinfo($data['file_name'], PATHINFO_EXTENSION) ?: 'png');
-        $name      = Str::limit(
+        $name = Str::limit(
             Str::slug(pathinfo($data['file_name'], PATHINFO_FILENAME) ?: 'avatar'),
             60,
             ''
         ) ?: 'avatar';
-        $path = 'profiles/avatars/' . now()->format('Y/m') . '/' . Str::uuid() . '-' . $name . '.' . $extension;
+        $path = 'profiles/avatars/'.now()->format('Y/m').'/'.Str::uuid().'-'.$name.'.'.$extension;
 
         Log::info('User requested avatar upload presign', [
-            'user_id'      => $user->id,
-            'has_avatar'   => $profile && $profile->getRawOriginal('avatar') !== null,
-            'file_name'    => $data['file_name'],
+            'user_id' => $user->id,
+            'has_avatar' => $profile && $profile->getRawOriginal('avatar') !== null,
+            'file_name' => $data['file_name'],
             'content_type' => $data['content_type'],
-            'file_size'    => $data['file_size'],
-            'path'         => $path,
+            'file_size' => $data['file_size'],
+            'path' => $path,
         ]);
 
-        $diskConfig       = config('filesystems.disks.s3');
+        $diskConfig = config('filesystems.disks.s3');
         $internalEndpoint = rtrim((string) $diskConfig['endpoint'], '/');
-        $publicEndpoint   = rtrim((string) ($diskConfig['public_endpoint'] ?: $diskConfig['endpoint']), '/');
-        $parsedPublic     = parse_url($publicEndpoint);
+        $publicEndpoint = rtrim((string) ($diskConfig['public_endpoint'] ?: $diskConfig['endpoint']), '/');
+        $parsedPublic = parse_url($publicEndpoint);
 
         $client = new S3Client([
-            'version'                 => 'latest',
-            'region'                  => $diskConfig['region'],
-            'endpoint'                => $internalEndpoint,
+            'version' => 'latest',
+            'region' => $diskConfig['region'],
+            'endpoint' => $internalEndpoint,
             'use_path_style_endpoint' => (bool) $diskConfig['use_path_style_endpoint'],
-            'credentials'             => [
-                'key'    => $diskConfig['key'],
+            'credentials' => [
+                'key' => $diskConfig['key'],
                 'secret' => $diskConfig['secret'],
             ],
         ]);
 
-        $putCommand  = $client->getCommand('PutObject', [
-            'Bucket'      => $diskConfig['bucket'],
-            'Key'         => $path,
+        $putCommand = $client->getCommand('PutObject', [
+            'Bucket' => $diskConfig['bucket'],
+            'Key' => $path,
             'ContentType' => $data['content_type'],
         ]);
-        $putRequest  = $client->createPresignedRequest($putCommand, '+15 minutes');
-        $uploadUrl   = $this->buildPresignedUrl($putRequest->getUri(), $parsedPublic);
+        $putRequest = $client->createPresignedRequest($putCommand, '+15 minutes');
+        $uploadUrl = $this->buildPresignedUrl($putRequest->getUri(), $parsedPublic);
 
-        $getCommand  = $client->getCommand('GetObject', [
+        $getCommand = $client->getCommand('GetObject', [
             'Bucket' => $diskConfig['bucket'],
-            'Key'    => $path,
+            'Key' => $path,
         ]);
-        $getRequest  = $client->createPresignedRequest($getCommand, '+1 hour');
-        $previewUrl  = $this->buildPresignedUrl($getRequest->getUri(), $parsedPublic);
+        $getRequest = $client->createPresignedRequest($getCommand, '+1 hour');
+        $previewUrl = $this->buildPresignedUrl($getRequest->getUri(), $parsedPublic);
 
         return response()->json([
-            'path'          => $path,
-            'upload_url'    => $uploadUrl,
-            'headers'       => ['Content-Type' => $data['content_type']],
-            'preview_url'   => $previewUrl,
+            'path' => $path,
+            'upload_url' => $uploadUrl,
+            'headers' => ['Content-Type' => $data['content_type']],
+            'preview_url' => $previewUrl,
             'max_file_size' => self::MAX_AVATAR_SIZE,
         ]);
     }
@@ -233,16 +247,16 @@ class AuthController extends Controller
         ];
     }
 
-    private function buildPresignedUrl(\Psr\Http\Message\UriInterface $uri, array $parsedPublic): string
+    private function buildPresignedUrl(UriInterface $uri, array $parsedPublic): string
     {
         $parsedRaw = parse_url((string) $uri);
-        $basePath  = rtrim($parsedPublic['path'] ?? '', '/');
+        $basePath = rtrim($parsedPublic['path'] ?? '', '/');
 
-        return ($parsedPublic['scheme'] ?? 'http') . '://'
-            . ($parsedPublic['host'] ?? 'localhost')
-            . (isset($parsedPublic['port']) ? ':' . $parsedPublic['port'] : '')
-            . $basePath
-            . ($parsedRaw['path'] ?? '')
-            . (isset($parsedRaw['query']) ? '?' . $parsedRaw['query'] : '');
+        return ($parsedPublic['scheme'] ?? 'http').'://'
+            .($parsedPublic['host'] ?? 'localhost')
+            .(isset($parsedPublic['port']) ? ':'.$parsedPublic['port'] : '')
+            .$basePath
+            .($parsedRaw['path'] ?? '')
+            .(isset($parsedRaw['query']) ? '?'.$parsedRaw['query'] : '');
     }
 }

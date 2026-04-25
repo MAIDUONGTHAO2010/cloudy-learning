@@ -302,9 +302,12 @@ export default {
     // ─── Profile ────────────────────────────────────────────────────
     profile: {
         title: 'Hồ sơ của tôi',
+        settings: 'Cài đặt hồ sơ',
         personalInfo: 'Thông tin cá nhân',
         name: 'Họ và tên',
+        namePlaceholder: 'Họ và tên của bạn',
         email: 'Email',
+        emailAddress: 'Địa chỉ email',
         password: 'Mật khẩu mới',
         passwordConfirm: 'Xác nhận mật khẩu',
         dateOfBirth: 'Ngày sinh',
@@ -314,6 +317,28 @@ export default {
         saveChanges: 'Lưu thay đổi',
         saving: 'Đang lưu…',
         updateSuccess: 'Cập nhật hồ sơ thành công!',
+        photo: 'Ảnh đại diện',
+        changePhoto: 'Thay ảnh',
+        uploadPhoto: 'Tải ảnh lên',
+        avatarHint: 'JPG, PNG hoặc GIF · Tối đa 5 MB',
+        avatarTooLarge: 'Tệp quá lớn. Kích thước tối đa là 5 MB.',
+        avatarInvalidType: 'Chỉ chấp nhận tệp ảnh.',
+        avatarUploadFailed: 'Tải ảnh thất bại: {msg}. Vui lòng thử lại.',
+        changePasswordLabel: 'Mật khẩu',
+        changePasswordDesc: 'Thay đổi mật khẩu tài khoản trên trang riêng.',
+        changePasswordLink: 'Đổi mật khẩu',
+        tryAgain: 'Đã xảy ra lỗi. Vui lòng thử lại.',
+    },
+
+    changePassword: {
+        title: 'Đổi mật khẩu',
+        back: '← Hồ sơ',
+        currentPassword: 'Mật khẩu hiện tại',
+        newPassword: 'Mật khẩu mới',
+        confirmPassword: 'Xác nhận mật khẩu mới',
+        submit: 'Cập nhật mật khẩu',
+        saving: 'Đang lưu…',
+        error: 'Đã xảy ra lỗi. Vui lòng thử lại.',
     },
 
     // ─── About ──────────────────────────────────────────────────────

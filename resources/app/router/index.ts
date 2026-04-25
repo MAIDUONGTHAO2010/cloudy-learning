@@ -18,6 +18,7 @@ const routes = [
     { path: '/my-courses/create', component: () => import('../pages/InstructorCreateCourse.vue'), meta: { requiresAuth: true, instructorOnly: true } },
     { path: '/my-courses/:courseId/edit', component: () => import('../pages/InstructorCourseEditor.vue'), meta: { requiresAuth: true, instructorOnly: true } },
     { path: '/profile', component: () => import('../pages/Profile.vue'), meta: { requiresAuth: true } },
+    { path: '/change-password', component: () => import('../pages/ChangePassword.vue'), meta: { requiresAuth: true } },
     { path: '/:pathMatch(.*)*', redirect: '/' },
 ];
 
