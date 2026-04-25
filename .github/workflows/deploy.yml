@@ -35,7 +35,13 @@ jobs:
             echo "==> Updating .env values..."
             sed -i 's/^APP_ENV=.*/APP_ENV=production/' .env
             sed -i 's/^APP_DEBUG=.*/APP_DEBUG=false/' .env
-            sed -i 's|^APP_URL=.*|APP_URL=${{ vars.APP_URL }}|' .env
+            APP_URL_VALUE="${{ vars.APP_URL }}"
+            if [ -z "$APP_URL_VALUE" ]; then
+              echo "ERROR: vars.APP_URL is not set in GitHub Actions repository variables." >&2
+              echo "Go to Settings → Secrets and variables → Actions → Variables and add APP_URL." >&2
+              exit 1
+            fi
+            sed -i "s|^APP_URL=.*|APP_URL=$APP_URL_VALUE|" .env
 
             echo "==> Building Docker images..."
             docker compose build --pull
