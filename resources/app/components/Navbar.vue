@@ -95,10 +95,16 @@
                 <template v-if="user">
                     <RouterLink
                         to="/profile"
-                        class="flex items-center gap-3 rounded-xl px-4 py-3 text-sm text-white transition hover:bg-white/5"
+                        class="flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white transition hover:bg-white/10 sm:flex"
                         @click="mobileOpen = false"
                     >
-                        <span class="grid h-7 w-7 place-items-center rounded-full bg-blue-600 text-xs font-bold">
+                        <img
+                            v-if="user?.profile?.avatar"
+                            :src="user.profile.avatar"
+                            alt="Avatar"
+                            class="h-7 w-7 rounded-full object-cover"
+                        />
+                        <span v-else class="grid h-7 w-7 place-items-center rounded-full bg-blue-600 text-xs font-bold">
                             {{ user?.name?.charAt(0)?.toUpperCase() ?? '?' }}
                         </span>
                         {{ user?.name }}
@@ -248,7 +254,13 @@
                         to="/profile"
                         class="hidden items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white transition hover:bg-white/10 sm:flex"
                     >
-                        <span class="grid h-6 w-6 place-items-center rounded-full bg-blue-600 text-xs font-bold">
+                        <img
+                            v-if="user?.profile?.avatar"
+                            :src="user.profile.avatar"
+                            alt="Avatar"
+                            class="h-6 w-6 rounded-full object-cover"
+                        />
+                        <span v-else class="grid h-6 w-6 place-items-center rounded-full bg-blue-600 text-xs font-bold">
                             {{ user?.name?.charAt(0)?.toUpperCase() ?? '?' }}
                         </span>
                         <span class="hidden sm:inline">{{ user?.name }}</span>

@@ -4,16 +4,22 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
+use App\Http\Requests\Auth\PresignProfileAvatarUploadRequest;
 use App\Http\Requests\Auth\RegisterRequest;
 use App\Models\Profile;
 use App\Models\User;
 use App\Services\NotificationService;
+use Aws\S3\S3Client;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
+    public const MAX_AVATAR_SIZE = 5242880; // 5 MB
     public function __construct(protected NotificationService $notificationService) {}
 
     public function login(LoginRequest $request)
@@ -108,6 +114,7 @@ class AuthController extends Controller
             'bio' => 'nullable|string|max:500',
             'categories' => 'nullable|array|max:3',
             'categories.*' => 'integer|exists:categories,id',
+            'avatar' => 'nullable|string|max:500',
         ]);
 
         $user = Auth::user();
@@ -128,6 +135,9 @@ class AuthController extends Controller
         if (array_key_exists('bio', $data)) {
             $profileData['bio'] = $data['bio'];
         }
+        if (array_key_exists('avatar', $data) && $data['avatar'] !== null) {
+            $profileData['avatar'] = $data['avatar'];
+        }
 
         $profile = $user->profile()->updateOrCreate(['user_id' => $user->id], $profileData);
 
@@ -138,6 +148,69 @@ class AuthController extends Controller
         return response()->json([
             'message' => 'Profile updated successfully.',
             'user' => $this->userPayload($user->fresh()),
+        ]);
+    }
+
+    public function presignAvatar(PresignProfileAvatarUploadRequest $request): JsonResponse
+    {
+        $user    = Auth::user();
+        $profile = $user->profile;
+
+        $data      = $request->validated();
+        $extension = strtolower(pathinfo($data['file_name'], PATHINFO_EXTENSION) ?: 'png');
+        $name      = Str::limit(
+            Str::slug(pathinfo($data['file_name'], PATHINFO_FILENAME) ?: 'avatar'),
+            60,
+            ''
+        ) ?: 'avatar';
+        $path = 'profiles/avatars/' . now()->format('Y/m') . '/' . Str::uuid() . '-' . $name . '.' . $extension;
+
+        Log::info('User requested avatar upload presign', [
+            'user_id'      => $user->id,
+            'has_avatar'   => $profile && $profile->getRawOriginal('avatar') !== null,
+            'file_name'    => $data['file_name'],
+            'content_type' => $data['content_type'],
+            'file_size'    => $data['file_size'],
+            'path'         => $path,
+        ]);
+
+        $diskConfig       = config('filesystems.disks.s3');
+        $internalEndpoint = rtrim((string) $diskConfig['endpoint'], '/');
+        $publicEndpoint   = rtrim((string) ($diskConfig['public_endpoint'] ?: $diskConfig['endpoint']), '/');
+        $parsedPublic     = parse_url($publicEndpoint);
+
+        $client = new S3Client([
+            'version'                 => 'latest',
+            'region'                  => $diskConfig['region'],
+            'endpoint'                => $internalEndpoint,
+            'use_path_style_endpoint' => (bool) $diskConfig['use_path_style_endpoint'],
+            'credentials'             => [
+                'key'    => $diskConfig['key'],
+                'secret' => $diskConfig['secret'],
+            ],
+        ]);
+
+        $putCommand  = $client->getCommand('PutObject', [
+            'Bucket'      => $diskConfig['bucket'],
+            'Key'         => $path,
+            'ContentType' => $data['content_type'],
+        ]);
+        $putRequest  = $client->createPresignedRequest($putCommand, '+15 minutes');
+        $uploadUrl   = $this->buildPresignedUrl($putRequest->getUri(), $parsedPublic);
+
+        $getCommand  = $client->getCommand('GetObject', [
+            'Bucket' => $diskConfig['bucket'],
+            'Key'    => $path,
+        ]);
+        $getRequest  = $client->createPresignedRequest($getCommand, '+1 hour');
+        $previewUrl  = $this->buildPresignedUrl($getRequest->getUri(), $parsedPublic);
+
+        return response()->json([
+            'path'          => $path,
+            'upload_url'    => $uploadUrl,
+            'headers'       => ['Content-Type' => $data['content_type']],
+            'preview_url'   => $previewUrl,
+            'max_file_size' => self::MAX_AVATAR_SIZE,
         ]);
     }
 
@@ -158,5 +231,18 @@ class AuthController extends Controller
                 'categories' => $user->profile->categories,
             ] : null,
         ];
+    }
+
+    private function buildPresignedUrl(\Psr\Http\Message\UriInterface $uri, array $parsedPublic): string
+    {
+        $parsedRaw = parse_url((string) $uri);
+        $basePath  = rtrim($parsedPublic['path'] ?? '', '/');
+
+        return ($parsedPublic['scheme'] ?? 'http') . '://'
+            . ($parsedPublic['host'] ?? 'localhost')
+            . (isset($parsedPublic['port']) ? ':' . $parsedPublic['port'] : '')
+            . $basePath
+            . ($parsedRaw['path'] ?? '')
+            . (isset($parsedRaw['query']) ? '?' . $parsedRaw['query'] : '');
     }
 }

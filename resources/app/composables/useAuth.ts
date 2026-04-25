@@ -6,6 +6,13 @@ export interface AuthUser {
     name: string;
     email: string;
     role: number;
+    profile?: {
+        avatar: string | null;
+        date_of_birth: string | null;
+        sex: number | null;
+        bio: string | null;
+        categories: { id: number; name: string; slug: string }[];
+    } | null;
 }
 
 const user = ref<AuthUser | null>(null);
