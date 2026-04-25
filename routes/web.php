@@ -37,6 +37,7 @@ Route::prefix('api')->group(function () {
 // Authenticated API (students & instructors only)
 Route::prefix('api')->middleware(['auth', 'user.site'])->group(function () {
     Route::put('profile', [AuthController::class, 'updateProfile']);
+    Route::post('profile/presign-avatar', [AuthController::class, 'presignAvatar']);
     Route::get('my-courses', [CourseController::class, 'myCourses']);
     Route::get('instructor/course-requests', [CourseController::class, 'instructorRequests']);
     Route::put('instructor/course-requests/{courseId}/{userId}', [CourseController::class, 'reviewEnrollment']);
