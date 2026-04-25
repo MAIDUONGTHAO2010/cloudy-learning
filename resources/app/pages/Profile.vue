@@ -3,7 +3,7 @@
         <Navbar />
 
         <main class="mx-auto max-w-2xl px-6 py-10">
-            <h1 class="mb-8 text-2xl font-semibold">Profile Settings</h1>
+            <h1 class="mb-8 text-2xl font-semibold">{{ t('profile.settings') }}</h1>
 
             <!-- Success message -->
             <div
@@ -23,7 +23,7 @@
 
             <!-- Avatar section -->
             <div class="mb-6 rounded-2xl border border-gray-200 bg-white p-6">
-                <h2 class="mb-4 text-sm font-medium text-gray-700">Profile Photo</h2>
+                <h2 class="mb-4 text-sm font-medium text-gray-700">{{ t('profile.photo') }}</h2>
                 <div class="flex items-center gap-5">
                     <!-- Current / preview avatar -->
                     <div class="relative h-20 w-20 shrink-0">
@@ -55,7 +55,7 @@
                         <label
                             class="cursor-pointer rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
                         >
-                            {{ user?.profile?.avatar ? 'Change photo' : 'Upload photo' }}
+                            {{ user?.profile?.avatar ? t('profile.changePhoto') : t('profile.uploadPhoto') }}
                             <input
                                 ref="avatarInput"
                                 type="file"
@@ -64,7 +64,7 @@
                                 @change="onAvatarSelected"
                             />
                         </label>
-                        <p class="text-xs text-gray-400">JPG, PNG or GIF · Max 5 MB</p>
+                        <p class="text-xs text-gray-400">{{ t('profile.avatarHint') }}</p>
                         <p v-if="avatarError" class="text-xs text-red-400">{{ avatarError }}</p>
                     </div>
                 </div>
@@ -73,11 +73,11 @@
             <form @submit.prevent="submit" class="space-y-5 rounded-2xl border border-gray-200 bg-white p-6">
                 <!-- Name -->
                 <div>
-                    <label class="mb-1.5 block text-sm font-medium text-gray-700">Full name</label>
+                    <label class="mb-1.5 block text-sm font-medium text-gray-700">{{ t('profile.name') }}</label>
                     <input
                         v-model="form.name"
                         type="text"
-                        placeholder="Your name"
+                        :placeholder="t('profile.namePlaceholder')"
                         class="w-full rounded-xl border bg-white px-4 py-3 text-sm text-gray-900 placeholder-gray-400 outline-none transition focus:ring-2"
                         :class="errors.name ? 'border-red-500 focus:ring-red-500/30' : 'border-gray-200 focus:ring-orange-400/30 focus:border-orange-400/60'"
                     />
@@ -86,7 +86,7 @@
 
                 <!-- Email -->
                 <div>
-                    <label class="mb-1.5 block text-sm font-medium text-gray-700">Email address</label>
+                    <label class="mb-1.5 block text-sm font-medium text-gray-700">{{ t('profile.emailAddress') }}</label>
                     <input
                         v-model="form.email"
                         type="email"
@@ -102,20 +102,20 @@
                     :disabled="loading"
                     class="w-full rounded-xl bg-[#1a1a4e] py-3 text-sm font-semibold text-white transition hover:bg-[#0f2460] disabled:opacity-60"
                 >
-                    {{ loading ? 'Saving…' : 'Save changes' }}
+                    {{ loading ? t('profile.saving') : t('profile.saveChanges') }}
                 </button>
             </form>
 
             <div class="mt-4 rounded-2xl border border-gray-200 bg-white p-5 flex items-center justify-between">
                 <div>
-                    <p class="text-sm font-medium text-gray-700">Password</p>
-                    <p class="mt-0.5 text-xs text-gray-400">Change your account password on a dedicated page.</p>
+                    <p class="text-sm font-medium text-gray-700">{{ t('profile.changePasswordLabel') }}</p>
+                    <p class="mt-0.5 text-xs text-gray-400">{{ t('profile.changePasswordDesc') }}</p>
                 </div>
                 <RouterLink
                     to="/change-password"
                     class="rounded-xl border border-gray-200 px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
                 >
-                    Change password
+                    {{ t('profile.changePasswordLink') }}
                 </RouterLink>
             </div>
         </main>
@@ -125,12 +125,14 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue';
+import { useI18n } from 'vue-i18n';
 import axios from 'axios';
 import { RouterLink } from 'vue-router';
 import { useAuth } from '../composables/useAuth';
 import Navbar from '../components/Navbar.vue';
 import AppFooter from '../components/Footer.vue';
 
+const { t } = useI18n();
 const { user, setUser } = useAuth();
 
 const form = reactive({
@@ -163,12 +165,12 @@ const onAvatarSelected = async (event: Event) => {
 
     const MAX_SIZE = 5 * 1024 * 1024;
     if (file.size > MAX_SIZE) {
-        avatarError.value = 'File is too large. Maximum size is 5 MB.';
+        avatarError.value = t('profile.avatarTooLarge');
         return;
     }
 
     if (!file.type.startsWith('image/')) {
-        avatarError.value = 'Only image files are allowed.';
+        avatarError.value = t('profile.avatarInvalidType');
         return;
     }
 
@@ -194,7 +196,7 @@ const onAvatarSelected = async (event: Event) => {
         pendingAvatarPath.value = presign.path;
     } catch (err: any) {
         const msg = err?.response?.data?.message ?? err?.message ?? 'Unknown error';
-        avatarError.value = `Failed to upload photo: ${msg}. Please try again.`;
+        avatarError.value = t('profile.avatarUploadFailed', { msg });
         avatarPreview.value = null;
         pendingAvatarPath.value = null;
     } finally {
@@ -231,7 +233,7 @@ const submit = async () => {
                 ),
             );
         } else {
-            generalError.value = data?.message ?? 'Something went wrong. Please try again.';
+            generalError.value = data?.message ?? t('profile.tryAgain');
         }
     } finally {
         loading.value = false;

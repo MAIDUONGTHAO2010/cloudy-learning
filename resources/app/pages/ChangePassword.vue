@@ -5,10 +5,10 @@
         <main class="mx-auto max-w-2xl px-6 py-10">
             <div class="mb-8 flex items-center gap-3">
                 <RouterLink to="/profile" class="text-sm text-gray-500 transition hover:text-gray-900">
-                    ← Profile
+                    {{ t('changePassword.back') }}
                 </RouterLink>
                 <span class="text-gray-300">/</span>
-                <h1 class="text-2xl font-semibold">Change Password</h1>
+                <h1 class="text-2xl font-semibold">{{ t('changePassword.title') }}</h1>
             </div>
 
             <!-- Success message -->
@@ -30,7 +30,7 @@
             <form @submit.prevent="submit" class="space-y-5 rounded-2xl border border-gray-200 bg-white p-6">
                 <!-- Current password -->
                 <div>
-                    <label class="mb-1.5 block text-sm font-medium text-gray-700">Current password</label>
+                    <label class="mb-1.5 block text-sm font-medium text-gray-700">{{ t('changePassword.currentPassword') }}</label>
                     <input
                         v-model="form.current_password"
                         type="password"
@@ -43,7 +43,7 @@
 
                 <!-- New password -->
                 <div>
-                    <label class="mb-1.5 block text-sm font-medium text-gray-700">New password</label>
+                    <label class="mb-1.5 block text-sm font-medium text-gray-700">{{ t('changePassword.newPassword') }}</label>
                     <input
                         v-model="form.password"
                         type="password"
@@ -56,7 +56,7 @@
 
                 <!-- Confirm new password -->
                 <div>
-                    <label class="mb-1.5 block text-sm font-medium text-gray-700">Confirm new password</label>
+                    <label class="mb-1.5 block text-sm font-medium text-gray-700">{{ t('changePassword.confirmPassword') }}</label>
                     <input
                         v-model="form.password_confirmation"
                         type="password"
@@ -72,7 +72,7 @@
                     :disabled="loading"
                     class="w-full rounded-xl bg-[#1a1a4e] py-3 text-sm font-semibold text-white transition hover:bg-[#0f2460] disabled:opacity-60"
                 >
-                    {{ loading ? 'Saving…' : 'Update password' }}
+                    {{ loading ? t('changePassword.saving') : t('changePassword.submit') }}
                 </button>
             </form>
         </main>
@@ -82,10 +82,13 @@
 
 <script setup lang="ts">
 import { ref, reactive } from 'vue';
+import { useI18n } from 'vue-i18n';
 import axios from 'axios';
 import { RouterLink } from 'vue-router';
 import Navbar from '../components/Navbar.vue';
 import AppFooter from '../components/Footer.vue';
+
+const { t } = useI18n();
 
 const form = reactive({
     current_password: '',
@@ -120,7 +123,7 @@ const submit = async () => {
                 ),
             );
         } else {
-            generalError.value = data?.message ?? 'Something went wrong. Please try again.';
+            generalError.value = data?.message ?? t('changePassword.error');
         }
     } finally {
         loading.value = false;

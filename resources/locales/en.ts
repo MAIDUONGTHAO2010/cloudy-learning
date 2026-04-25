@@ -296,9 +296,12 @@ export default {
 
     profile: {
         title: 'My Profile',
+        settings: 'Profile Settings',
         personalInfo: 'Personal Information',
         name: 'Full name',
+        namePlaceholder: 'Your name',
         email: 'Email',
+        emailAddress: 'Email address',
         password: 'New password',
         passwordConfirm: 'Confirm password',
         dateOfBirth: 'Date of birth',
@@ -308,6 +311,28 @@ export default {
         saveChanges: 'Save changes',
         saving: 'Saving…',
         updateSuccess: 'Profile updated successfully!',
+        photo: 'Profile Photo',
+        changePhoto: 'Change photo',
+        uploadPhoto: 'Upload photo',
+        avatarHint: 'JPG, PNG or GIF · Max 5 MB',
+        avatarTooLarge: 'File is too large. Maximum size is 5 MB.',
+        avatarInvalidType: 'Only image files are allowed.',
+        avatarUploadFailed: 'Failed to upload photo: {msg}. Please try again.',
+        changePasswordLabel: 'Password',
+        changePasswordDesc: 'Change your account password on a dedicated page.',
+        changePasswordLink: 'Change password',
+        tryAgain: 'Something went wrong. Please try again.',
+    },
+
+    changePassword: {
+        title: 'Change Password',
+        back: '← Profile',
+        currentPassword: 'Current password',
+        newPassword: 'New password',
+        confirmPassword: 'Confirm new password',
+        submit: 'Update password',
+        saving: 'Saving…',
+        error: 'Something went wrong. Please try again.',
     },
 
     about: {
