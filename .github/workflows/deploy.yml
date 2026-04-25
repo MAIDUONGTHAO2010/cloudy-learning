@@ -35,10 +35,10 @@ jobs:
             echo "==> Updating .env values..."
             sed -i 's/^APP_ENV=.*/APP_ENV=production/' .env
             sed -i 's/^APP_DEBUG=.*/APP_DEBUG=false/' .env
-            APP_URL_VALUE="${{ vars.APP_URL }}"
+            APP_URL_VALUE="${{ vars.EC2_APP_URL }}"
             if [ -z "$APP_URL_VALUE" ]; then
-              echo "ERROR: vars.APP_URL is not set in GitHub Actions repository variables." >&2
-              echo "Go to Settings → Secrets and variables → Actions → Variables and add APP_URL." >&2
+              echo "ERROR: vars.EC2_APP_URL is not set in GitHub Actions repository variables." >&2
+              echo "Go to Settings → Secrets and variables → Actions → Variables and add EC2_APP_URL." >&2
               exit 1
             fi
             sed -i "s|^APP_URL=.*|APP_URL=$APP_URL_VALUE|" .env
