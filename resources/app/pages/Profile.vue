@@ -97,36 +97,6 @@
                     <p v-if="errors.email" class="mt-1 text-xs text-red-400">{{ errors.email }}</p>
                 </div>
 
-                <hr class="border-gray-200" />
-
-                <!-- New password -->
-                <div>
-                    <label class="mb-1.5 block text-sm font-medium text-gray-700">
-                        New password <span class="text-gray-400 font-normal">(leave blank to keep current)</span>
-                    </label>
-                    <input
-                        v-model="form.password"
-                        type="password"
-                        placeholder="········"
-                        class="w-full rounded-xl border bg-white px-4 py-3 text-sm text-gray-900 placeholder-gray-400 outline-none transition focus:ring-2"
-                        :class="errors.password ? 'border-red-500 focus:ring-red-500/30' : 'border-gray-200 focus:ring-orange-400/30 focus:border-orange-400/60'"
-                    />
-                    <p v-if="errors.password" class="mt-1 text-xs text-red-400">{{ errors.password }}</p>
-                </div>
-
-                <!-- Confirm password -->
-                <div>
-                    <label class="mb-1.5 block text-sm font-medium text-gray-700">Confirm new password</label>
-                    <input
-                        v-model="form.password_confirmation"
-                        type="password"
-                        placeholder="········"
-                        class="w-full rounded-xl border bg-white px-4 py-3 text-sm text-gray-900 placeholder-gray-400 outline-none transition focus:ring-2"
-                        :class="errors.password_confirmation ? 'border-red-500 focus:ring-red-500/30' : 'border-gray-200 focus:ring-orange-400/30 focus:border-orange-400/60'"
-                    />
-                    <p v-if="errors.password_confirmation" class="mt-1 text-xs text-red-400">{{ errors.password_confirmation }}</p>
-                </div>
-
                 <button
                     type="submit"
                     :disabled="loading"
@@ -135,6 +105,19 @@
                     {{ loading ? 'Saving…' : 'Save changes' }}
                 </button>
             </form>
+
+            <div class="mt-4 rounded-2xl border border-gray-200 bg-white p-5 flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-700">Password</p>
+                    <p class="mt-0.5 text-xs text-gray-400">Change your account password on a dedicated page.</p>
+                </div>
+                <RouterLink
+                    to="/change-password"
+                    class="rounded-xl border border-gray-200 px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
+                >
+                    Change password
+                </RouterLink>
+            </div>
         </main>
         <AppFooter />
     </div>
@@ -143,6 +126,7 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue';
 import axios from 'axios';
+import { RouterLink } from 'vue-router';
 import { useAuth } from '../composables/useAuth';
 import Navbar from '../components/Navbar.vue';
 import AppFooter from '../components/Footer.vue';
@@ -152,8 +136,6 @@ const { user, setUser } = useAuth();
 const form = reactive({
     name: '',
     email: '',
-    password: '',
-    password_confirmation: '',
 });
 
 const errors = reactive<Record<string, string>>({});
@@ -236,8 +218,6 @@ const submit = async () => {
 
         const { data } = await axios.put('/api/profile', payload);
         setUser(data.user);
-        form.password = '';
-        form.password_confirmation = '';
         pendingAvatarPath.value = null;
         avatarPreview.value = null;
         successMessage.value = data.message;

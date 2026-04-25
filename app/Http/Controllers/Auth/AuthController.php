@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Auth\ChangePasswordRequest;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\PresignProfileAvatarUploadRequest;
 use App\Http\Requests\Auth\RegisterRequest;
@@ -102,13 +103,28 @@ class AuthController extends Controller
         return response()->json($this->userPayload($user));
     }
 
+    public function changePassword(ChangePasswordRequest $request): JsonResponse
+    {
+        $user = Auth::user();
+        $data = $request->validated();
+
+        if (! Hash::check($data['current_password'], $user->password)) {
+            return response()->json([
+                'message' => 'The current password is incorrect.',
+                'errors'  => ['current_password' => ['The current password is incorrect.']],
+            ], 422);
+        }
+
+        $user->update(['password' => Hash::make($data['password'])]);
+
+        return response()->json(['message' => 'Password changed successfully.']);
+    }
+
     public function updateProfile(Request $request)
     {
         $data = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . Auth::id(),
-            'password' => 'nullable|string|min:8|confirmed',
-            'password_confirmation' => 'nullable|string',
             'date_of_birth' => 'nullable|date|before:today',
             'sex' => 'nullable|in:0,1,2',
             'bio' => 'nullable|string|max:500',
@@ -119,11 +135,7 @@ class AuthController extends Controller
 
         $user = Auth::user();
 
-        $updateData = ['name' => $data['name'], 'email' => $data['email']];
-        if (! empty($data['password'])) {
-            $updateData['password'] = Hash::make($data['password']);
-        }
-        $user->update($updateData);
+        $user->update(['name' => $data['name'], 'email' => $data['email']]);
 
         $profileData = [];
         if (array_key_exists('date_of_birth', $data)) {
