@@ -7,6 +7,43 @@ use Aws\S3\S3Client;
 trait HasS3PresignedUrl
 {
     /**
+     * Extract the raw S3 object key from a full URL or path before saving.
+     *
+     * Handles:
+     *  - Plain URLs:     http://host:9000/bucket/key   → key
+     *  - Presigned URLs: http://host:9000/bucket/key?X-Amz-...  → key
+     *  - Raw S3 keys:    courses/thumbnails/2026/04/uuid-name.png → unchanged
+     *
+     * @param  string|null  $value  The value being saved
+     * @return string|null
+     */
+    protected static function presignedSetValue(?string $value): ?string
+    {
+        if (empty($value)) {
+            return null;
+        }
+
+        if (! str_starts_with($value, 'http')) {
+            return ltrim($value, '/');
+        }
+
+        $diskConfig = config('filesystems.disks.s3');
+        $bucket = (string) $diskConfig['bucket'];
+
+        $urlPath = ltrim(parse_url($value, PHP_URL_PATH) ?? '', '/');
+
+        $publicEndpoint = rtrim((string) ($diskConfig['public_endpoint'] ?: $diskConfig['endpoint']), '/');
+        $publicBasePath = ltrim(parse_url($publicEndpoint, PHP_URL_PATH) ?? '', '/');
+        if ($publicBasePath !== '' && str_starts_with($urlPath, $publicBasePath . '/')) {
+            $urlPath = substr($urlPath, strlen($publicBasePath) + 1);
+        }
+
+        return str_starts_with($urlPath, $bucket . '/')
+            ? substr($urlPath, strlen($bucket) + 1)
+            : $urlPath;
+    }
+
+    /**
      * Generate a presigned S3 GET URL from a stored value.
      *
      * Handles:

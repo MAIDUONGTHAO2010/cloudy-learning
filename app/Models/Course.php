@@ -30,7 +30,8 @@ class Course extends Model
     protected function thumbnail(): Attribute
     {
         return Attribute::make(
-            get: fn(?string $value) => static::presignedGetUrl($value)
+            get: fn(?string $value) => static::presignedGetUrl($value),
+            set: fn(?string $value) => static::presignedSetValue($value),
         );
     }
 

@@ -2,10 +2,14 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasLocalUrl;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 
 class Category extends Model
 {
+    use HasLocalUrl;
+
     /**
      * The attributes that are mass assignable.
      *
@@ -20,6 +24,14 @@ class Category extends Model
         'is_active',
         'parent_id',
     ];
+
+    protected function image(): Attribute
+    {
+        return Attribute::make(
+            get: fn(?string $value) => static::localGetUrl($value),
+            set: fn(?string $value) => static::localSetValue($value),
+        );
+    }
 
     public function children()
     {
