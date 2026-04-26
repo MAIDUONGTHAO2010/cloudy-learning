@@ -221,10 +221,10 @@ const days: Day[] = [
                 activities: [
                     { label: 'Nhận xe máy & gửi đồ tại Daisy Hotel', location: 'Daisy Flower Hotel', type: 'Khác' },
                     { label: 'Cà phê Hòn Chồng – view biển tuyệt đẹp', location: 'Hòn Chồng', type: 'Ăn uống' },
-                    { label: 'Ăn bánh căn đặc sản Nha Trang', type: 'Ăn uống' },
+                    { label: 'Ăn bánh căn mực Cô Loan', location: 'Bánh căn Cô Loan', type: 'Ăn uống' },
                     { label: 'Ghé Bờ Kè Làng Chụt check-in', location: 'Bờ Kè Làng Chụt', type: 'Tham quan' },
                 ],
-                tip: 'Bánh căn là đặc sản không thể bỏ qua – nên đến sớm để tránh hết hàng. Bờ Kè Làng Chụt là điểm check-in siêu đẹp ven biển.',
+                tip: 'Bánh căn mực Cô Loan là đặc sản không thể bỏ qua – nên đến sớm để tránh hết hàng. Sau đó ghé Bờ Kè Làng Chụt – điểm check-in siêu đẹp ven biển.',
             },
             {
                 period: 'Buổi Trưa – Chiều',
@@ -235,7 +235,7 @@ const days: Day[] = [
                 title: 'Nhà thờ Đỏ & ăn ốc Lương Sơn',
                 description: 'Ghé thăm Nhà thờ Đỏ – công trình kiến trúc nổi tiếng tại trung tâm Nha Trang, sau đó thưởng thức ốc Lương Sơn hấp dẫn rồi về lại Daisy Hotel nghỉ ngơi.',
                 activities: [
-                    { label: 'Ghé Nhà thờ Đỏ', location: 'Nhà thờ Đỏ Nha Trang', type: 'Tham quan' },
+                    { label: 'Tham quan & check-in Nhà thờ Đỏ', location: 'Nhà thờ Đỏ Nha Trang', type: 'Tham quan' },
                     { label: 'Ăn ốc Lương Sơn', location: 'Lương Sơn', type: 'Ăn uống' },
                     { label: 'Về lại Daisy Hotel nghỉ ngơi', location: 'Daisy Flower Hotel', type: 'Khác' },
                 ],
