@@ -6,16 +6,16 @@
         <section class="bg-gradient-to-br from-[#1a1a4e] via-[#0f2460] to-[#0c1d50] py-20 text-center">
             <div class="mx-auto max-w-3xl px-6">
                 <span class="inline-block rounded-full bg-orange-500/10 px-4 py-1 text-xs font-semibold uppercase tracking-widest text-orange-400">
-                    ✈️ Hành trình du lịch
+                    🌴 Hành trình du lịch
                 </span>
-                <h1 class="mt-4 text-4xl font-bold leading-tight text-white">Khám phá Đà Nẵng – Hội An</h1>
+                <h1 class="mt-4 text-4xl font-bold leading-tight text-white">Khám phá Nha Trang</h1>
                 <p class="mt-4 text-lg text-blue-100/80 leading-relaxed">
-                    Lịch trình 3 ngày trải nghiệm bãi biển, phố cổ và ẩm thực miền Trung
+                    Lịch trình 29/04 – 03/05/2026 · Biển xanh, Vinpearl, ẩm thực và tiệc cưới
                 </p>
                 <div class="mt-6 flex flex-wrap justify-center gap-4 text-sm text-blue-100/70">
-                    <span class="flex items-center gap-1"><span>📅</span> 3 ngày 2 đêm</span>
-                    <span class="flex items-center gap-1"><span>👥</span> 2–4 người</span>
-                    <span class="flex items-center gap-1"><span>📍</span> Đà Nẵng – Hội An</span>
+                    <span class="flex items-center gap-1"><span>📅</span> 29/04 – 03/05/2026</span>
+                    <span class="flex items-center gap-1"><span>🏨</span> Daisy Flower Hotel</span>
+                    <span class="flex items-center gap-1"><span>📍</span> Nha Trang, Khánh Hoà</span>
                 </div>
             </div>
         </section>
@@ -51,7 +51,8 @@
                         <div class="flex items-start gap-4">
                             <span class="text-4xl">{{ days[activeDay].emoji }}</span>
                             <div>
-                                <h2 class="text-xl font-bold text-gray-900">{{ days[activeDay].title }}</h2>
+                                <p class="text-xs font-medium text-orange-500">{{ days[activeDay].date }}</p>
+                                <h2 class="mt-0.5 text-xl font-bold text-gray-900">{{ days[activeDay].title }}</h2>
                                 <p class="mt-1 text-gray-500">{{ days[activeDay].summary }}</p>
                                 <div class="mt-3 flex flex-wrap gap-2">
                                     <span
@@ -106,7 +107,13 @@
                                         class="flex items-start gap-2 text-sm text-gray-700"
                                     >
                                         <span class="mt-0.5 text-orange-400">▸</span>
-                                        <span>{{ activity }}</span>
+                                        <span>
+                                            {{ activity.label }}
+                                            <span v-if="activity.location" class="ml-1 inline-flex items-center gap-0.5 text-xs text-gray-400">
+                                                <svg class="h-3 w-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"/></svg>
+                                                {{ activity.location }}
+                                            </span>
+                                        </span>
                                     </li>
                                 </ul>
 
@@ -125,7 +132,7 @@
                             @click="activeDay--"
                             class="flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-5 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition hover:bg-gray-50"
                         >
-                            ← Ngày {{ activeDay }}
+                            ← {{ days[activeDay - 1].label }}
                         </button>
                         <div v-else></div>
                         <button
@@ -133,7 +140,7 @@
                             @click="activeDay++"
                             class="flex items-center gap-2 rounded-xl bg-orange-500 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-orange-600"
                         >
-                            Ngày {{ activeDay + 2 }} →
+                            {{ days[activeDay + 1].label }} →
                         </button>
                     </div>
                 </div>
@@ -159,12 +166,13 @@ interface Slot {
     badgeClass: string;
     title: string;
     description: string;
-    activities: string[];
+    activities: { label: string; location?: string; type?: string }[];
     tip?: string;
 }
 
 interface Day {
     label: string;
+    date: string;
     title: string;
     emoji: string;
     summary: string;
@@ -174,176 +182,257 @@ interface Day {
 
 const days: Day[] = [
     {
-        label: 'Ngày 1',
-        title: 'Khám phá Đà Nẵng',
-        emoji: '🌊',
-        summary: 'Ngày đầu tiên đặt chân đến thành phố biển – check-in, tham quan cầu Rồng và tắm biển Mỹ Khê.',
-        tags: ['Biển', 'Cầu Rồng', 'Hải sản'],
+        label: '29/04',
+        date: 'Thứ Tư, 29/04/2026',
+        title: 'Ngày khởi hành',
+        emoji: '🚗',
+        summary: 'Lên đường đến Nha Trang – khởi đầu chuyến hành trình đầy hứng khởi.',
+        tags: ['Di chuyển'],
         slots: [
             {
                 period: 'Buổi Sáng',
-                time: '07:00 – 11:30',
+                time: 'Cả ngày',
                 icon: '🌅',
                 bgColor: 'bg-amber-100',
                 badgeClass: 'bg-amber-100 text-amber-700',
-                title: 'Bay đến Đà Nẵng & nhận phòng',
-                description: 'Di chuyển từ sân bay Đà Nẵng về khách sạn, nhận phòng và nghỉ ngơi lấy sức.',
-                activities: [
-                    'Đón xe từ sân bay Đà Nẵng (30 phút)',
-                    'Check-in khách sạn khu vực biển Mỹ Khê',
-                    'Ăn sáng tại khách sạn hoặc quán mì Quảng gần đó',
-                    'Dạo bộ dọc bờ biển buổi sáng',
-                ],
-                tip: 'Đặt phòng khách sạn tầng cao để ngắm view biển đẹp hơn.',
+                title: 'Lên đường',
+                description: 'Khởi hành đến Nha Trang bằng xe.',
+                activities: [{ label: 'Đi xe đến Nha Trang', type: 'Di chuyển' }],
+                tip: 'Chuẩn bị đồ ăn nhẹ và nước uống cho chuyến đi dài.',
             },
             {
                 period: 'Buổi Chiều',
-                time: '13:00 – 18:00',
+                time: '',
                 icon: '☀️',
                 bgColor: 'bg-sky-100',
                 badgeClass: 'bg-sky-100 text-sky-700',
-                title: 'Tắm biển Mỹ Khê & tham quan Cầu Rồng',
-                description: 'Tận hưởng bãi biển được CNN bình chọn là một trong những bãi biển đẹp nhất hành tinh.',
-                activities: [
-                    'Tắm biển Mỹ Khê (1–2 giờ)',
-                    'Chụp ảnh tại Cầu Rồng',
-                    'Thăm Bảo tàng Chăm (tùy chọn)',
-                    'Dạo phố Bạch Đằng dọc sông Hàn',
-                ],
-                tip: 'Mang kem chống nắng SPF 50+, biển Đà Nẵng nắng rất gắt từ 10h–16h.',
+                title: 'Trên đường',
+                description: 'Tiếp tục hành trình di chuyển.',
+                activities: [{ label: 'Nghỉ dọc đường, ngắm cảnh' }],
             },
             {
                 period: 'Buổi Tối',
-                time: '18:30 – 22:00',
+                time: '',
                 icon: '🌙',
                 bgColor: 'bg-indigo-100',
                 badgeClass: 'bg-indigo-100 text-indigo-700',
-                title: 'Ẩm thực tối & xem Cầu Rồng phun lửa',
-                description: 'Thưởng thức hải sản tươi sống rồi đến xem màn trình diễn phun lửa đặc sắc của Cầu Rồng.',
-                activities: [
-                    'Ăn tối tại nhà hàng hải sản Trần Phú',
-                    'Đặc sản: tôm hùm, cua ghẹ, cá ngừ đại dương',
-                    'Đến Cầu Rồng lúc 21:00 xem phun lửa / phun nước (Thứ 7, CN)',
-                    'Cà phê view sông Hàn về đêm',
-                ],
-                tip: 'Cầu Rồng chỉ phun lửa vào tối Thứ 7 và Chủ Nhật lúc 21:00. Nên đến trước 20:30.',
+                title: 'Đến nơi & nghỉ ngơi',
+                description: 'Đến Nha Trang, ổn định chỗ ở và nghỉ ngơi lấy sức.',
+                activities: [{ label: 'Check-in Daisy Flower Hotel', location: 'Daisy Flower Hotel' }],
             },
         ],
     },
     {
-        label: 'Ngày 2',
-        title: 'Bà Nà Hills & Phố cổ Hội An',
-        emoji: '🏔️',
-        summary: 'Buổi sáng chinh phục Bà Nà Hills trên mây, buổi chiều và tối đắm chìm trong vẻ đẹp cổ kính của Hội An.',
-        tags: ['Bà Nà Hills', 'Hội An', 'Đèn lồng'],
+        label: '30/04',
+        date: 'Thứ Năm, 30/04/2026',
+        title: 'Khám phá Nha Trang',
+        emoji: '🌊',
+        summary: 'Nhận xe máy, thưởng thức ẩm thực đặc trưng, tham quan Nhà hát Đỏ và vui chơi về đêm.',
+        tags: ['Ẩm thực', 'Tham quan', 'Nightlife'],
         slots: [
             {
                 period: 'Buổi Sáng',
-                time: '07:30 – 12:00',
-                icon: '🌄',
+                time: 'Sáng sớm',
+                icon: '🌅',
                 bgColor: 'bg-amber-100',
                 badgeClass: 'bg-amber-100 text-amber-700',
-                title: 'Bà Nà Hills – Cầu Vàng',
-                description: 'Di chuyển lên Bà Nà Hills bằng cáp treo dài nhất Đông Nam Á và chiêm ngưỡng Cầu Vàng nổi tiếng thế giới.',
+                title: 'Nhận xe & ăn sáng đặc sản',
+                description: 'Nhận xe máy tại khách sạn, cất hành lý và bắt đầu ngày mới với cà phê view biển và bánh căn mực đặc trưng Nha Trang.',
                 activities: [
-                    'Khởi hành từ khách sạn lúc 7:30',
-                    'Mua vé cáp treo Bà Nà Hills',
-                    'Tham quan Cầu Vàng – chụp ảnh sống ảo',
-                    'Khám phá làng Pháp cổ trên đỉnh núi',
-                    'Trải nghiệm Fantasy Park',
+                    { label: 'Nhận xe máy tại Daisy Flower Hotel', location: 'Daisy Flower Hotel', type: 'Khác' },
+                    { label: 'Cất hành lý', type: 'Khác' },
+                    { label: 'Cà phê Hòn Chồng – view biển tuyệt đẹp', type: 'Ăn uống' },
+                    { label: 'Ăn bánh căn mực Cô Loan', location: 'Bánh căn mực Cô Loan', type: 'Ăn uống' },
                 ],
-                tip: 'Mang áo khoác mỏng vì trên đỉnh Bà Nà nhiệt độ chỉ 15–20°C, lạnh hơn dưới chân núi nhiều.',
+                tip: 'Bánh căn mực Cô Loan là đặc sản không thể bỏ qua – nên đến sớm trước 9h để tránh hết hàng.',
             },
             {
                 period: 'Buổi Chiều',
-                time: '13:30 – 18:00',
-                icon: '🏮',
+                time: 'Chiều',
+                icon: '☀️',
                 bgColor: 'bg-sky-100',
                 badgeClass: 'bg-sky-100 text-sky-700',
-                title: 'Hội An phố cổ',
-                description: 'Di chuyển đến Hội An (30 km từ Đà Nẵng) – Di sản văn hóa thế giới UNESCO với những con phố đèn lồng rực rỡ.',
+                title: 'Nhà hát Đỏ & nhận phòng',
+                description: 'Tham quan Nhà hát Đỏ – công trình kiến trúc ấn tượng tại trung tâm Nha Trang, sau đó chính thức nhận phòng nghỉ ngơi.',
                 activities: [
-                    'Di chuyển Bà Nà – Hội An (~45 phút)',
-                    'Tham quan Chùa Cầu Nhật Bản',
-                    'Khám phá Hội quán Phúc Kiến',
-                    'Dạo phố cổ Nguyễn Thái Học, Trần Phú',
-                    'Mua sắm đồ thủ công mỹ nghệ, đèn lồng',
+                    { label: 'Tham quan Nhà hát Đỏ', type: 'Khác' },
+                    { label: 'Nhận phòng khách sạn', location: 'Daisy Flower Hotel' },
+                    { label: 'Nghỉ ngơi, tắm biển (tùy chọn)' },
                 ],
-                tip: 'Nên mặc đồ lịch sự khi vào các hội quán và chùa trong phố cổ.',
+                tip: 'Nhà hát Đỏ (Trung tâm Hội nghị tỉnh Khánh Hoà) có kiến trúc đặc trưng đỏ nổi bật – điểm check-in đẹp.',
             },
             {
                 period: 'Buổi Tối',
-                time: '18:30 – 22:00',
-                icon: '✨',
+                time: 'Tối – Đêm',
+                icon: '🌙',
                 bgColor: 'bg-indigo-100',
                 badgeClass: 'bg-indigo-100 text-indigo-700',
-                title: 'Thả đèn hoa đăng & ẩm thực Hội An',
-                description: 'Thưởng thức cao lầu, mì Quảng đặc sản Hội An rồi thả đèn hoa đăng trên sông Hoài lung linh.',
+                title: 'Nhậu Lương Sơn & đi Bar',
+                description: 'Tối đến khu Lương Sơn nổi tiếng với hải sản tươi sống, sau đó tận hưởng không khí về đêm Nha Trang.',
                 activities: [
-                    'Ăn tối: Cao lầu Hội An, Cơm gà Bà Buội',
-                    'Mua đèn hoa đăng và ra bờ sông Hoài',
-                    'Thả đèn và ngắm đèn lồng phố cổ về đêm',
-                    'Uống trà hoặc cà phê view sông',
+                    { label: 'Ăn tối & nhậu tại khu Lương Sơn', location: 'Lương Sơn', type: 'Ăn uống' },
+                    { label: 'Khám phá bar & nightlife Nha Trang' },
                 ],
-                tip: 'Đêm rằm âm lịch, phố cổ Hội An tắt điện thắp nến – không khí cực kỳ huyền ảo.',
+                tip: 'Khu Lương Sơn có nhiều quán hải sản tươi, giá cả bình dân – nên hỏi giá trước khi gọi món.',
             },
         ],
     },
     {
-        label: 'Ngày 3',
-        title: 'Ngũ Hành Sơn & Mua sắm',
-        emoji: '🗿',
-        summary: 'Buổi sáng leo Ngũ Hành Sơn huyền bí, chiều tham quan làng nghề và mua sắm, tối chia tay thành phố biển.',
-        tags: ['Ngũ Hành Sơn', 'Làng đá', 'Shopping'],
+        label: '01/05',
+        date: 'Thứ Sáu, 01/05/2026',
+        title: 'Vinpearl cả ngày',
+        emoji: '🎡',
+        summary: 'Cả ngày vui chơi tại Vinpearl Land – cáp treo, zipline, thuỷ cung, show nhạc nước và nhiều trò giải trí đỉnh cao.',
+        tags: ['Vinpearl', 'Giải trí', 'Show diễn'],
         slots: [
             {
                 period: 'Buổi Sáng',
-                time: '07:30 – 11:30',
-                icon: '⛰️',
+                time: '8:30 – 12:00',
+                icon: '🎢',
                 bgColor: 'bg-amber-100',
                 badgeClass: 'bg-amber-100 text-amber-700',
-                title: 'Ngũ Hành Sơn – Thạch động huyền bí',
-                description: 'Khám phá quần thể núi đá vôi Ngũ Hành Sơn với nhiều hang động, chùa chiền ẩn sâu trong lòng núi.',
+                title: 'Cáp treo & khu phiêu lưu',
+                description: 'Lên Vinpearl bằng cáp treo biển dài nhất thế giới, trải nghiệm những trò chơi mạo hiểm đầu ngày.',
                 activities: [
-                    'Di chuyển đến Ngũ Hành Sơn (20 phút từ trung tâm)',
-                    'Leo bộ hoặc đi thang máy lên Thủy Sơn',
-                    'Tham quan động Huyền Không, chùa Tam Thai',
-                    'Ngắm toàn cảnh Đà Nẵng từ đỉnh núi',
-                    'Thăm làng điêu khắc đá Non Nước',
+                    { label: 'Di chuyển đến bến cáp treo Vinpearl', location: 'Vinpearl Nha Trang' },
+                    { label: '8:30 xếp hàng lên cáp treo – nên đến sớm!' },
+                    { label: 'Zipline – cảm giác bay trên không' },
+                    { label: 'Trượt núi' },
+                    { label: 'Phiêu lưu hầm mỏ' },
                 ],
-                tip: 'Đi giày đế bằng hoặc sneaker khi leo núi. Mang theo nước uống.',
+                tip: 'Đến trước 8:30 để tránh hàng dài. Mang giày thể thao để chơi các trò mạo hiểm.',
             },
             {
                 period: 'Buổi Chiều',
-                time: '13:00 – 17:30',
-                icon: '🛍️',
+                time: '12:00 – 17:30',
+                icon: '🌊',
                 bgColor: 'bg-sky-100',
                 badgeClass: 'bg-sky-100 text-sky-700',
-                title: 'Mua sắm & thư giãn',
-                description: 'Tranh thủ mua đồ lưu niệm, đặc sản và nghỉ ngơi trước khi về.',
+                title: 'Thuỷ cung, rạp phim 360° & công viên',
+                description: 'Khám phá thuỷ cung đẳng cấp, trải nghiệm rạp phim 360° độc đáo và dạo quanh các khu vui chơi.',
                 activities: [
-                    'Mua đặc sản: bánh tráng cuốn thịt heo, mắm Đà Nẵng, nước mắm Nam Ô',
-                    'Tham quan chợ Hàn hoặc chợ Cồn',
-                    'Ghé Lotte Mart / Vincom mua sắm thêm',
-                    'Nghỉ ngơi tại khách sạn, check-out',
+                    { label: 'Thuỷ cung Vinpearl' },
+                    { label: 'Ăn trưa tại khu ẩm thực Vinpearl' },
+                    { label: 'Rạp phim 360°' },
+                    { label: 'Ta Ta River' },
+                    { label: 'Bánh xe bầu trời (Ferris Wheel)' },
+                    { label: 'King Garden – vườn hoa đẹp' },
                 ],
-                tip: 'Giá tại chợ thường rẻ hơn các cửa hàng, nhớ mặc cả nhé!',
+                tip: 'Ưu tiên thuỷ cung vào đầu chiều – buổi chiều ít người hơn buổi sáng.',
             },
             {
                 period: 'Buổi Tối',
-                time: '18:00 – 21:00',
-                icon: '🍽️',
+                time: '18:00 – 23:00',
+                icon: '🎆',
                 bgColor: 'bg-indigo-100',
                 badgeClass: 'bg-indigo-100 text-indigo-700',
-                title: 'Bữa tối chia tay & ra sân bay',
-                description: 'Bữa tối cuối cùng tại Đà Nẵng với những đặc sản không thể bỏ lỡ, rồi ra sân bay về nhà.',
+                title: 'Show nhạc nước, Tata Show & ăn khuya',
+                description: 'Kết thúc ngày tại Vinpearl với show nhạc nước hoành tráng, Tata Show đặc sắc, rồi về ăn khuya gần Tháp Bà.',
                 activities: [
-                    'Ăn tối: Bánh xèo bà Dưỡng, bún mắm nêm, bánh mì Phượng',
-                    'Dạo bờ biển lần cuối, ngắm hoàng hôn',
-                    'Di chuyển ra sân bay Đà Nẵng',
-                    'Bay về – kết thúc hành trình tuyệt vời',
+                    { label: 'Ăn tối trong khuôn viên Vinpearl' },
+                    { label: 'Xem Show nhạc nước' },
+                    { label: 'Xem Tata Show' },
+                    { label: 'Ăn khuya gần Tháp Bà Ponagar', location: 'Tháp Bà Ponagar' },
+                    { label: 'Về lại Daisy Flower Hotel', location: 'Daisy Flower Hotel' },
                 ],
-                tip: 'Nên ra sân bay trước ít nhất 90 phút cho chuyến bay nội địa.',
+                tip: 'Show nhạc nước và Tata Show thường diễn vào tối – kiểm tra lịch cụ thể tại quầy thông tin Vinpearl.',
+            },
+        ],
+    },
+    {
+        label: '02/05',
+        date: 'Thứ Bảy, 02/05/2026',
+        title: 'Bình minh & Đám cưới',
+        emoji: '💒',
+        summary: 'Ngắm bình minh trên biển, ăn sáng tại Sailing Club sang trọng, rồi tham dự đám cưới.',
+        tags: ['Bình minh', 'Ăn sáng', 'Đám cưới'],
+        slots: [
+            {
+                period: 'Buổi Sáng',
+                time: 'Sáng sớm',
+                icon: '🌅',
+                bgColor: 'bg-amber-100',
+                badgeClass: 'bg-amber-100 text-amber-700',
+                title: 'Bình minh & ăn sáng Sailing Club',
+                description: 'Dậy sớm ra bờ biển ngắm bình minh Nha Trang – khoảnh khắc không thể quên, rồi ăn sáng tại Sailing Club nổi tiếng.',
+                activities: [
+                    { label: 'Đi ngắm bình minh trên bờ biển Nha Trang' },
+                    { label: 'Ăn sáng tại Sailing Club', location: 'Sailing Club Nha Trang' },
+                ],
+                tip: 'Bình minh Nha Trang khoảng 5:30–6:00 sáng – cực đẹp và yên tĩnh. Mang máy ảnh nhé!',
+            },
+            {
+                period: 'Buổi Chiều',
+                time: 'Chiều',
+                icon: '💐',
+                bgColor: 'bg-sky-100',
+                badgeClass: 'bg-sky-100 text-sky-700',
+                title: 'Đám cưới',
+                description: 'Tham dự tiệc cưới – chúc mừng cô dâu chú rể trong không khí vui tươi.',
+                activities: [
+                    { label: 'Đi đám cưới' },
+                    { label: 'Về lại khách sạn nghỉ ngơi' },
+                ],
+            },
+            {
+                period: 'Buổi Tối',
+                time: 'Tối',
+                icon: '🥂',
+                bgColor: 'bg-indigo-100',
+                badgeClass: 'bg-indigo-100 text-indigo-700',
+                title: 'Tiệc cưới buổi tối',
+                description: 'Tiếp tục tham dự đám cưới buổi tối.',
+                activities: [
+                    { label: 'Tham dự tiệc cưới tối' },
+                ],
+            },
+        ],
+    },
+    {
+        label: '03/05',
+        date: 'Chủ Nhật, 03/05/2026',
+        title: 'Buổi sáng cuối & về nhà',
+        emoji: '☕',
+        summary: 'Buổi sáng thong thả tại Duyên Hà Coffee trước khi kết thúc hành trình đáng nhớ.',
+        tags: ['Cà phê', 'Về nhà'],
+        slots: [
+            {
+                period: 'Buổi Sáng',
+                time: 'Sáng',
+                icon: '☕',
+                bgColor: 'bg-amber-100',
+                badgeClass: 'bg-amber-100 text-amber-700',
+                title: 'Ăn sáng & cà phê chia tay',
+                description: 'Thong thả buổi sáng cuối tại Duyên Hà Coffee trước khi lên đường về.',
+                activities: [
+                    { label: 'Đi ăn sáng tại Duyên Hà Coffee', location: 'Duyên Hà Coffee' },
+                    { label: 'Uống cà phê, ngắm biển lần cuối' },
+                ],
+                tip: 'Duyên Hà Coffee có view biển đẹp – một điểm kết thúc hoàn hảo cho chuyến đi.',
+            },
+            {
+                period: 'Buổi Chiều',
+                time: 'Chiều',
+                icon: '🏠',
+                bgColor: 'bg-sky-100',
+                badgeClass: 'bg-sky-100 text-sky-700',
+                title: 'Check-out & về nhà',
+                description: 'Trả phòng, thu dọn hành lý và lên đường về.',
+                activities: [
+                    { label: 'Check-out khách sạn' },
+                    { label: 'Mua thêm đặc sản làm quà (yến sào, nem Ninh Hoà…)' },
+                    { label: 'Lên đường về nhà, mang theo kỷ niệm đẹp' },
+                ],
+            },
+            {
+                period: 'Buổi Tối',
+                time: '',
+                icon: '🌙',
+                bgColor: 'bg-indigo-100',
+                badgeClass: 'bg-indigo-100 text-indigo-700',
+                title: 'Về đến nhà',
+                description: 'Kết thúc hành trình Nha Trang tuyệt vời.',
+                activities: [{ label: 'An toàn về đến nhà 🏡' }],
             },
         ],
     },
