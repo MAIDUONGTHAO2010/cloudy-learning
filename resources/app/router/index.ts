@@ -8,6 +8,7 @@ const routes = [
     { path: '/register', component: () => import('../pages/Register.vue'), meta: { guest: true } },
     { path: '/', component: () => import('../pages/Home.vue') },
     { path: '/about', component: () => import('../pages/About.vue') },
+    { path: '/travel', component: () => import('../pages/TravelItinerary.vue') },
     { path: '/policy', component: () => import('../pages/Policy.vue') },
     { path: '/contact', component: () => import('../pages/Contact.vue') },
     { path: '/courses', component: () => import('../pages/Courses.vue') },
