@@ -281,7 +281,7 @@
 
                             <div class="mt-3 flex flex-wrap items-center justify-center gap-2 text-xs">
                                 <span class="rounded-full bg-gray-100 px-3 py-1 text-gray-600">
-                                    {{ inst.courses_count }} {{ t('courses.lessons') }}
+                                    {{ inst.courses_count }} {{ t('courses.courses') }}
                                 </span>
                                 <span
                                     v-if="inst.course_reviews_avg_rating"
