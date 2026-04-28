@@ -2054,10 +2054,6 @@ class CardServiceTest extends TestCase
 
     public function test_get_card_folder_returns_string()
     {
-        if (!function_exists('get_card_folder')) {
-            function get_card_folder($card) { return '/tmp/cards/' . ($card->id ?? 0) . '/'; }
-        }
-
         $this->model->id = 1;
 
         $response = $this->service->getCardFolder($this->model);
@@ -2095,19 +2091,10 @@ class CardServiceTest extends TestCase
 
     public function test_export_preview_returns_true_when_has_atena_and_preview_image_exists()
     {
-        $this->model->style = ['width' => 100, 'height' => 100];
-        $this->model->shouldReceive('save')->andReturn(true);
-        $this->service = \Mockery::mock(CardService::class)->makePartial()->shouldAllowMockingProtectedMethods();
-        $this->service->shouldReceive('findCardById')->andReturn($this->model);
-        if (!function_exists('get_card_folder')) {
-            function get_card_folder($card) { return '/tmp/cards/' . ($card->id ?? 0) . '/'; }
-        }
-
-        \Mockery::close(); // Reset all previous mocks
-        \Mockery::getConfiguration()->allowMockingNonExistentMethods(false);
         $this->model->id = 99;
         $this->model->has_atena = true;
-
+        $this->model->style = ['width' => 100, 'height' => 100];
+        $this->model->shouldReceive('save')->andReturn(true);
         $this->model
             ->shouldReceive('findOrFail')
             ->andReturn($this->model);
@@ -2127,20 +2114,6 @@ class CardServiceTest extends TestCase
 
     public function test_export_preview_returns_true_on_successful_export()
     {
-        $this->model->style = ['width' => 100, 'height' => 100];
-        $this->model->shouldReceive('save')->andReturn(true);
-        $this->service = \Mockery::mock(CardService::class)->makePartial()->shouldAllowMockingProtectedMethods();
-        $this->service->shouldReceive('findCardById')->andReturn($this->model);
-        \Mockery::close(); // Reset all previous mocks
-        \Mockery::getConfiguration()->allowMockingNonExistentMethods(false);
-        if (!function_exists('get_session_id')) {
-            function get_session_id() { return 'test-session-id'; }
-        }
-
-        if (!function_exists('get_card_folder')) {
-            function get_card_folder($card) { return '/tmp/cards/' . ($card->id ?? 0) . '/'; }
-        }
-
         config(['card.preview_dpi' => 1]);
         config(['card.image_name.preview' => 'preview']);
 
@@ -2162,6 +2135,7 @@ class CardServiceTest extends TestCase
 
         $this->model->shouldReceive('getImageElements')->andReturn(collect([]));
         $this->model->shouldReceive('getClipElements->keyBy->toArray')->andReturn([]);
+        $this->model->shouldReceive('toArray')->andReturn([]);
 
         $diskMock = m::mock();
         $diskMock->shouldReceive('exists')->andReturn(false);
@@ -2183,10 +2157,7 @@ class CardServiceTest extends TestCase
         };
         \Intervention\Image\Laravel\Facades\Image::swap($imageManagerFake);
 
-        $jpgPath = '/tmp/cards/99/preview.jpg';
-        File::shouldReceive('exists')->andReturnUsing(function($path) use ($jpgPath) {
-            return $path === $jpgPath ? false : null;
-        });
+        File::shouldReceive('exists')->andReturn(false);
 
         $this->imageRepository->shouldReceive('getListStampImage')->andReturn(collect([]));
 
@@ -2201,14 +2172,6 @@ class CardServiceTest extends TestCase
 
     public function test_export_atena_preview_returns_true_when_has_atena_and_export_succeeds()
     {
-        if (!function_exists('get_session_id')) {
-            function get_session_id() { return 'test-session-id'; }
-        }
-
-        if (!function_exists('get_card_folder')) {
-            function get_card_folder($card) { return '/tmp/cards/' . ($card->id ?? 0) . '/'; }
-        }
-
         config(['card.preview_dpi' => 1]);
 
         $this->model->id = 99;
