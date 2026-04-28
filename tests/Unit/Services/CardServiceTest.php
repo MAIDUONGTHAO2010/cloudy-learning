@@ -28,6 +28,7 @@ use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\Client;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Intervention\Image\Laravel\Facades\Image;
 
 class CardServiceTest extends TestCase
