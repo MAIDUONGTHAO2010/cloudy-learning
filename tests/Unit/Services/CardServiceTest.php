@@ -2092,4 +2092,104 @@ class CardServiceTest extends TestCase
 
         $this->assertFalse($response);
     }
+
+    public function test_export_preview_returns_true_when_has_atena_and_preview_image_exists()
+    {
+        $this->model->id = 99;
+        $this->model->has_atena = true;
+
+        $this->model
+            ->shouldReceive('findOrFail')
+            ->andReturn($this->model);
+
+        File::shouldReceive('exists')->andReturn(true);
+
+        Log::shouldReceive('error')->andReturn(null);
+
+        $response = $this->service->exportPreview($this->model->id);
+
+        $this->assertTrue($response);
+    }
+
+    public function test_export_preview_returns_true_on_successful_export()
+    {
+        if (!function_exists('get_session_id')) {
+            function get_session_id() { return 'test-session-id'; }
+        }
+
+        config(['card.preview_dpi' => 1]);
+
+        $this->model->id = 99;
+        $this->model->hash_id = 'testhash99';
+        $this->model->has_atena = false;
+        $this->model->image = 'bg.jpg';
+        $this->model->style = ['width' => 100, 'height' => 100];
+
+        $this->model
+            ->shouldReceive('findOrFail')
+            ->andReturn($this->model);
+
+        session(["card_session_testhash99" => [
+            'user_photo' => [],
+            'stamp_photo' => null,
+            'crop_photo' => null,
+        ]]);
+
+        $this->model->shouldReceive('getImageElements')->andReturn(collect([]));
+        $this->model->shouldReceive('getClipElements->keyBy->toArray')->andReturn([]);
+
+        $testImagePath = storage_path('app/tests/preview.jpg');
+        $diskMock = m::mock();
+        $diskMock->shouldReceive('exists')->andReturn(false);
+        $diskMock->shouldReceive('get')->andReturn(file_get_contents($testImagePath));
+        $diskMock->shouldReceive('put')->andReturn(true);
+        Storage::shouldReceive('disk')->andReturn($diskMock);
+
+        Image::shouldReceive('read->core->native')->andReturn(new \Imagick($testImagePath));
+
+        File::shouldReceive('exists')->andReturn(true);
+
+        $this->imageRepository->shouldReceive('getListStampImage')->andReturn(collect([]));
+
+        $this->model->shouldReceive('save')->andReturn(true);
+
+        Log::shouldReceive('error')->andReturn(null);
+
+        $response = $this->service->exportPreview($this->model->id);
+
+        $this->assertTrue($response);
+    }
+
+    public function test_export_atena_preview_returns_true_when_has_atena_and_export_succeeds()
+    {
+        if (!function_exists('get_session_id')) {
+            function get_session_id() { return 'test-session-id'; }
+        }
+
+        config(['card.preview_dpi' => 1]);
+
+        $this->model->id = 99;
+        $this->model->has_atena = true;
+
+        $this->model
+            ->shouldReceive('findOrFail')
+            ->andReturn($this->model);
+
+        $testImagePath = storage_path('app/tests/preview.jpg');
+        Image::shouldReceive('read->core->native')->andReturn(new \Imagick($testImagePath));
+
+        File::shouldReceive('exists')->andReturn(false);
+
+        $diskMock = m::mock();
+        $diskMock->shouldReceive('put')->andReturn(true);
+        Storage::shouldReceive('disk')->andReturn($diskMock);
+
+        $this->model->shouldReceive('save')->andReturn(true);
+
+        Log::shouldReceive('error')->andReturn(null);
+
+        $response = $this->service->exportAtenaPreview($this->model->id);
+
+        $this->assertTrue($response);
+    }
 }
