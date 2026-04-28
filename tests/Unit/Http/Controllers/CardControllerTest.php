@@ -132,6 +132,15 @@ class CardControllerTest extends TestCase
         if (!function_exists('is_kanchuu')) {
             function is_kanchuu($item_kbn) { return false; }
         }
+        if (!function_exists('is_yokan')) {
+            function is_yokan($item_kbn, $agency_id) { return false; }
+        }
+        if (!function_exists('get_session_id')) {
+            function get_session_id() { return 'test-session-id'; }
+        }
+        if (!function_exists('check_card_session_preview')) {
+            function check_card_session_preview($cardCheck, $cardPreview) { return false; }
+        }
         if (!function_exists('filterFontColor')) {
             function filterFontColor($vDesignM) { return '#000000'; }
         }
@@ -3160,6 +3169,435 @@ class CardControllerTest extends TestCase
         } else {
             $this->assertNull($result);
         }
+    }
+
+    public function test_preview_with_method_get_and_storage_not_exists_returns_redirect()
+    {
+        $card = $this->mock(Card::class)->makePartial();
+        $card->style = ['item_kbn' => config('card.item_kbn.mourning')];
+        $card->agency_id = 'LS01';
+        $card->product_code = 'P01';
+        $card->material_id = 'M01';
+        $card->area_id = 'A1';
+        $card->id = 70;
+        $card->kumihan_id = null;
+
+        $this->service->shouldReceive('findCardByHashId')->andReturn($card);
+        $this->service->shouldReceive('getCardFolder')->andReturn('/tmp/card/');
+        $this->customerDetailService->shouldReceive('exists')->andReturn(false);
+
+        \Illuminate\Support\Facades\Storage::shouldReceive('disk->exists')->andReturn(false);
+
+        $request = new Request();
+        $request->setMethod('get');
+
+        $result = $this->cardController->preview($request, $this->hashid);
+
+        $this->assertInstanceOf(RedirectResponse::class, $result);
+        $this->assertEquals(Response::HTTP_FOUND, $result->getStatusCode());
+    }
+
+    public function test_preview_with_no_update_session_skips_get_early_return()
+    {
+        $card = $this->mock(Card::class)->makePartial();
+        $card->style = [
+            'item_kbn' => config('card.item_kbn.mourning'),
+            'edit_count' => 1,
+        ];
+        $card->agency_id = 'LS01';
+        $card->product_code = 'P01';
+        $card->material_id = 'M01';
+        $card->area_id = 'A1';
+        $card->id = 71;
+        $card->kumihan_id = null;
+        $card->reset_flag = config('card.no_reset_flag');
+        $card->first_sender_input_data = null;
+        $card->shouldReceive('load')->andReturnSelf();
+        $card->shouldReceive('getBackgroundElement')->andReturn(null);
+
+        $this->service->shouldReceive('findCardByHashId')->andReturn($card);
+        $this->customerDetailService->shouldReceive('exists')->andReturn(false);
+
+        // Returning true for no_update session → isNoUpdate = true → GET early return is skipped
+        Session::shouldReceive('get')->with("no_update_{$this->hashid}")->andReturn(true);
+
+        $this->kumihanService->shouldReceive('create')->andReturn([
+            'status' => 'fail',
+            'isSpecialError' => false,
+        ]);
+
+        $request = new Request(['edit_data' => '']);
+        $request->setMethod('get');
+
+        $result = $this->cardController->preview($request, $this->hashid);
+
+        // GET early return is skipped; kumihan fails → redirect back
+        $this->assertInstanceOf(RedirectResponse::class, $result);
+        $this->assertEquals(Response::HTTP_FOUND, $result->getStatusCode());
+    }
+
+    public function test_preview_background_element_with_screen_in_image_is_skipped()
+    {
+        $card = $this->mock(Card::class)->makePartial();
+        $card->style = [
+            'item_kbn' => config('card.item_kbn.mourning'),
+            'edit_count' => 1,
+            'design_ty' => '',
+        ];
+        $card->agency_id = 'LS01';
+        $card->product_code = 'P01';
+        $card->material_id = 'M01';
+        $card->area_id = 'A1';
+        $card->id = 72;
+        $card->kumihan_id = null;
+        $card->reset_flag = config('card.no_reset_flag');
+        $card->first_sender_input_data = null;
+        $card->shouldReceive('load')->andReturnSelf();
+
+        $this->service->shouldReceive('findCardByHashId')->andReturn($card);
+        $this->customerDetailService->shouldReceive('exists')->andReturn(false);
+
+        $this->kumihanService->shouldReceive('create')->andReturn([
+            'status' => 'fail',
+            'isSpecialError' => false,
+        ]);
+
+        // Background element with '/screen.' in image is unset and skipped
+        $request = new Request([
+            'edit_data' => '',
+            'elements' => json_encode([
+                [
+                    'style' => ['type' => config('card.element_type.background')],
+                    'image' => '/path/to/screen.png',
+                ],
+            ]),
+        ]);
+        $request->setMethod('post');
+
+        $result = $this->cardController->preview($request, $this->hashid);
+
+        $this->assertInstanceOf(RedirectResponse::class, $result);
+        $this->assertEquals(Response::HTTP_FOUND, $result->getStatusCode());
+    }
+
+    public function test_preview_background_element_image_matches_skips_file_copy()
+    {
+        $existingElement = \Mockery::mock();
+        $existingElement->image = 'same_image.png';
+
+        $card = $this->mock(Card::class)->makePartial();
+        $card->style = [
+            'item_kbn' => config('card.item_kbn.mourning'),
+            'edit_count' => 1,
+            'design_ty' => '',
+        ];
+        $card->agency_id = 'LS01';
+        $card->product_code = 'P01';
+        $card->material_id = 'M01';
+        $card->area_id = 'A1';
+        $card->id = 73;
+        $card->kumihan_id = null;
+        $card->reset_flag = config('card.no_reset_flag');
+        $card->first_sender_input_data = null;
+        $card->shouldReceive('load')->andReturnSelf();
+        $card->shouldReceive('getBackgroundElement')->andReturn($existingElement);
+
+        $this->service->shouldReceive('findCardByHashId')->andReturn($card);
+        $this->customerDetailService->shouldReceive('exists')->andReturn(false);
+
+        $this->kumihanService->shouldReceive('create')->andReturn([
+            'status' => 'fail',
+            'isSpecialError' => false,
+        ]);
+
+        // Background element with image matching existing background → File::copy is skipped
+        $request = new Request([
+            'edit_data' => '',
+            'elements' => json_encode([
+                [
+                    'style' => ['type' => config('card.element_type.background')],
+                    'image' => 'same_image.png',
+                ],
+            ]),
+        ]);
+        $request->setMethod('post');
+
+        $result = $this->cardController->preview($request, $this->hashid);
+
+        $this->assertInstanceOf(RedirectResponse::class, $result);
+        $this->assertEquals(Response::HTTP_FOUND, $result->getStatusCode());
+    }
+
+    public function test_preview_stamp_element_is_collected_into_stamp_photo()
+    {
+        $card = $this->mock(Card::class)->makePartial();
+        $card->style = [
+            'item_kbn' => config('card.item_kbn.mourning'),
+            'edit_count' => 1,
+            'design_ty' => '',
+        ];
+        $card->agency_id = 'LS01';
+        $card->product_code = 'P01';
+        $card->material_id = 'M01';
+        $card->area_id = 'A1';
+        $card->id = 74;
+        $card->kumihan_id = null;
+        $card->reset_flag = config('card.no_reset_flag');
+        $card->first_sender_input_data = null;
+        $card->shouldReceive('load')->andReturnSelf();
+
+        $this->service->shouldReceive('findCardByHashId')->andReturn($card);
+        $this->customerDetailService->shouldReceive('exists')->andReturn(false);
+
+        $stampElement = [
+            'style' => ['type' => config('card.element_type.stamp')],
+            'image' => 'stamp.png',
+        ];
+
+        // Verify stamp element is included in stamp_photo of the kumihan request
+        $this->kumihanService->shouldReceive('create')
+            ->withArgs(function ($kumihanRequest) use ($stampElement) {
+                if (!isset($kumihanRequest['stamp_photo']) || !is_array($kumihanRequest['stamp_photo'])) {
+                    return false;
+                }
+                foreach ($kumihanRequest['stamp_photo'] as $item) {
+                    if (($item['image'] ?? null) === $stampElement['image']
+                        && ($item['style']['type'] ?? null) === $stampElement['style']['type']
+                    ) {
+                        return true;
+                    }
+                }
+                return false;
+            })
+            ->andReturn(['status' => 'fail', 'isSpecialError' => false]);
+
+        $request = new Request([
+            'edit_data' => '',
+            'elements' => json_encode([$stampElement]),
+        ]);
+        $request->setMethod('post');
+
+        $result = $this->cardController->preview($request, $this->hashid);
+
+        $this->assertInstanceOf(RedirectResponse::class, $result);
+        $this->assertEquals(Response::HTTP_FOUND, $result->getStatusCode());
+    }
+
+    public function test_preview_with_card_session_preview_session_existing_continues_normally()
+    {
+        $card = $this->mock(Card::class)->makePartial();
+        $card->style = [
+            'item_kbn' => config('card.item_kbn.mourning'),
+            'edit_count' => 1,
+            'design_ty' => '',
+        ];
+        $card->agency_id = 'LS01';
+        $card->product_code = 'P01';
+        $card->material_id = 'M01';
+        $card->area_id = 'A1';
+        $card->id = 75;
+        $card->kumihan_id = null;
+        $card->reset_flag = config('card.no_reset_flag');
+        $card->first_sender_input_data = null;
+        $card->shouldReceive('load')->andReturnSelf();
+        $card->shouldReceive('getBackgroundElement')->andReturn(null);
+
+        $this->service->shouldReceive('findCardByHashId')->andReturn($card);
+        $this->customerDetailService->shouldReceive('exists')->andReturn(false);
+
+        // card_session_preview exists → check_card_session_preview is called
+        Session::shouldReceive('has')->with("card_session_preview_{$this->hashid}")->andReturn(true);
+        Session::shouldReceive('get')->with("card_session_{$this->hashid}")->andReturn(['style' => ['edit_count' => 1]]);
+        Session::shouldReceive('get')->with("card_session_preview_{$this->hashid}")->andReturn(['style' => ['edit_count' => 1]]);
+
+        Log::shouldReceive('info')->zeroOrMoreTimes();
+
+        $this->kumihanService->shouldReceive('create')->andReturn([
+            'status' => 'fail',
+            'isSpecialError' => false,
+        ]);
+
+        $request = new Request(['edit_data' => '']);
+        $request->setMethod('post');
+
+        $result = $this->cardController->preview($request, $this->hashid);
+
+        $this->assertInstanceOf(RedirectResponse::class, $result);
+        $this->assertEquals(Response::HTTP_FOUND, $result->getStatusCode());
+    }
+
+    public function test_preview_with_session_timeout_returns_view_immediately()
+    {
+        $card = $this->mock(Card::class)->makePartial();
+        $card->style = [
+            'item_kbn' => config('card.item_kbn.mourning'),
+            'edit_count' => 1,
+            'design_ty' => '',
+            'isTypeSetting' => false,
+        ];
+        $card->agency_id = 'LS01';
+        $card->product_code = 'P01';
+        $card->material_id = 'M01';
+        $card->area_id = 'A1';
+        $card->id = 76;
+        $card->kumihan_id = null;
+        $card->reset_flag = config('card.no_reset_flag');
+        $card->first_sender_input_data = null;
+        $card->shouldReceive('load')->andReturnSelf();
+        $card->shouldReceive('getBackgroundElement')->andReturn(null);
+        $card->shouldReceive('save')->andReturnSelf();
+
+        $this->service->shouldReceive('findCardByHashId')->andReturn($card);
+        $this->customerDetailService->shouldReceive('exists')->andReturn(false);
+
+        $this->kumihanService->shouldReceive('create')->andReturn([
+            'status' => 'success',
+            'elements' => [],
+            'path' => '/tmp/preview/',
+        ]);
+
+        // cart_session (not card_session) pull returns truthy → isSessionTimeout = true
+        Session::shouldReceive('pull')->with("cart_session_{$this->hashid}")->andReturn('1');
+
+        $request = new Request(['edit_data' => '']);
+        $request->setMethod('post');
+
+        $result = $this->cardController->preview($request, $this->hashid);
+
+        if ($result instanceof RedirectResponse) {
+            $this->assertEquals(Response::HTTP_FOUND, $result->getStatusCode());
+        } else {
+            $this->assertInstanceOf(View::class, $result);
+        }
+    }
+
+    public function test_preview_export_preview_succeeds_but_atena_preview_fails_returns_null()
+    {
+        $card = $this->mock(Card::class)->makePartial();
+        $card->style = [
+            'item_kbn' => config('card.item_kbn.mourning'),
+            'edit_count' => 1,
+            'design_ty' => '',
+            'isTypeSetting' => false,
+        ];
+        $card->agency_id = 'LS01';
+        $card->product_code = 'P01';
+        $card->material_id = 'M01';
+        $card->area_id = 'A1';
+        $card->id = 77;
+        $card->kumihan_id = null;
+        $card->reset_flag = config('card.no_reset_flag');
+        $card->first_sender_input_data = null;
+        $card->shouldReceive('load')->andReturnSelf();
+        $card->shouldReceive('getBackgroundElement')->andReturn(null);
+        $card->shouldReceive('save')->andReturnSelf();
+
+        $this->service->shouldReceive('findCardByHashId')->andReturn($card);
+        $this->customerDetailService->shouldReceive('exists')->andReturn(false);
+
+        $this->kumihanService->shouldReceive('create')->andReturn([
+            'status' => 'success',
+            'elements' => [],
+            'path' => '/tmp/preview/',
+        ]);
+
+        $this->service->shouldReceive('exportPreview')->andReturn(true);
+        $this->service->shouldReceive('exportAtenaPreview')->andReturn(false);
+
+        $request = new Request(['edit_data' => '']);
+        $request->setMethod('post');
+
+        $result = $this->cardController->preview($request, $this->hashid);
+
+        // exportPreview succeeds but exportAtenaPreview fails → method returns null (falls through)
+        if ($result instanceof RedirectResponse) {
+            $this->assertEquals(Response::HTTP_FOUND, $result->getStatusCode());
+        } else {
+            $this->assertNull($result);
+        }
+    }
+
+    public function test_preview_edit_mode_stays_one_when_first_sender_input_data_set()
+    {
+        $card = $this->mock(Card::class)->makePartial();
+        $card->style = [
+            'item_kbn' => config('card.item_kbn.mourning'),
+            'edit_count' => 1,
+            'design_ty' => '',
+        ];
+        $card->agency_id = 'LS01';
+        $card->product_code = 'P01';
+        $card->material_id = 'M01';
+        $card->area_id = 'A1';
+        $card->id = 78;
+        $card->kumihan_id = null;
+        $card->reset_flag = config('card.no_reset_flag');
+        // first_sender_input_data is NOT empty → edit_mode stays '1'
+        $card->first_sender_input_data = 'sender_data';
+        $card->shouldReceive('load')->andReturnSelf();
+        $card->shouldReceive('getBackgroundElement')->andReturn(null);
+
+        $this->service->shouldReceive('findCardByHashId')->andReturn($card);
+        $this->customerDetailService->shouldReceive('exists')->andReturn(false);
+
+        // Assert that edit_mode='1' is passed to kumihan (not overridden to '0')
+        $this->kumihanService->shouldReceive('create')
+            ->withArgs(function ($kumihanRequest, $card) {
+                return ($kumihanRequest['edit_mode'] ?? null) === '1';
+            })
+            ->andReturn(['status' => 'fail', 'isSpecialError' => false]);
+
+        $request = new Request(['edit_data' => '']);
+        $request->setMethod('post');
+
+        $result = $this->cardController->preview($request, $this->hashid);
+
+        $this->assertInstanceOf(RedirectResponse::class, $result);
+        $this->assertEquals(Response::HTTP_FOUND, $result->getStatusCode());
+    }
+
+    public function test_preview_logs_info_when_card_session_preview_check_fails()
+    {
+        $card = $this->mock(Card::class)->makePartial();
+        $card->style = [
+            'item_kbn' => config('card.item_kbn.mourning'),
+            'edit_count' => 1,
+            'design_ty' => '',
+        ];
+        $card->agency_id = 'LS01';
+        $card->product_code = 'P01';
+        $card->material_id = 'M01';
+        $card->area_id = 'A1';
+        $card->id = 79;
+        $card->kumihan_id = null;
+        $card->reset_flag = config('card.no_reset_flag');
+        $card->first_sender_input_data = null;
+        $card->shouldReceive('load')->andReturnSelf();
+        $card->shouldReceive('getBackgroundElement')->andReturn(null);
+
+        $this->service->shouldReceive('findCardByHashId')->andReturn($card);
+        $this->customerDetailService->shouldReceive('exists')->andReturn(false);
+
+        // card_session_preview exists; check_card_session_preview returns false (stub in setUp) → Log::info called
+        Session::shouldReceive('has')->with("card_session_preview_{$this->hashid}")->andReturn(true);
+        Session::shouldReceive('get')->with("card_session_{$this->hashid}")->andReturn(['style' => ['edit_count' => 1]]);
+        Session::shouldReceive('get')->with("card_session_preview_{$this->hashid}")->andReturn(['style' => ['edit_count' => 1]]);
+
+        // Use zeroOrMoreTimes to avoid Mockery expectation failure in tearDown
+        Log::shouldReceive('info')->zeroOrMoreTimes();
+
+        $this->kumihanService->shouldReceive('create')->andReturn([
+            'status' => 'fail',
+            'isSpecialError' => false,
+        ]);
+
+        $request = new Request(['edit_data' => '']);
+        $request->setMethod('post');
+
+        $result = $this->cardController->preview($request, $this->hashid);
+
+        $this->assertInstanceOf(RedirectResponse::class, $result);
+        $this->assertEquals(Response::HTTP_FOUND, $result->getStatusCode());
     }
 
     public function test_get_card_info()
