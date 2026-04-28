@@ -2083,8 +2083,8 @@ class CardServiceTest extends TestCase
     {
         $this->model->id = 99;
         $this->model
-            ->shouldReceive('getAttribute')
-            ->andThrow(Exception::class);
+            ->shouldReceive('findOrFail')
+            ->andThrow(new Exception('test error'));
 
         Log::shouldReceive('error')->andReturn(null);
 
@@ -2095,6 +2095,10 @@ class CardServiceTest extends TestCase
 
     public function test_export_preview_returns_true_when_has_atena_and_preview_image_exists()
     {
+        if (!function_exists('get_card_folder')) {
+            function get_card_folder($card) { return '/tmp/cards/' . ($card->id ?? 0) . '/'; }
+        }
+
         $this->model->id = 99;
         $this->model->has_atena = true;
 
@@ -2115,6 +2119,10 @@ class CardServiceTest extends TestCase
     {
         if (!function_exists('get_session_id')) {
             function get_session_id() { return 'test-session-id'; }
+        }
+
+        if (!function_exists('get_card_folder')) {
+            function get_card_folder($card) { return '/tmp/cards/' . ($card->id ?? 0) . '/'; }
         }
 
         config(['card.preview_dpi' => 1]);
@@ -2138,14 +2146,25 @@ class CardServiceTest extends TestCase
         $this->model->shouldReceive('getImageElements')->andReturn(collect([]));
         $this->model->shouldReceive('getClipElements->keyBy->toArray')->andReturn([]);
 
-        $testImagePath = storage_path('app/tests/preview.jpg');
         $diskMock = m::mock();
         $diskMock->shouldReceive('exists')->andReturn(false);
-        $diskMock->shouldReceive('get')->andReturn(file_get_contents($testImagePath));
+        $diskMock->shouldReceive('get')->andReturn('fake-image-data');
         $diskMock->shouldReceive('put')->andReturn(true);
         Storage::shouldReceive('disk')->andReturn($diskMock);
 
-        Image::shouldReceive('read->core->native')->andReturn(new \Imagick($testImagePath));
+        $imageManagerFake = new class {
+            public function read($source) {
+                $imagick = new \Imagick();
+                $imagick->newPseudoImage(10, 10, 'xc:white');
+                $imagick->setImageFormat('jpeg');
+                return new class($imagick) {
+                    public function __construct(public \Imagick $im) {}
+                    public function core() { return $this; }
+                    public function native() { return $this->im; }
+                };
+            }
+        };
+        \Intervention\Image\Laravel\Facades\Image::swap($imageManagerFake);
 
         File::shouldReceive('exists')->andReturn(true);
 
@@ -2166,6 +2185,10 @@ class CardServiceTest extends TestCase
             function get_session_id() { return 'test-session-id'; }
         }
 
+        if (!function_exists('get_card_folder')) {
+            function get_card_folder($card) { return '/tmp/cards/' . ($card->id ?? 0) . '/'; }
+        }
+
         config(['card.preview_dpi' => 1]);
 
         $this->model->id = 99;
@@ -2175,8 +2198,19 @@ class CardServiceTest extends TestCase
             ->shouldReceive('findOrFail')
             ->andReturn($this->model);
 
-        $testImagePath = storage_path('app/tests/preview.jpg');
-        Image::shouldReceive('read->core->native')->andReturn(new \Imagick($testImagePath));
+        $imageManagerFake = new class {
+            public function read($source) {
+                $imagick = new \Imagick();
+                $imagick->newPseudoImage(10, 10, 'xc:white');
+                $imagick->setImageFormat('jpeg');
+                return new class($imagick) {
+                    public function __construct(public \Imagick $im) {}
+                    public function core() { return $this; }
+                    public function native() { return $this->im; }
+                };
+            }
+        };
+        \Intervention\Image\Laravel\Facades\Image::swap($imageManagerFake);
 
         File::shouldReceive('exists')->andReturn(false);
 
