@@ -1846,4 +1846,151 @@ class CardServiceTest extends TestCase
 
         $response = $this->service->duplicateCard($this->model->kumihan_id);
     }
+
+    // ──────────────────────────────────────────────────────────────────────
+    // Tests for CardService functions called from CardController::preview()
+    // ──────────────────────────────────────────────────────────────────────
+
+    public function test_get_session_exchange_returns_default_when_no_session()
+    {
+        $response = $this->service->getSessionExchange($this->hashid);
+
+        $this->assertIsArray($response);
+        $this->assertArrayHasKey('kousei_email', $response);
+        $this->assertArrayHasKey('oemail', $response);
+        $this->assertArrayHasKey('kousei_flg', $response);
+        $this->assertArrayHasKey('accept_preview', $response);
+        $this->assertArrayHasKey('no_deal_reason', $response);
+        $this->assertEquals('', $response['kousei_email']);
+        $this->assertEquals(1, $response['accept_preview']);
+    }
+
+    public function test_get_session_exchange_returns_session_data_when_present()
+    {
+        $exchangeData = [
+            'kousei_email' => 'test@example.com',
+            'oemail' => 'order@example.com',
+            'kousei_flg' => 1,
+            'accept_preview' => 0,
+            'no_deal_reason' => 'reason',
+        ];
+
+        session(["exchange_{$this->hashid}" => $exchangeData]);
+
+        $response = $this->service->getSessionExchange($this->hashid);
+
+        $this->assertEquals($exchangeData, $response);
+        $this->assertEquals('test@example.com', $response['kousei_email']);
+        $this->assertEquals(1, $response['kousei_flg']);
+    }
+
+    public function test_check_support_atena_throws_when_area_agency_not_found()
+    {
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage('Area agency was not found.');
+
+        $this->areaAgencyRepository
+            ->shouldReceive('getAreaAgencyByAreaIdAndAgencyId')
+            ->with('A1', 'LS01')
+            ->andReturnNull();
+
+        Log::shouldReceive('error')->andReturn(null);
+
+        $this->service->checkSupportAtena([
+            'design_id'   => 'P01',
+            'material_id' => 'M01',
+            'agency_id'   => 'LS01',
+            'site_id'     => 'A1',
+        ], $this->hashid);
+    }
+
+    public function test_check_support_atena_returns_no_atena_when_atena_support_empty()
+    {
+        $areaAgency = (object) [
+            'atena_support' => null,
+            'atena_end_date' => null,
+        ];
+
+        $this->areaAgencyRepository
+            ->shouldReceive('getAreaAgencyByAreaIdAndAgencyId')
+            ->andReturn($areaAgency);
+
+        $response = $this->service->checkSupportAtena([
+            'design_id'   => 'P01',
+            'material_id' => 'M01',
+            'agency_id'   => 'LS01',
+            'site_id'     => 'A1',
+        ], $this->hashid);
+
+        $this->assertIsArray($response);
+        $this->assertFalse($response['has_atena']);
+    }
+
+    public function test_check_support_atena_throws_when_design_not_found()
+    {
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage('Design was not found.');
+
+        $areaAgency = m::mock(\App\Models\AreaAgency::class)->makePartial();
+        $areaAgency->atena_support = \App\Models\AreaAgency::ATENA_SUPPORT[0] ?? 1;
+        $areaAgency->atena_end_date = null;
+
+        $this->areaAgencyRepository
+            ->shouldReceive('getAreaAgencyByAreaIdAndAgencyId')
+            ->andReturn($areaAgency);
+
+        $this->designRepository
+            ->shouldReceive('findDesignByMaterialIdAndDesignId')
+            ->andReturnNull();
+
+        Log::shouldReceive('error')->andReturn(null);
+
+        $this->service->checkSupportAtena([
+            'design_id'   => 'P01',
+            'material_id' => 'M01',
+            'agency_id'   => 'LS01',
+            'site_id'     => 'A1',
+        ], $this->hashid);
+    }
+
+    public function test_get_card_folder_returns_string()
+    {
+        if (!function_exists('get_card_folder')) {
+            function get_card_folder($card) { return '/tmp/cards/' . ($card->id ?? 0) . '/'; }
+        }
+
+        $this->model->id = 1;
+
+        $response = $this->service->getCardFolder($this->model);
+
+        $this->assertIsString($response);
+    }
+
+    public function test_export_atena_preview_returns_true_when_card_has_no_atena()
+    {
+        $this->model->id = 99;
+        $this->model->has_atena = false;
+
+        $this->model
+            ->shouldReceive('findOrFail')
+            ->andReturn($this->model);
+
+        $response = $this->service->exportAtenaPreview($this->model->id);
+
+        $this->assertTrue($response);
+    }
+
+    public function test_export_atena_preview_returns_false_on_exception()
+    {
+        $this->model->id = 99;
+        $this->model
+            ->shouldReceive('getAttribute')
+            ->andThrow(Exception::class);
+
+        Log::shouldReceive('error')->andReturn(null);
+
+        $response = $this->service->exportAtenaPreview($this->model->id);
+
+        $this->assertFalse($response);
+    }
 }
