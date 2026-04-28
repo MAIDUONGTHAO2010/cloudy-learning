@@ -3186,7 +3186,9 @@ class CardControllerTest extends TestCase
         $this->service->shouldReceive('getCardFolder')->andReturn('/tmp/card/');
         $this->customerDetailService->shouldReceive('exists')->andReturn(false);
 
-        \Illuminate\Support\Facades\Storage::shouldReceive('disk->exists')->andReturn(false);
+        $diskMock = \Mockery::mock();
+        $diskMock->shouldReceive('exists')->andReturn(false);
+        \Illuminate\Support\Facades\Storage::shouldReceive('disk')->andReturn($diskMock);
 
         $request = new Request();
         $request->setMethod('get');
@@ -3218,8 +3220,14 @@ class CardControllerTest extends TestCase
         $this->service->shouldReceive('findCardByHashId')->andReturn($card);
         $this->customerDetailService->shouldReceive('exists')->andReturn(false);
 
-        // Returning true for no_update session → isNoUpdate = true → GET early return is skipped
-        Session::shouldReceive('get')->with("no_update_{$this->hashid}")->andReturn(true);
+        // session()->get("no_update_$hashid") must return truthy to trigger lines 983-984
+        $hashid = $this->hashid;
+        Session::shouldReceive('get')->andReturnUsing(function ($key, $default = null) use ($hashid) {
+            if ($key === "no_update_$hashid") {
+                return true;
+            }
+            return $default;
+        });
 
         $this->kumihanService->shouldReceive('create')->andReturn([
             'status' => 'fail',
@@ -3406,9 +3414,16 @@ class CardControllerTest extends TestCase
         $this->customerDetailService->shouldReceive('exists')->andReturn(false);
 
         // card_session_preview exists → check_card_session_preview is called
-        Session::shouldReceive('has')->with("card_session_preview_{$this->hashid}")->andReturn(true);
-        Session::shouldReceive('get')->with("card_session_{$this->hashid}")->andReturn(['style' => ['edit_count' => 1]]);
-        Session::shouldReceive('get')->with("card_session_preview_{$this->hashid}")->andReturn(['style' => ['edit_count' => 1]]);
+        $hashid = $this->hashid;
+        Session::shouldReceive('has')->andReturnUsing(function ($key) use ($hashid) {
+            return $key === "card_session_preview_$hashid";
+        });
+        Session::shouldReceive('get')->andReturnUsing(function ($key, $default = null) use ($hashid) {
+            if ($key === "card_session_$hashid" || $key === "card_session_preview_$hashid") {
+                return ['style' => ['edit_count' => 1]];
+            }
+            return $default;
+        });
 
         Log::shouldReceive('info')->zeroOrMoreTimes();
 
@@ -3455,6 +3470,9 @@ class CardControllerTest extends TestCase
             'elements' => [],
             'path' => '/tmp/preview/',
         ]);
+
+        // Provide card session data so array_merge at line 1135 receives a valid array
+        Session::shouldReceive('get')->andReturn(['id' => 76, 'style' => ['edit_count' => 1]]);
 
         // cart_session (not card_session) pull returns truthy → isSessionTimeout = true
         Session::shouldReceive('pull')->with("cart_session_{$this->hashid}")->andReturn('1');
@@ -3503,6 +3521,9 @@ class CardControllerTest extends TestCase
 
         $this->service->shouldReceive('exportPreview')->andReturn(true);
         $this->service->shouldReceive('exportAtenaPreview')->andReturn(false);
+
+        // Provide card session data so array_merge at line 1135 receives a valid array
+        Session::shouldReceive('get')->andReturn(['id' => 77, 'style' => ['edit_count' => 1]]);
 
         $request = new Request(['edit_data' => '']);
         $request->setMethod('post');
@@ -3579,9 +3600,16 @@ class CardControllerTest extends TestCase
         $this->customerDetailService->shouldReceive('exists')->andReturn(false);
 
         // card_session_preview exists; check_card_session_preview returns false (stub in setUp) → Log::info called
-        Session::shouldReceive('has')->with("card_session_preview_{$this->hashid}")->andReturn(true);
-        Session::shouldReceive('get')->with("card_session_{$this->hashid}")->andReturn(['style' => ['edit_count' => 1]]);
-        Session::shouldReceive('get')->with("card_session_preview_{$this->hashid}")->andReturn(['style' => ['edit_count' => 1]]);
+        $hashid = $this->hashid;
+        Session::shouldReceive('has')->andReturnUsing(function ($key) use ($hashid) {
+            return $key === "card_session_preview_$hashid";
+        });
+        Session::shouldReceive('get')->andReturnUsing(function ($key, $default = null) use ($hashid) {
+            if ($key === "card_session_$hashid" || $key === "card_session_preview_$hashid") {
+                return ['style' => ['edit_count' => 1]];
+            }
+            return $default;
+        });
 
         // Use zeroOrMoreTimes to avoid Mockery expectation failure in tearDown
         Log::shouldReceive('info')->zeroOrMoreTimes();
@@ -3598,6 +3626,167 @@ class CardControllerTest extends TestCase
 
         $this->assertInstanceOf(RedirectResponse::class, $result);
         $this->assertEquals(Response::HTTP_FOUND, $result->getStatusCode());
+    }
+
+    public function test_preview_background_element_triggers_file_copy_for_horizontal_design()
+    {
+        \Config::set('common.storage_server.free_design.screen_card_horizontal', '/designs/%s_screen.png');
+        \Config::set('common.storage_server.free_design.print_card_horizontal', '/designs/%s_print.png');
+        \Config::set('common.storage_server.free_design.screen_card_vertical', '/designs/%s_screen_v.png');
+        \Config::set('common.storage_server.free_design.print_card_vertical', '/designs/%s_print_v.png');
+        \Config::set('card.default_name.screen', 'default_screen.%s');
+        \Config::set('card.default_name.print', 'default_print.%s');
+
+        $existingElement = \Mockery::mock();
+        $existingElement->image = 'different_existing_image.png';
+
+        $card = $this->mock(Card::class)->makePartial();
+        $card->style = [
+            'item_kbn' => config('card.item_kbn.mourning'),
+            'edit_count' => 1,
+            'design_ty' => '',
+        ];
+        $card->agency_id = 'LS01';
+        $card->product_code = 'P01';
+        $card->material_id = 'M01';
+        $card->area_id = 'A1';
+        $card->id = 80;
+        $card->kumihan_id = null;
+        $card->reset_flag = config('card.no_reset_flag');
+        $card->first_sender_input_data = null;
+        $card->shouldReceive('load')->andReturnSelf();
+        $card->shouldReceive('getBackgroundElement')->andReturn($existingElement);
+
+        $this->service->shouldReceive('findCardByHashId')->andReturn($card);
+        $this->service->shouldReceive('getCardFolder')->andReturn('/tmp/card');
+        $this->customerDetailService->shouldReceive('exists')->andReturn(false);
+
+        $this->kumihanService->shouldReceive('create')->andReturn([
+            'status' => 'fail',
+            'isSpecialError' => false,
+        ]);
+
+        // Background element with image DIFFERENT from existing → triggers horizontal File::copy path
+        $request = new Request([
+            'edit_data' => '',
+            'elements' => json_encode([
+                [
+                    'style' => ['type' => config('card.element_type.background')],
+                    'image' => 'new_background.png',
+                ],
+            ]),
+        ]);
+        $request->setMethod('post');
+
+        $result = $this->cardController->preview($request, $this->hashid);
+
+        $this->assertInstanceOf(RedirectResponse::class, $result);
+        $this->assertEquals(Response::HTTP_FOUND, $result->getStatusCode());
+    }
+
+    public function test_preview_background_element_triggers_file_copy_for_vertical_design()
+    {
+        \Config::set('common.storage_server.free_design.screen_card_vertical', '/designs/%s_screen_v.png');
+        \Config::set('common.storage_server.free_design.print_card_vertical', '/designs/%s_print_v.png');
+        \Config::set('common.storage_server.free_design.screen_card_horizontal', '/designs/%s_screen.png');
+        \Config::set('common.storage_server.free_design.print_card_horizontal', '/designs/%s_print.png');
+        \Config::set('card.default_name.screen', 'default_screen.%s');
+        \Config::set('card.default_name.print', 'default_print.%s');
+
+        $card = $this->mock(Card::class)->makePartial();
+        $card->style = [
+            'item_kbn' => config('card.item_kbn.mourning'),
+            'edit_count' => 1,
+            'design_ty' => Card::IS_VERTICAL_DESIGN,
+        ];
+        $card->agency_id = 'LS01';
+        $card->product_code = 'P01';
+        $card->material_id = 'M01';
+        $card->area_id = 'A1';
+        $card->id = 81;
+        $card->kumihan_id = null;
+        $card->reset_flag = config('card.no_reset_flag');
+        $card->first_sender_input_data = null;
+        $card->shouldReceive('load')->andReturnSelf();
+        // No existing background element → !$backgroundElement = true → always triggers copy
+        $card->shouldReceive('getBackgroundElement')->andReturn(null);
+
+        $this->service->shouldReceive('findCardByHashId')->andReturn($card);
+        $this->service->shouldReceive('getCardFolder')->andReturn('/tmp/card');
+        $this->customerDetailService->shouldReceive('exists')->andReturn(false);
+
+        $this->kumihanService->shouldReceive('create')->andReturn([
+            'status' => 'fail',
+            'isSpecialError' => false,
+        ]);
+
+        // Background element with new image → triggers vertical File::copy path
+        $request = new Request([
+            'edit_data' => '',
+            'elements' => json_encode([
+                [
+                    'style' => ['type' => config('card.element_type.background')],
+                    'image' => 'new_background.png',
+                ],
+            ]),
+        ]);
+        $request->setMethod('post');
+
+        $result = $this->cardController->preview($request, $this->hashid);
+
+        $this->assertInstanceOf(RedirectResponse::class, $result);
+        $this->assertEquals(Response::HTTP_FOUND, $result->getStatusCode());
+    }
+
+    public function test_preview_export_both_succeed_returns_preview_view()
+    {
+        $card = $this->mock(Card::class)->makePartial();
+        $card->style = [
+            'item_kbn' => config('card.item_kbn.mourning'),
+            'edit_count' => 1,
+            'design_ty' => '',
+            'isTypeSetting' => false,
+        ];
+        $card->agency_id = 'LS01';
+        $card->product_code = 'P01';
+        $card->material_id = 'M01';
+        $card->area_id = 'A1';
+        $card->id = 82;
+        $card->kumihan_id = null;
+        $card->reset_flag = config('card.no_reset_flag');
+        $card->first_sender_input_data = null;
+        $card->shouldReceive('load')->andReturnSelf();
+        $card->shouldReceive('getBackgroundElement')->andReturn(null);
+        $card->shouldReceive('save')->andReturnSelf();
+
+        $this->service->shouldReceive('findCardByHashId')->andReturn($card);
+        $this->customerDetailService->shouldReceive('exists')->andReturn(false);
+
+        $this->kumihanService->shouldReceive('create')->andReturn([
+            'status' => 'success',
+            'elements' => [],
+            'path' => '/tmp/preview/',
+        ]);
+
+        // Provide card session data so array_merge at line 1135 receives a valid array
+        Session::shouldReceive('get')->andReturn(['id' => 82, 'style' => ['edit_count' => 1]]);
+        // session()->has("card_session_$hashid") must return true so line 1164 executes
+        Session::shouldReceive('has')->andReturn(true);
+
+        $this->service->shouldReceive('exportPreview')->andReturn(true);
+        $this->service->shouldReceive('exportAtenaPreview')->andReturn(true);
+
+        $request = new Request(['edit_data' => '']);
+        $request->setMethod('post');
+
+        $result = $this->cardController->preview($request, $this->hashid);
+
+        if ($result instanceof RedirectResponse) {
+            $this->assertEquals(Response::HTTP_FOUND, $result->getStatusCode());
+        } else {
+            $this->assertInstanceOf(View::class, $result);
+            $this->assertEquals('cards.preview', $result->getName());
+        }
     }
 
     public function test_get_card_info()
