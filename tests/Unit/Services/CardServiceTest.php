@@ -2095,10 +2095,16 @@ class CardServiceTest extends TestCase
 
     public function test_export_preview_returns_true_when_has_atena_and_preview_image_exists()
     {
+        $this->model->style = ['width' => 100, 'height' => 100];
+        $this->model->shouldReceive('save')->andReturn(true);
+        $this->service = \Mockery::mock(CardService::class)->makePartial()->shouldAllowMockingProtectedMethods();
+        $this->service->shouldReceive('findCardById')->andReturn($this->model);
         if (!function_exists('get_card_folder')) {
             function get_card_folder($card) { return '/tmp/cards/' . ($card->id ?? 0) . '/'; }
         }
 
+        \Mockery::close(); // Reset all previous mocks
+        \Mockery::getConfiguration()->allowMockingNonExistentMethods(false);
         $this->model->id = 99;
         $this->model->has_atena = true;
 
@@ -2106,7 +2112,11 @@ class CardServiceTest extends TestCase
             ->shouldReceive('findOrFail')
             ->andReturn($this->model);
 
-        File::shouldReceive('exists')->andReturn(true);
+        config(['card.image_name.preview' => 'preview']);
+        $jpgPath = '/tmp/cards/99/preview.jpg';
+        File::shouldReceive('exists')->andReturnUsing(function($path) use ($jpgPath) {
+            return $path === $jpgPath;
+        });
 
         Log::shouldReceive('error')->andReturn(null);
 
@@ -2117,6 +2127,12 @@ class CardServiceTest extends TestCase
 
     public function test_export_preview_returns_true_on_successful_export()
     {
+        $this->model->style = ['width' => 100, 'height' => 100];
+        $this->model->shouldReceive('save')->andReturn(true);
+        $this->service = \Mockery::mock(CardService::class)->makePartial()->shouldAllowMockingProtectedMethods();
+        $this->service->shouldReceive('findCardById')->andReturn($this->model);
+        \Mockery::close(); // Reset all previous mocks
+        \Mockery::getConfiguration()->allowMockingNonExistentMethods(false);
         if (!function_exists('get_session_id')) {
             function get_session_id() { return 'test-session-id'; }
         }
@@ -2126,6 +2142,7 @@ class CardServiceTest extends TestCase
         }
 
         config(['card.preview_dpi' => 1]);
+        config(['card.image_name.preview' => 'preview']);
 
         $this->model->id = 99;
         $this->model->hash_id = 'testhash99';
@@ -2166,7 +2183,10 @@ class CardServiceTest extends TestCase
         };
         \Intervention\Image\Laravel\Facades\Image::swap($imageManagerFake);
 
-        File::shouldReceive('exists')->andReturn(true);
+        $jpgPath = '/tmp/cards/99/preview.jpg';
+        File::shouldReceive('exists')->andReturnUsing(function($path) use ($jpgPath) {
+            return $path === $jpgPath ? false : null;
+        });
 
         $this->imageRepository->shouldReceive('getListStampImage')->andReturn(collect([]));
 
