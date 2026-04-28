@@ -1374,6 +1374,24 @@ class CardControllerTest extends TestCase
             ->andReturn($card);
 
         $vDesign = $this->mock(VDesignM::class)->makePartial();
+        $vDesign->is_free_design = 0;
+        $vDesign->photo_flg = Card::HAS_PHOTO_FLG;
+        $vDesign->dtype = '';
+        $vDesign->allow_decoration_stamp = '';
+        $vDesign->designcolor_name = '';
+        $vDesign->printedmount = '';
+        $vDesign->kumi_txt_no = '';
+        $vDesign->pldptmng_no_str = '';
+        $vDesign->design_ty = 'T';
+        $vDesign->kumi_font_cd = '';
+        $vDesign->photo_finishing_flg = '';
+        $vDesign->yoridori_kbn = '';
+        $vDesign->item_kbn = '';
+        $vDesign->free_edit_flg = '';
+        $vDesign->kumi_ty = '';
+        $vDesign->han_color_k = '';
+        $vDesign->outline_char_kbn = '';
+        $vDesign->kumi_atena_faceprt_flg = '';
 
         $this->vDesignMService->shouldReceive('findByDesignNo')->andReturn($vDesign);
 
@@ -1448,6 +1466,24 @@ class CardControllerTest extends TestCase
             ->andReturn($card);
 
         $vDesign = $this->mock(VDesignM::class)->makePartial();
+        $vDesign->is_free_design = 0;
+        $vDesign->photo_flg = Card::HAS_PHOTO_FLG;
+        $vDesign->dtype = '';
+        $vDesign->allow_decoration_stamp = '';
+        $vDesign->designcolor_name = '';
+        $vDesign->printedmount = '';
+        $vDesign->kumi_txt_no = '';
+        $vDesign->pldptmng_no_str = '';
+        $vDesign->design_ty = 'T';
+        $vDesign->kumi_font_cd = '';
+        $vDesign->photo_finishing_flg = '';
+        $vDesign->yoridori_kbn = '';
+        $vDesign->item_kbn = '';
+        $vDesign->free_edit_flg = '';
+        $vDesign->kumi_ty = '';
+        $vDesign->han_color_k = '';
+        $vDesign->outline_char_kbn = '';
+        $vDesign->kumi_atena_faceprt_flg = '';
 
         $this->vDesignMService->shouldReceive('findByDesignNo')->andReturn($vDesign);
 
@@ -1523,6 +1559,24 @@ class CardControllerTest extends TestCase
             ->andReturn($card);
 
         $vDesign = $this->mock(VDesignM::class)->makePartial();
+        $vDesign->is_free_design = 0;
+        $vDesign->photo_flg = Card::HAS_PHOTO_FLG;
+        $vDesign->dtype = '';
+        $vDesign->allow_decoration_stamp = '';
+        $vDesign->designcolor_name = '';
+        $vDesign->printedmount = '';
+        $vDesign->kumi_txt_no = '';
+        $vDesign->pldptmng_no_str = '';
+        $vDesign->design_ty = 'T';
+        $vDesign->kumi_font_cd = '';
+        $vDesign->photo_finishing_flg = '';
+        $vDesign->yoridori_kbn = '';
+        $vDesign->item_kbn = '';
+        $vDesign->free_edit_flg = '';
+        $vDesign->kumi_ty = '';
+        $vDesign->han_color_k = '';
+        $vDesign->outline_char_kbn = '';
+        $vDesign->kumi_atena_faceprt_flg = '';
 
         $this->vDesignMService->shouldReceive('findByDesignNo')->andReturn($vDesign);
 
@@ -1598,6 +1652,24 @@ class CardControllerTest extends TestCase
             ->andReturn($card);
 
         $vDesign = $this->mock(VDesignM::class)->makePartial();
+        $vDesign->is_free_design = 0;
+        $vDesign->photo_flg = Card::HAS_PHOTO_FLG;
+        $vDesign->dtype = '';
+        $vDesign->allow_decoration_stamp = '';
+        $vDesign->designcolor_name = '';
+        $vDesign->printedmount = '';
+        $vDesign->kumi_txt_no = '';
+        $vDesign->pldptmng_no_str = '';
+        $vDesign->design_ty = 'T';
+        $vDesign->kumi_font_cd = '';
+        $vDesign->photo_finishing_flg = '';
+        $vDesign->yoridori_kbn = '';
+        $vDesign->item_kbn = '';
+        $vDesign->free_edit_flg = '';
+        $vDesign->kumi_ty = '';
+        $vDesign->han_color_k = '';
+        $vDesign->outline_char_kbn = '';
+        $vDesign->kumi_atena_faceprt_flg = '';
 
         $this->vDesignMService->shouldReceive('findByDesignNo')->andReturn($vDesign);
 
@@ -1673,6 +1745,24 @@ class CardControllerTest extends TestCase
             ->andReturn($card);
 
         $vDesign = $this->mock(VDesignM::class)->makePartial();
+        $vDesign->is_free_design = 0;
+        $vDesign->photo_flg = Card::HAS_PHOTO_FLG;
+        $vDesign->dtype = '';
+        $vDesign->allow_decoration_stamp = '';
+        $vDesign->designcolor_name = '';
+        $vDesign->printedmount = '';
+        $vDesign->kumi_txt_no = '';
+        $vDesign->pldptmng_no_str = '';
+        $vDesign->design_ty = 'T';
+        $vDesign->kumi_font_cd = '';
+        $vDesign->photo_finishing_flg = '';
+        $vDesign->yoridori_kbn = '';
+        $vDesign->item_kbn = '';
+        $vDesign->free_edit_flg = '';
+        $vDesign->kumi_ty = '';
+        $vDesign->han_color_k = '';
+        $vDesign->outline_char_kbn = '';
+        $vDesign->kumi_atena_faceprt_flg = '';
 
         $this->vDesignMService->shouldReceive('findByDesignNo')->andReturn($vDesign);
 
@@ -1732,6 +1822,24 @@ class CardControllerTest extends TestCase
             ->andReturn($card);
 
         $vDesign = $this->mock(VDesignM::class)->makePartial();
+        $vDesign->is_free_design = 0;
+        $vDesign->photo_flg = Card::HAS_PHOTO_FLG;
+        $vDesign->dtype = '';
+        $vDesign->allow_decoration_stamp = '';
+        $vDesign->designcolor_name = '';
+        $vDesign->printedmount = '';
+        $vDesign->kumi_txt_no = '';
+        $vDesign->pldptmng_no_str = '';
+        $vDesign->design_ty = 'T';
+        $vDesign->kumi_font_cd = '';
+        $vDesign->photo_finishing_flg = '';
+        $vDesign->yoridori_kbn = '';
+        $vDesign->item_kbn = '';
+        $vDesign->free_edit_flg = '';
+        $vDesign->kumi_ty = '';
+        $vDesign->han_color_k = '';
+        $vDesign->outline_char_kbn = '';
+        $vDesign->kumi_atena_faceprt_flg = '';
 
         $this->vDesignMService->shouldReceive('findByDesignNo')->andReturn($vDesign);
 
