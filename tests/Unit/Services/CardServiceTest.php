@@ -2135,6 +2135,7 @@ class CardServiceTest extends TestCase
 
         $this->model->shouldReceive('getImageElements')->andReturn(collect([]));
         $this->model->shouldReceive('getClipElements->keyBy->toArray')->andReturn([]);
+        // toArray() is evaluated eagerly as the default arg to session()->get() in getCardPreviewSession()
         $this->model->shouldReceive('toArray')->andReturn([]);
 
         $diskMock = m::mock();
