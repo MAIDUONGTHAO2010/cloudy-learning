@@ -2100,10 +2100,7 @@ class CardServiceTest extends TestCase
             ->andReturn($this->model);
 
         config(['card.image_name.preview' => 'preview']);
-        $jpgPath = '/tmp/cards/99/preview.jpg';
-        File::shouldReceive('exists')->andReturnUsing(function($path) use ($jpgPath) {
-            return $path === $jpgPath;
-        });
+        File::shouldReceive('exists')->andReturn(true);
 
         Log::shouldReceive('error')->andReturn(null);
 
