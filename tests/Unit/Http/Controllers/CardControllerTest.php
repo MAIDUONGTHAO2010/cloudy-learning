@@ -120,7 +120,7 @@ class CardControllerTest extends TestCase
         $storageMock->shouldReceive('put')->andReturn(true);
         $storageMock->shouldReceive('get')->andReturn('');
         $storageMock->shouldReceive('delete')->andReturn(true);
-        \Storage::shouldReceive('disk')->andReturn($storageMock);
+        \Storage::shouldReceive('disk')->byDefault()->andReturn($storageMock);
 
         // Stub helper functions
         if (!function_exists('find_design_screen_image')) {
@@ -3328,14 +3328,8 @@ class CardControllerTest extends TestCase
         $this->service->shouldReceive('findCardByHashId')->andReturn($card);
         $this->customerDetailService->shouldReceive('exists')->andReturn(false);
 
-        // session()->get("no_update_$hashid") must return truthy to trigger lines 983-984
-        $hashid = $this->hashid;
-        Session::shouldReceive('get')->andReturnUsing(function ($key, $default = null) use ($hashid) {
-            if ($key === "no_update_$hashid") {
-                return true;
-            }
-            return $default;
-        });
+        // Set the actual session so session()->get("no_update_$hashid") returns truthy
+        session(['no_update_' . $this->hashid => true]);
 
         $this->kumihanService->shouldReceive('create')->andReturn([
             'status' => 'fail',
@@ -3579,11 +3573,12 @@ class CardControllerTest extends TestCase
             'path' => '/tmp/preview/',
         ]);
 
-        // Provide card session data so array_merge at line 1135 receives a valid array
-        Session::shouldReceive('get')->andReturn(['id' => 76, 'style' => ['edit_count' => 1]]);
-
-        // cart_session (not card_session) pull returns truthy → isSessionTimeout = true
-        Session::shouldReceive('pull')->with("cart_session_{$this->hashid}")->andReturn('1');
+        // Provide card session data via real session so array_merge at line 1135 receives a valid array
+        // and cart_session pull returns truthy to trigger isSessionTimeout
+        session([
+            'card_session_' . $this->hashid => ['id' => 76, 'style' => ['edit_count' => 1]],
+            'cart_session_' . $this->hashid => 'timeout',
+        ]);
 
         $request = new Request(['edit_data' => '']);
         $request->setMethod('post');
