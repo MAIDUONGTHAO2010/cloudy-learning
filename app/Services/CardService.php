@@ -737,7 +737,7 @@ class CardService
 
     private function composeStampAndCropElements(Imagick $final, array $stampAndCropElements, $cardPreviewDpi)
     {
-        $imageStamps = array_pluck($stampAndCropElements, 'style.imageId');
+        $imageStamps = \Illuminate\Support\Arr::pluck($stampAndCropElements, 'style.imageId');
         $imagesIdList = $this->imageRepository->getListStampImage($imageStamps);
 
         foreach ($stampAndCropElements as $element) {
