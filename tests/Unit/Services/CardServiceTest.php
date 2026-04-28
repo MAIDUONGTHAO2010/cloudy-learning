@@ -1932,7 +1932,9 @@ class CardServiceTest extends TestCase
         $this->expectExceptionMessage('Design was not found.');
 
         $areaAgency = m::mock(\App\Models\AreaAgency::class)->makePartial();
-        $areaAgency->atena_support = \App\Models\AreaAgency::ATENA_SUPPORT[0] ?? 1;
+        $areaAgency->atena_support = defined('App\\Models\\AreaAgency::ATENA_SUPPORT')
+            ? \App\Models\AreaAgency::ATENA_SUPPORT[0]
+            : 1;
         $areaAgency->atena_end_date = null;
 
         $this->areaAgencyRepository
@@ -1951,6 +1953,102 @@ class CardServiceTest extends TestCase
             'agency_id'   => 'LS01',
             'site_id'     => 'A1',
         ], $this->hashid);
+    }
+
+    public function test_check_support_atena_returns_no_atena_when_end_date_expired()
+    {
+        $atenaSupport = defined('App\\Models\\AreaAgency::ATENA_SUPPORT')
+            ? \App\Models\AreaAgency::ATENA_SUPPORT[0]
+            : 1;
+
+        $areaAgency = m::mock(\App\Models\AreaAgency::class)->makePartial();
+        $areaAgency->atena_support = $atenaSupport;
+        $areaAgency->atena_end_date = '2000-01-01 00:00:00'; // past date → expired
+
+        $this->areaAgencyRepository
+            ->shouldReceive('getAreaAgencyByAreaIdAndAgencyId')
+            ->andReturn($areaAgency);
+
+        $response = $this->service->checkSupportAtena([
+            'design_id'   => 'P01',
+            'material_id' => 'M01',
+            'agency_id'   => 'LS01',
+            'site_id'     => 'A1',
+        ], $this->hashid);
+
+        $this->assertIsArray($response);
+        $this->assertFalse($response['has_atena']);
+    }
+
+    public function test_check_support_atena_returns_no_atena_when_design_not_support_atena()
+    {
+        $atenaSupport = defined('App\\Models\\AreaAgency::ATENA_SUPPORT')
+            ? \App\Models\AreaAgency::ATENA_SUPPORT[0]
+            : 1;
+
+        $areaAgency = m::mock(\App\Models\AreaAgency::class)->makePartial();
+        $areaAgency->atena_support = $atenaSupport;
+        $areaAgency->atena_end_date = null;
+
+        $this->areaAgencyRepository
+            ->shouldReceive('getAreaAgencyByAreaIdAndAgencyId')
+            ->andReturn($areaAgency);
+
+        $designAtenaSupport = defined('App\\Models\\Design::ATENA_SUPPORT')
+            ? \App\Models\Design::ATENA_SUPPORT
+            : 1;
+
+        $design = (object) ['atena_support' => $designAtenaSupport + 1]; // wrong value → not supported
+
+        $this->designRepository
+            ->shouldReceive('findDesignByMaterialIdAndDesignId')
+            ->andReturn($design);
+
+        $response = $this->service->checkSupportAtena([
+            'design_id'   => 'P01',
+            'material_id' => 'M01',
+            'agency_id'   => 'LS01',
+            'site_id'     => 'A1',
+        ], $this->hashid);
+
+        $this->assertIsArray($response);
+        $this->assertFalse($response['has_atena']);
+    }
+
+    public function test_check_support_atena_returns_has_atena_true_when_all_valid()
+    {
+        $atenaSupport = defined('App\\Models\\AreaAgency::ATENA_SUPPORT')
+            ? \App\Models\AreaAgency::ATENA_SUPPORT[0]
+            : 1;
+
+        $areaAgency = m::mock(\App\Models\AreaAgency::class)->makePartial();
+        $areaAgency->atena_support = $atenaSupport;
+        $areaAgency->atena_end_date = null;
+
+        $this->areaAgencyRepository
+            ->shouldReceive('getAreaAgencyByAreaIdAndAgencyId')
+            ->andReturn($areaAgency);
+
+        $designAtenaSupport = defined('App\\Models\\Design::ATENA_SUPPORT')
+            ? \App\Models\Design::ATENA_SUPPORT
+            : 1;
+
+        $design = (object) ['atena_support' => $designAtenaSupport]; // correct value
+
+        $this->designRepository
+            ->shouldReceive('findDesignByMaterialIdAndDesignId')
+            ->andReturn($design);
+
+        $response = $this->service->checkSupportAtena([
+            'design_id'   => 'P01',
+            'material_id' => 'M01',
+            'agency_id'   => 'LS01',
+            'site_id'     => 'A1',
+        ], $this->hashid);
+
+        $this->assertIsArray($response);
+        $this->assertTrue($response['has_atena']);
+        $this->assertEquals('', $response['redirect_url']);
     }
 
     public function test_get_card_folder_returns_string()
