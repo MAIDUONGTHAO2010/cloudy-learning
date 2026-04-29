@@ -123,4 +123,19 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Read-Only Mode
+    |--------------------------------------------------------------------------
+    |
+    | When enabled, the application rejects all write HTTP methods (POST, PUT,
+    | PATCH, DELETE) except for login and logout routes. This is useful for
+    | reducing database write costs while keeping the app readable.
+    |
+    | Set READ_ONLY_MODE=true in your .env file to activate.
+    |
+    */
+
+    'read_only_mode' => (bool) env('READ_ONLY_MODE', false),
+
 ];
