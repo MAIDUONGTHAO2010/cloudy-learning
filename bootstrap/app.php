@@ -3,6 +3,7 @@
 use App\Http\Middleware\Admin\EnsureAdminValid;
 use App\Http\Middleware\EnsureInstructorOnly;
 use App\Http\Middleware\EnsureUserSiteAccess;
+use App\Http\Middleware\ReadOnlyMode;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -20,6 +21,8 @@ return Application::configure(basePath: dirname(__DIR__))
         },
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->append(ReadOnlyMode::class);
+
         $middleware->validateCsrfTokens(except: [
             'auth/*',
             'api/*',
